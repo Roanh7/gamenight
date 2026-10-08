@@ -12,6 +12,7 @@ export function MatchResults({
   profiles,
   href,
   live,
+  teams,
 }: {
   match: Match;
   game?: Game;
@@ -19,7 +20,9 @@ export function MatchResults({
   profiles: Map<string, Profile>;
   href?: string;
   live?: { user_id: string; total: number; rounds: number }[];
+  teams?: Map<string, string | null>;
 }) {
+  const isTeamGame = game?.is_team ?? false;
   const sorted = [...results].sort((a, b) => a.placement - b.placement);
   const header = (
     <div className="flex items-center gap-3 border-b-2 border-line bg-cream px-3 py-2.5">
@@ -31,6 +34,8 @@ export function MatchResults({
         </span>
       ) : match.is_draw ? (
         <span className="chip bg-soft">🤝 Gelijkspel</span>
+      ) : match.winning_team ? (
+        <span className="chip bg-yellow">🏆 {match.winning_team}</span>
       ) : match.winner_id ? (
         <span className="chip bg-yellow">🏆 Winnaar</span>
       ) : (
@@ -50,12 +55,18 @@ export function MatchResults({
                 <RankBadge rank={r.placement} />
                 <Avatar name={p?.username ?? "?"} color={p?.avatar_color} size="xs" crown={r.is_winner} />
                 <span className="min-w-0 flex-1 truncate font-bold">{p?.username ?? "Speler"}</span>
-                <span className="text-sm font-black">{formatScore(r.total)}</span>
+                {isTeamGame && teams?.get(r.user_id) ? (
+                  <span className={`chip ${r.is_winner ? "bg-yellow" : "bg-soft"}`}>{teams.get(r.user_id)}</span>
+                ) : (
+                  <span className="text-sm font-black">{formatScore(r.total)}</span>
+                )}
                 <span className="w-12 text-right text-xs font-black text-green">+{r.league_points} pt</span>
               </li>
             );
           })}
         </ol>
+      ) : isTeamGame ? (
+        <p className="px-3 py-3 text-sm font-bold text-muted">🤫 Rollen zijn geheim. De uitslag volgt na afloop.</p>
       ) : live && live.length > 0 ? (
         <LiveStanding
           live={live}

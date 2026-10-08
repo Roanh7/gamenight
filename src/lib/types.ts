@@ -18,6 +18,8 @@ export type Profile = {
   created_at: string;
 };
 
+export type GameTeam = { name: string; points: number };
+
 export type Game = {
   id: string;
   name: string;
@@ -31,6 +33,7 @@ export type Game = {
   placement_points: number[];
   participation_points: number;
   is_team: boolean;
+  teams: GameTeam[];
   created_by: string | null;
   created_at: string;
 };
@@ -64,6 +67,7 @@ export type Match = {
   status: "live" | "finished";
   winner_id: string | null;
   is_draw: boolean;
+  winning_team: string | null;
   created_at: string;
   finished_at: string | null;
 };

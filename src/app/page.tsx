@@ -284,7 +284,7 @@ async function Dashboard({
                         🏆 {w.username}
                       </span>
                     ) : !m.is_draw ? (
-                      <span className="text-sm font-black">🏆 Teamwinst</span>
+                      <span className="text-sm font-black">🏆 {m.winning_team ?? "Teamwinst"}</span>
                     ) : (
                       <span className="chip bg-soft">Gelijkspel</span>
                     )}

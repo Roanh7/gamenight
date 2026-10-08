@@ -128,25 +128,47 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
         </span>
       </SectionTitle>
       <section className="card space-y-3 p-4 text-sm">
-        <p>
-          <b>{game.scoring_mode === "lowest_wins" ? "Laagste" : "Hoogste"} totaalscore wint.</b>{" "}
-          {game.is_team
-            ? "Teamspel: iedereen op de eerste plek wint samen. Staat iedereen gelijk, dan is er geen winnaar."
-            : "Bij gelijke stand bovenaan is er geen winnaar."}
-        </p>
-        <div>
-          <p className="mb-1.5 font-black">Ranglijstpunten per plek</p>
-          <div className="flex flex-wrap gap-1.5">
-            {game.placement_points.map((p, i) => (
-              <span key={i} className={`chip ${i === 0 ? "bg-yellow" : "bg-paper"}`}>
-                {i + 1}e: {p} pt
-              </span>
-            ))}
-            {game.participation_points > 0 && (
-              <span className="chip bg-green-soft">+{game.participation_points} pt meedoen</span>
-            )}
-          </div>
-        </div>
+        {game.is_team ? (
+          <>
+            <p>
+              <b>Teamspel met geheime rollen.</b> Na afloop tikt de host per speler de rol aan en kiest hij welk team
+              won. Iedereen in het winnende team krijgt de punten van dat team.
+            </p>
+            <div>
+              <p className="mb-1.5 font-black">Punten bij winst</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(game.teams ?? []).map((t) => (
+                  <span key={t.name} className="chip bg-purple-soft">
+                    {t.name}: {t.points} pt
+                  </span>
+                ))}
+                {game.participation_points > 0 && (
+                  <span className="chip bg-green-soft">+{game.participation_points} pt meedoen</span>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <p>
+              <b>{game.scoring_mode === "lowest_wins" ? "Laagste" : "Hoogste"} totaalscore wint.</b> Bij gelijke stand
+              bovenaan is er geen winnaar.
+            </p>
+            <div>
+              <p className="mb-1.5 font-black">Ranglijstpunten per plek</p>
+              <div className="flex flex-wrap gap-1.5">
+                {game.placement_points.map((p, i) => (
+                  <span key={i} className={`chip ${i === 0 ? "bg-yellow" : "bg-paper"}`}>
+                    {i + 1}e: {p} pt
+                  </span>
+                ))}
+                {game.participation_points > 0 && (
+                  <span className="chip bg-green-soft">+{game.participation_points} pt meedoen</span>
+                )}
+              </div>
+            </div>
+          </>
+        )}
         {game.rules && (
           <div className="border-t-2 border-soft pt-3">
             <p className="mb-1 font-black">Spelregels</p>
@@ -169,7 +191,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
                 <Link href={`/agenda/${m.night_id}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-cream">
                   <span className="w-20 text-xs font-bold text-muted">{m.finished_at ? formatDateShort(m.finished_at) : ""}</span>
                   {!w && !m.is_draw ? (
-                    <span className="flex-1 font-black">🏆 Teamwinst</span>
+                    <span className="flex-1 font-black">🏆 {m.winning_team ?? "Teamwinst"}</span>
                   ) : w ? (
                     <span className="flex min-w-0 flex-1 items-center gap-2 font-black">
                       <Avatar name={w.username} color={w.avatar_color} size="xs" />

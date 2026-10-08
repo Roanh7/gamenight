@@ -221,6 +221,58 @@ begin
   select payload::text into t from public.activity where match_id = m2 and type = 'match_finished';
   rep := rep || case when t like '%"team": true%' then 'OK' else 'FAIL' end || ' 23c nieuws teamwinst: ' || t || E'\n';
 
+  -- 24. Teamspel met rollen die pas na afloop bekend zijn
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ua::text, true);
+  set local role authenticated;
+  insert into public.games (name, created_by, is_team, participation_points, teams)
+  values ('ZzHitler', ua, true, 2, '[{"name":"Liberalen","points":8},{"name":"Fascisten","points":12}]')
+  returning id into g2;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  insert into public.matches (night_id, game_id) values (n1, g2) returning id into m2;
+  insert into public.match_players (match_id, user_id) values (m2, ua), (m2, ub), (m2, uc);
+  begin
+    perform public.finalize_team_match(m2, 'Fascisten', jsonb_build_object(ua::text, 'Fascisten', ub::text, 'Liberalen'));
+    rep := rep || E'FAIL 24 afronden zonder alle rollen toegestaan\n';
+  exception when others then rep := rep || E'OK 24 eerst alle rollen invullen\n';
+  end;
+  perform public.finalize_team_match(m2, 'Fascisten', jsonb_build_object(ua::text, 'Fascisten', ub::text, 'Liberalen', uc::text, 'Liberalen'));
+  reset role;
+  select string_agg(p.username || ':' || mp.team || '/' || r.league_points || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
+    into t from public.match_results r join public.profiles p on p.id = r.user_id
+    join public.match_players mp on mp.match_id = r.match_id and mp.user_id = r.user_id where r.match_id = m2;
+  select t || ' | winnaar=' || coalesce((select username from public.profiles where id = winner_id), 'geen') || ' | team=' || winning_team
+    into t from public.matches where id = m2;
+  rep := rep || case when t = 'ZzTestA:Fascisten/14/WIN, ZzTestB:Liberalen/2, ZzTestC:Liberalen/2 | winnaar=ZzTestA | team=Fascisten' then 'OK' else 'FAIL' end
+         || ' 24b fascist wint alleen: ' || t || E'\n';
+
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  insert into public.matches (night_id, game_id) values (n1, g2) returning id into m1;
+  insert into public.match_players (match_id, user_id) values (m1, ua), (m1, ub), (m1, uc);
+  perform public.finalize_team_match(m1, 'Liberalen', jsonb_build_object(ua::text, 'Fascisten', ub::text, 'Liberalen', uc::text, 'Liberalen'));
+  reset role;
+  select string_agg(p.username || '/' || r.league_points || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
+    into t from public.match_results r join public.profiles p on p.id = r.user_id where r.match_id = m1;
+  rep := rep || case when t = 'ZzTestA/2, ZzTestB/10/WIN, ZzTestC/10/WIN' then 'OK' else 'FAIL' end || ' 24c liberalen winnen samen: ' || t || E'\n';
+  select payload ->> 'team_name' into t from public.activity where match_id = m1 and type = 'match_finished';
+  rep := rep || case when t = 'Liberalen' then 'OK' else 'FAIL' end || E' 24d nieuws noemt winnend team\n';
+
+  perform set_config('request.jwt.claims', json_build_object('sub', uc, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', uc::text, true);
+  set local role authenticated;
+  begin
+    update public.match_players set team = 'Fascisten' where match_id = m1 and user_id = uc;
+    get diagnostics cnt = row_count;
+    rep := rep || case when cnt = 0 then 'OK' else 'FAIL' end || E' 24e speler kan eigen rol niet aanpassen\n';
+  exception when others then rep := rep || E'OK 24e speler kan eigen rol niet aanpassen\n';
+  end;
+  reset role;
+
   -- 22. Niet ingelogd
   set local role anon;
   begin

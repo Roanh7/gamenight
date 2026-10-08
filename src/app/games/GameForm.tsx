@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
-import type { Color, Game } from "@/lib/types";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Plus, Trophy, Users, X } from "lucide-react";
+import type { Color, Game, GameTeam } from "@/lib/types";
 import { GAME_ICONS, GameIcon } from "@/components/GameIcon";
 import { ColorPicker } from "@/components/ColorPicker";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -21,6 +21,15 @@ export function GameForm({
   const [icon, setIcon] = useState(game?.icon ?? "gamepad");
   const [mode, setMode] = useState<Game["scoring_mode"]>(game?.scoring_mode ?? "highest_wins");
   const points = game?.placement_points ?? [10, 6, 4, 2, 1];
+  const [isTeam, setIsTeam] = useState(game?.is_team ?? false);
+  const [teams, setTeams] = useState<GameTeam[]>(
+    game?.teams?.length
+      ? game.teams
+      : [
+          { name: "Team A", points: 10 },
+          { name: "Team B", points: 10 },
+        ],
+  );
 
   return (
     <form action={action} className="space-y-5">
@@ -85,64 +94,135 @@ export function GameForm({
       <section className="card space-y-4 p-5">
         <div>
           <p className="pixel mb-1 text-[10px] text-red">SCOREREGELS</p>
-          <p className="text-sm text-muted">Hoe wordt een potje gewonnen, en hoeveel ranglijstpunten krijg je?</p>
+          <p className="text-sm text-muted">Wat voor soort spel is het, en hoeveel ranglijstpunten krijg je?</p>
         </div>
-        <input type="hidden" name="scoring_mode" value={mode} />
+
+        {/* Soort spel */}
+        <input type="hidden" name="is_team" value={isTeam ? "on" : ""} />
         <div className="grid grid-cols-2 gap-2">
           {(
             [
-              ["highest_wins", "Hoogste score wint", "bijv. punten, munten", ArrowUpWideNarrow],
-              ["lowest_wins", "Laagste score wint", "bijv. golf, tijd", ArrowDownWideNarrow],
+              [false, "Ieder voor zich", "Punten tellen, bijv. Mario Kart, 30 seconds", Trophy],
+              [true, "Teams & rollen", "Rollen pas na afloop bekend, bijv. Weerwolven", Users],
             ] as const
-          ).map(([key, label, hint, Icon]) => (
+          ).map(([val, label, hint, Icon]) => (
             <button
-              key={key}
+              key={label}
               type="button"
-              onClick={() => setMode(key)}
-              aria-pressed={mode === key}
-              className={`rounded-xl border-2 border-line p-3 text-left ${mode === key ? "bg-blue text-white shadow-[0_3px_0_var(--color-line)]" : "bg-paper"}`}
+              onClick={() => setIsTeam(val)}
+              aria-pressed={isTeam === val}
+              className={`rounded-xl border-2 border-line p-3 text-left ${isTeam === val ? "bg-purple text-white shadow-[0_3px_0_var(--color-line)]" : "bg-paper"}`}
             >
               <Icon size={20} strokeWidth={2.5} />
               <p className="mt-1 text-sm font-black leading-tight">{label}</p>
-              <p className={`text-xs ${mode === key ? "opacity-80" : "text-muted"}`}>{hint}</p>
+              <p className={`text-xs ${isTeam === val ? "opacity-80" : "text-muted"}`}>{hint}</p>
             </button>
           ))}
         </div>
-        <div>
-          <span className="label">Ranglijstpunten per plek</span>
-          <div className="grid grid-cols-6 gap-1.5">
-            {PLACES.map((pl, i) => (
-              <label key={pl} className="text-center">
-                <span className="pixel mb-1 block text-[9px] text-muted">{pl}</span>
-                <input
-                  name={`p${i + 1}`}
-                  type="number"
-                  min={0}
-                  max={999}
-                  inputMode="numeric"
-                  className="input h-11 min-h-0 px-1 text-center font-black"
-                  defaultValue={points[i] ?? ""}
-                />
-              </label>
+
+        {/* Teams */}
+        <input type="hidden" name="teams" value={JSON.stringify(teams)} />
+        {isTeam && (
+          <div>
+            <span className="label">Teams & punten bij winst</span>
+            <ul className="space-y-2">
+              {teams.map((t, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <input
+                    className="input min-h-[44px] flex-1"
+                    value={t.name}
+                    maxLength={30}
+                    placeholder={`Team ${i + 1}`}
+                    aria-label={`Naam team ${i + 1}`}
+                    onChange={(e) => setTeams(teams.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    max={999}
+                    inputMode="numeric"
+                    className="input min-h-[44px] w-20 px-2 text-center font-black"
+                    value={t.points}
+                    aria-label={`Punten bij winst ${t.name || `team ${i + 1}`}`}
+                    onChange={(e) =>
+                      setTeams(teams.map((x, j) => (j === i ? { ...x, points: Number(e.target.value) || 0 } : x)))
+                    }
+                  />
+                  <span className="text-xs font-black text-muted">pt</span>
+                  {teams.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setTeams(teams.filter((_, j) => j !== i))}
+                      className="btn btn-secondary btn-sm h-11 w-11 px-0"
+                      aria-label="Team verwijderen"
+                    >
+                      <X size={16} strokeWidth={3} />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {teams.length < 6 && (
+              <button
+                type="button"
+                onClick={() => setTeams([...teams, { name: "", points: 10 }])}
+                className="btn btn-secondary btn-sm mt-2"
+              >
+                <Plus size={16} strokeWidth={3} /> Team of rol toevoegen
+              </button>
+            )}
+            <p className="mt-2 text-xs text-muted">
+              Na afloop tikt de host per speler zijn rol aan en kiest hij wie er won. Iedereen in het winnende team
+              krijgt deze punten. Tip: geef het kleine, lastige team meer punten.
+            </p>
+          </div>
+        )}
+
+        {/* Punten per plek (ieder voor zich) */}
+        <input type="hidden" name="scoring_mode" value={mode} />
+        <div className={isTeam ? "hidden" : "space-y-4"}>
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ["highest_wins", "Hoogste score wint", "bijv. punten, munten", ArrowUpWideNarrow],
+                ["lowest_wins", "Laagste score wint", "bijv. golf, tijd", ArrowDownWideNarrow],
+              ] as const
+            ).map(([key, label, hint, Icon]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setMode(key)}
+                aria-pressed={mode === key}
+                className={`rounded-xl border-2 border-line p-3 text-left ${mode === key ? "bg-blue text-white shadow-[0_3px_0_var(--color-line)]" : "bg-paper"}`}
+              >
+                <Icon size={20} strokeWidth={2.5} />
+                <p className="mt-1 text-sm font-black leading-tight">{label}</p>
+                <p className={`text-xs ${mode === key ? "opacity-80" : "text-muted"}`}>{hint}</p>
+              </button>
             ))}
           </div>
-          <p className="mt-1 text-xs text-muted">Leeg = 0 punten. Gedeelde plek = zelfde punten.</p>
+          <div>
+            <span className="label">Ranglijstpunten per plek</span>
+            <div className="grid grid-cols-6 gap-1.5">
+              {PLACES.map((pl, i) => (
+                <label key={pl} className="text-center">
+                  <span className="pixel mb-1 block text-[9px] text-muted">{pl}</span>
+                  <input
+                    name={`p${i + 1}`}
+                    type="number"
+                    min={0}
+                    max={999}
+                    inputMode="numeric"
+                    className="input h-11 min-h-0 px-1 text-center font-black"
+                    defaultValue={points[i] ?? ""}
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-muted">Leeg = 0 punten. Gedeelde plek = zelfde punten. Gelijk bovenaan = geen winnaar.</p>
+          </div>
         </div>
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-line bg-paper p-3 has-[:checked]:bg-purple-soft">
-          <input
-            type="checkbox"
-            name="is_team"
-            defaultChecked={game?.is_team ?? false}
-            className="mt-1 h-5 w-5 shrink-0 accent-[#7b4fd6]"
-          />
-          <span>
-            <span className="block text-sm font-black">Teamspel</span>
-            <span className="block text-xs text-muted">
-              Iedereen met de hoogste score wint samen (bijv. Weerwolven, Secret Hitler). Tip: geef de winnaars 1
-              punt en de rest 0. Staat iedereen gelijk, dan is er geen winnaar.
-            </span>
-          </span>
-        </label>
+
         <div>
           <label className="label" htmlFor="participation_points">
             Bonus voor meedoen
@@ -154,9 +234,9 @@ export function GameForm({
             min={0}
             max={999}
             className="input"
-            defaultValue={game?.participation_points ?? 0}
+            defaultValue={game?.participation_points ?? (game ? 0 : 0)}
           />
-          <p className="mt-1 text-xs text-muted">Extra punten die iedere speler krijgt per potje.</p>
+          <p className="mt-1 text-xs text-muted">Extra punten die iedere speler krijgt per potje, ook als je verliest.</p>
         </div>
       </section>
 

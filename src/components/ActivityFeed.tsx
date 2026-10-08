@@ -66,7 +66,13 @@ export function ActivityFeed({ items, profiles, games, nights }: Props) {
                 .join(" & ");
               icon = <Trophy size={16} />;
               tone = "bg-yellow-soft";
-              text = (
+              const teamName = a.payload.team_name ? String(a.payload.team_name) : null;
+              text = teamName ? (
+                <>
+                  <b className="font-black">{teamName}</b> wint {gameLink}
+                  {names ? <span className="text-muted"> ({names})</span> : null}
+                </>
+              ) : (
                 <>
                   <b className="font-black">{names || "Het team"}</b> wonnen {gameLink} samen
                 </>

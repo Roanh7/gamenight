@@ -10,6 +10,23 @@ function str(fd: FormData, key: string) {
   return String(fd.get(key) ?? "").trim();
 }
 
+function parseTeams(raw: string) {
+  try {
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+    return list
+      .map((t) => ({
+        name: String(t?.name ?? "").trim().slice(0, 30),
+        points: Math.max(0, Math.min(999, Math.round(Number(t?.points) || 0))),
+      }))
+      .filter((t) => t.name)
+      .filter((t, i, all) => all.findIndex((x) => x.name.toLowerCase() === t.name.toLowerCase()) === i)
+      .slice(0, 6);
+  } catch {
+    return [];
+  }
+}
+
 function parseGame(fd: FormData) {
   const placement = [1, 2, 3, 4, 5, 6]
     .map((i) => str(fd, `p${i}`))
@@ -32,6 +49,7 @@ function parseGame(fd: FormData) {
     placement_points: placement.map((v) => v ?? 0),
     participation_points: Math.max(0, Math.round(Number(str(fd, "participation_points")) || 0)),
     is_team: fd.get("is_team") === "on",
+    teams: fd.get("is_team") === "on" ? parseTeams(str(fd, "teams")) : [],
   };
 }
 

@@ -167,7 +167,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                             ? "Gelijkspel"
                             : w
                               ? `Gewonnen door ${w.username}`
-                              : "Teamwinst"}
+                              : `${m.winning_team ?? "Team"} wint`}
                       </p>
                     </div>
                     {m.status === "live" ? <span className="chip bg-red text-white">● Live</span> : <span>🏆</span>}

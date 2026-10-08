@@ -177,8 +177,10 @@ export default async function UitlegPage() {
               <b>gelijke stand bovenaan is er geen winnaar</b> 🤝.
             </li>
             <li>
-              Uitzondering: <b>teamspellen</b> (zoals Weerwolven of Secret Hitler). Daar winnen alle spelers
-              bovenaan samen. Geef de winnaars 1 punt en de rest 0.
+              <b>Teamspellen met geheime rollen</b> (Weerwolven, Secret Hitler, Undercover) werken anders. Tijdens
+              het spel vult de host niks in. Na afloop tikt hij per speler de rol aan (bijv. Dorp of Weerwolf) en
+              kiest hij welk team won. Iedereen in dat team krijgt de punten van het team; het kleine, lastige team
+              levert meer op. Wie verliest krijgt alleen de meedoen-bonus.
             </li>
           </ul>
           <p className="pt-1">

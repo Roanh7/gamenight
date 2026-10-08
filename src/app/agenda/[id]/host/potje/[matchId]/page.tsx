@@ -12,6 +12,7 @@ import { Flash } from "@/components/Flash";
 import { Avatar } from "@/components/Avatar";
 import { PageHeader } from "@/components/ui";
 import { ScoreBoard } from "./ScoreBoard";
+import { TeamResult } from "./TeamResult";
 
 export const metadata: Metadata = { title: "Scores" };
 
@@ -24,7 +25,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   const [{ data: night }, { data: matchData }, { data: mp }, { data: entries }, profiles] = await Promise.all([
     supabase.from("game_nights").select("id, title, host_id").eq("id", id).maybeSingle(),
     supabase.from("matches").select("*").eq("id", matchId).maybeSingle(),
-    supabase.from("match_players").select("user_id").eq("match_id", matchId),
+    supabase.from("match_players").select("user_id, team").eq("match_id", matchId),
     supabase.from("score_entries").select("user_id, round, points").eq("match_id", matchId),
     getProfiles(supabase),
   ]);
@@ -36,9 +37,12 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   const game = gameData as Game | null;
 
   const players = (mp ?? [])
-    .map((x) => profiles.byId.get(x.user_id))
-    .filter(Boolean)
-    .map((p) => ({ id: p!.id, username: p!.username, avatar_color: p!.avatar_color }));
+    .filter((x) => profiles.byId.has(x.user_id))
+    .map((x) => {
+      const p = profiles.byId.get(x.user_id)!;
+      return { id: p.id, username: p.username, avatar_color: p.avatar_color, team: (x.team as string | null) ?? null };
+    });
+  const teamOf = new Map(players.map((p) => [p.id, p.team]));
 
   let results: MatchResult[] = [];
   if (match.status === "finished") {
@@ -58,6 +62,15 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
 
       {match.status === "live" ? (
         <>
+          {game?.is_team ? (
+            <TeamResult
+              matchId={match.id}
+              nightId={id}
+              players={players}
+              teams={game.teams ?? []}
+              participationPoints={game.participation_points}
+            />
+          ) : (
           <ScoreBoard
             matchId={match.id}
             nightId={id}
@@ -66,6 +79,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             lowestWins={game?.scoring_mode === "lowest_wins"}
             isTeam={game?.is_team ?? false}
           />
+          )}
           <form action={deleteMatch} className="mt-8">
             <input type="hidden" name="night_id" value={id} />
             <input type="hidden" name="match_id" value={match.id} />
@@ -84,11 +98,14 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
                   <Avatar name={winner.username} color={winner.avatar_color} size="xl" crown />
                 </div>
                 <p className="mt-3 text-2xl font-black">{winner.username}</p>
-                <p className="text-sm font-bold">wint {game?.name}</p>
+                <p className="text-sm font-bold">
+                  wint {game?.name}
+                  {match.winning_team ? ` als ${match.winning_team}` : ""}
+                </p>
               </>
-            ) : teamWinners.length > 1 ? (
+            ) : teamWinners.length > 1 || match.winning_team ? (
               <>
-                <p className="pixel text-[10px]">TEAM WINS!</p>
+                <p className="pixel text-[10px]">{match.winning_team ? `${match.winning_team.toUpperCase()} WINNEN!` : "TEAM WINS!"}</p>
                 <div className="mt-3 flex justify-center -space-x-2">
                   {teamWinners.map((p) => (
                     <Avatar key={p.id} name={p.username} color={p.avatar_color} size="lg" crown />
@@ -106,7 +123,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
               </>
             )}
           </section>
-          <MatchResults match={match} game={game ?? undefined} results={results} profiles={profiles.byId} />
+          <MatchResults match={match} game={game ?? undefined} results={results} profiles={profiles.byId} teams={teamOf} />
           <div className="mt-6 grid gap-2">
             <Link href={`/agenda/${id}/host`} className="btn btn-primary">
               ▶ Volgend potje

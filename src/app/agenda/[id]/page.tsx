@@ -28,7 +28,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
     getGames(supabase),
   ]);
   if (!data || !me) notFound();
-  const { night, participants, votes, matches, results, live } = data;
+  const { night, participants, votes, matches, results, live, teams } = data;
   const hasLive = matches.some((m) => m.status === "live");
 
   const host = profiles.byId.get(night.host_id);
@@ -59,6 +59,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                 profiles={profiles.byId}
                 href={isHost ? `/agenda/${night.id}/host/potje/${m.id}` : undefined}
                 live={live.get(m.id)}
+                teams={teams.get(m.id)}
               />
             ))}
           </div>
