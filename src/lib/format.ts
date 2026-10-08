@@ -65,3 +65,8 @@ export function formatScore(n: number | string | null | undefined) {
 export function ordinal(n: number) {
   return `${n}e`;
 }
+
+/** ISO-tijdstip van `hours` uur geleden (voor queries). */
+export function hoursAgoIso(hours: number) {
+  return new Date(Date.now() - hours * 3600_000).toISOString();
+}

@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
+// Alle pagina's zijn persoonlijk (ingelogde gebruiker), dus we renderen dynamisch.
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
   turbopack: {
     rules: {
       "*.css": {

@@ -3,7 +3,7 @@ import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-re
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getActivity, getGames, getOverall, getProfiles, tallyVotes } from "@/lib/data";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
-import { countdown, formatDateLong, formatTime, timeAgo } from "@/lib/format";
+import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { Avatar } from "@/components/Avatar";
@@ -110,7 +110,7 @@ async function Dashboard({
   welcome: boolean;
 }) {
   const supabase = await createClient();
-  const since = new Date(Date.now() - 12 * 3600_000).toISOString();
+  const since = hoursAgoIso(12);
 
   const [profiles, games, overall, activity, nightsRes, lastMatchesRes] = await Promise.all([
     getProfiles(supabase),
