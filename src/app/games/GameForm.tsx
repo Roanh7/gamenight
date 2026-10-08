@@ -128,6 +128,21 @@ export function GameForm({
           </div>
           <p className="mt-1 text-xs text-muted">Leeg = 0 punten. Gedeelde plek = zelfde punten.</p>
         </div>
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-line bg-paper p-3 has-[:checked]:bg-purple-soft">
+          <input
+            type="checkbox"
+            name="is_team"
+            defaultChecked={game?.is_team ?? false}
+            className="mt-1 h-5 w-5 shrink-0 accent-[#7b4fd6]"
+          />
+          <span>
+            <span className="block text-sm font-black">Teamspel</span>
+            <span className="block text-xs text-muted">
+              Iedereen met de hoogste score wint samen (bijv. Weerwolven, Secret Hitler). Tip: geef de winnaars 1
+              punt en de rest 0. Staat iedereen gelijk, dan is er geen winnaar.
+            </span>
+          </span>
+        </label>
         <div>
           <label className="label" htmlFor="participation_points">
             Bonus voor meedoen

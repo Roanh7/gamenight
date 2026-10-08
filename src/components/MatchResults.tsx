@@ -31,8 +31,10 @@ export function MatchResults({
         </span>
       ) : match.is_draw ? (
         <span className="chip bg-soft">🤝 Gelijkspel</span>
-      ) : (
+      ) : match.winner_id ? (
         <span className="chip bg-yellow">🏆 Winnaar</span>
+      ) : (
+        <span className="chip bg-yellow">🏆 Teamwinst</span>
       )}
     </div>
   );
@@ -55,7 +57,12 @@ export function MatchResults({
           })}
         </ol>
       ) : live && live.length > 0 ? (
-        <LiveStanding live={live} profiles={profiles} lowestWins={game?.scoring_mode === "lowest_wins"} />
+        <LiveStanding
+          live={live}
+          profiles={profiles}
+          lowestWins={game?.scoring_mode === "lowest_wins"}
+          isTeam={game?.is_team ?? false}
+        />
       ) : (
         <p className="px-3 py-3 text-sm font-bold text-muted">De host houdt de score bij…</p>
       )}
@@ -67,10 +74,12 @@ function LiveStanding({
   live,
   profiles,
   lowestWins,
+  isTeam,
 }: {
   live: { user_id: string; total: number; rounds: number }[];
   profiles: Map<string, Profile>;
   lowestWins: boolean;
+  isTeam: boolean;
 }) {
   const better = (a: number, b: number) => (lowestWins ? a < b : a > b);
   const sorted = [...live].sort((a, b) => (lowestWins ? a.total - b.total : b.total - a.total));
@@ -83,7 +92,10 @@ function LiveStanding({
       <ol className="divide-y-2 divide-soft">
         {sorted.map((l) => {
           const p = profiles.get(l.user_id);
-          const crown = anyScore && leaders.length === 1 && leaders[0].user_id === l.user_id;
+          const crown =
+            anyScore &&
+            leaders.some((x) => x.user_id === l.user_id) &&
+            (leaders.length === 1 || (isTeam && leaders.length < live.length));
           return (
             <li key={l.user_id} className={`flex items-center gap-3 px-3 py-2 ${crown ? "bg-yellow-soft" : ""}`}>
               <span className="pixel w-5 text-[10px] text-muted">{anyScore ? place(l.total) : "–"}</span>

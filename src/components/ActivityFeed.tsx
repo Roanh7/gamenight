@@ -59,7 +59,19 @@ export function ActivityFeed({ items, profiles, games, nights }: Props) {
             );
             break;
           case "match_finished":
-            if (a.payload?.draw) {
+            if (a.payload?.team) {
+              const names = ((a.payload.winners as string[]) ?? [])
+                .map((id) => profiles.get(id)?.username)
+                .filter(Boolean)
+                .join(" & ");
+              icon = <Trophy size={16} />;
+              tone = "bg-yellow-soft";
+              text = (
+                <>
+                  <b className="font-black">{names || "Het team"}</b> wonnen {gameLink} samen
+                </>
+              );
+            } else if (a.payload?.draw) {
               icon = <Handshake size={16} />;
               tone = "bg-soft";
               text = <>Gelijkspel bij {gameLink}. Geen winnaar!</>;

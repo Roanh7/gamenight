@@ -16,12 +16,14 @@ export function ScoreBoard({
   players,
   initialEntries,
   lowestWins,
+  isTeam = false,
 }: {
   matchId: string;
   nightId: string;
   players: Player[];
   initialEntries: Entry[];
   lowestWins: boolean;
+  isTeam?: boolean;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -146,7 +148,8 @@ export function ScoreBoard({
             .map((p) => {
               const t = totals.find((x) => x.id === p.id)!.total;
               const place = placeOf(p.id);
-              const crown = anyScore && place === 1 && leaders.length === 1;
+              const crown =
+                anyScore && place === 1 && (leaders.length === 1 || (isTeam && leaders.length < players.length));
               return (
                 <li key={p.id} className={`flex items-center gap-3 px-4 py-2.5 ${crown ? "bg-yellow-soft" : ""}`}>
                   <span className="pixel w-5 text-[11px] text-muted">{anyScore ? place : "–"}</span>
@@ -159,7 +162,9 @@ export function ScoreBoard({
         </ul>
         {anyScore && leaders.length > 1 && (
           <p className="border-t-2 border-line bg-soft px-4 py-2 text-xs font-bold">
-            🤝 Gelijke stand bovenaan: als het zo blijft is er geen winnaar.
+            {isTeam && leaders.length < players.length
+              ? `👥 Teamspel: ${leaders.length} spelers bovenaan winnen samen.`
+              : "🤝 Gelijke stand bovenaan: als het zo blijft is er geen winnaar."}
           </p>
         )}
       </section>
@@ -265,7 +270,8 @@ export function ScoreBoard({
         {finishing ? "Afronden…" : "🏁 Potje afronden"}
       </button>
       <p className="mt-2 text-center text-xs text-muted">
-        Scores worden automatisch opgeslagen. Bij gelijke stand bovenaan is er geen winnaar.
+        Scores worden automatisch opgeslagen.{" "}
+        {isTeam ? "Teamspel: iedereen bovenaan wint samen." : "Bij gelijke stand bovenaan is er geen winnaar."}
       </p>
     </div>
   );

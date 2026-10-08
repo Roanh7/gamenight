@@ -129,8 +129,10 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
       </SectionTitle>
       <section className="card space-y-3 p-4 text-sm">
         <p>
-          <b>{game.scoring_mode === "lowest_wins" ? "Laagste" : "Hoogste"} totaalscore wint.</b> Bij gelijke stand
-          bovenaan is er geen winnaar.
+          <b>{game.scoring_mode === "lowest_wins" ? "Laagste" : "Hoogste"} totaalscore wint.</b>{" "}
+          {game.is_team
+            ? "Teamspel: iedereen op de eerste plek wint samen. Staat iedereen gelijk, dan is er geen winnaar."
+            : "Bij gelijke stand bovenaan is er geen winnaar."}
         </p>
         <div>
           <p className="mb-1.5 font-black">Ranglijstpunten per plek</p>
@@ -166,7 +168,9 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
               <li key={m.id}>
                 <Link href={`/agenda/${m.night_id}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-cream">
                   <span className="w-20 text-xs font-bold text-muted">{m.finished_at ? formatDateShort(m.finished_at) : ""}</span>
-                  {w ? (
+                  {!w && !m.is_draw ? (
+                    <span className="flex-1 font-black">🏆 Teamwinst</span>
+                  ) : w ? (
                     <span className="flex min-w-0 flex-1 items-center gap-2 font-black">
                       <Avatar name={w.username} color={w.avatar_color} size="xs" />
                       <span className="truncate">{w.username}</span> 🏆

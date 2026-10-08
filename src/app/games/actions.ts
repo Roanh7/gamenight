@@ -31,6 +31,7 @@ function parseGame(fd: FormData) {
     scoring_mode: str(fd, "scoring_mode") === "lowest_wins" ? "lowest_wins" : "highest_wins",
     placement_points: placement.map((v) => v ?? 0),
     participation_points: Math.max(0, Math.round(Number(str(fd, "participation_points")) || 0)),
+    is_team: fd.get("is_team") === "on",
   };
 }
 

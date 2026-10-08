@@ -283,6 +283,8 @@ async function Dashboard({
                       <span className="flex items-center gap-2 text-sm font-black">
                         🏆 {w.username}
                       </span>
+                    ) : !m.is_draw ? (
+                      <span className="text-sm font-black">🏆 Teamwinst</span>
                     ) : (
                       <span className="chip bg-soft">Gelijkspel</span>
                     )}

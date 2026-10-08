@@ -46,6 +46,10 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
     results = (data ?? []) as MatchResult[];
   }
   const winner = match.winner_id ? profiles.byId.get(match.winner_id) : undefined;
+  const teamWinners = results
+    .filter((r) => r.is_winner)
+    .map((r) => profiles.byId.get(r.user_id))
+    .filter(Boolean) as NonNullable<ReturnType<typeof profiles.byId.get>>[];
 
   return (
     <div>
@@ -60,6 +64,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             players={players}
             initialEntries={(entries ?? []).map((e) => ({ ...e, points: Number(e.points) }))}
             lowestWins={game?.scoring_mode === "lowest_wins"}
+            isTeam={game?.is_team ?? false}
           />
           <form action={deleteMatch} className="mt-8">
             <input type="hidden" name="night_id" value={id} />
@@ -71,7 +76,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
         </>
       ) : (
         <>
-          <section className={`card mb-4 p-6 text-center ${sp.klaar ? "animate-pop" : ""} ${winner ? "bg-yellow" : "bg-soft"}`}>
+          <section className={`card mb-4 p-6 text-center ${sp.klaar ? "animate-pop" : ""} ${winner || teamWinners.length ? "bg-yellow" : "bg-soft"}`}>
             {winner ? (
               <>
                 <p className="pixel text-[10px]">WINNER!</p>
@@ -80,6 +85,17 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
                 </div>
                 <p className="mt-3 text-2xl font-black">{winner.username}</p>
                 <p className="text-sm font-bold">wint {game?.name}</p>
+              </>
+            ) : teamWinners.length > 1 ? (
+              <>
+                <p className="pixel text-[10px]">TEAM WINS!</p>
+                <div className="mt-3 flex justify-center -space-x-2">
+                  {teamWinners.map((p) => (
+                    <Avatar key={p.id} name={p.username} color={p.avatar_color} size="lg" crown />
+                  ))}
+                </div>
+                <p className="mt-3 text-xl font-black">{teamWinners.map((p) => p.username).join(" & ")}</p>
+                <p className="text-sm font-bold">winnen {game?.name} samen</p>
               </>
             ) : (
               <>

@@ -30,6 +30,7 @@ export type Game = {
   scoring_mode: "highest_wins" | "lowest_wins";
   placement_points: number[];
   participation_points: number;
+  is_team: boolean;
   created_by: string | null;
   created_at: string;
 };

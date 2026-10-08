@@ -194,6 +194,33 @@ begin
   rep := rep || case when cnt = 6 then 'OK' else 'FAIL' end || E' 21 resultaten met datum leesbaar (seizoenen)\n';
   reset role;
 
+  -- 23. Teamspel: meerdere winnaars bij gelijke stand bovenaan
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ua::text, true);
+  set local role authenticated;
+  insert into public.games (name, created_by, is_team) values ('ZzWolven', ua, true) returning id into g2;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  insert into public.matches (night_id, game_id) values (n1, g2) returning id into m2;
+  insert into public.match_players values (m2, ua), (m2, ub), (m2, uc);
+  insert into public.score_entries (match_id, user_id, round, points) values (m2, ua, 1, 1), (m2, ub, 1, 1), (m2, uc, 1, 0);
+  perform public.finalize_match(m2);
+  insert into public.matches (night_id, game_id) values (n1, g2) returning id into m1;
+  insert into public.match_players values (m1, ua), (m1, ub);
+  insert into public.score_entries (match_id, user_id, round, points) values (m1, ua, 1, 1), (m1, ub, 1, 1);
+  perform public.finalize_match(m1);
+  reset role;
+  select string_agg(p.username || case when r.is_winner then ':WIN' else ':-' end, ', ' order by p.username)
+    into t from public.match_results r join public.profiles p on p.id = r.user_id where r.match_id = m2;
+  select t || ' | draw=' || is_draw::text into t from public.matches where id = m2;
+  rep := rep || case when t = 'ZzTestA:WIN, ZzTestB:WIN, ZzTestC:- | draw=false' then 'OK' else 'FAIL' end || ' 23 teamspel twee winnaars: ' || t || E'\n';
+  select is_draw::text into t from public.matches where id = m1;
+  rep := rep || case when t = 'true' then 'OK' else 'FAIL' end || E' 23b teamspel iedereen gelijk = gelijkspel\n';
+  select payload::text into t from public.activity where match_id = m2 and type = 'match_finished';
+  rep := rep || case when t like '%"team": true%' then 'OK' else 'FAIL' end || ' 23c nieuws teamwinst: ' || t || E'\n';
+
   -- 22. Niet ingelogd
   set local role anon;
   begin

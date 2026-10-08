@@ -176,6 +176,10 @@ export default async function UitlegPage() {
               Eindig je gelijk, dan deel je de plek en krijg je dezelfde punten. Bij een{" "}
               <b>gelijke stand bovenaan is er geen winnaar</b> 🤝.
             </li>
+            <li>
+              Uitzondering: <b>teamspellen</b> (zoals Weerwolven of Secret Hitler). Daar winnen alle spelers
+              bovenaan samen. Geef de winnaars 1 punt en de rest 0.
+            </li>
           </ul>
           <p className="pt-1">
             Elke game heeft een eigen <b>leaderboard</b>, plus een <b>algemeen klassement</b> over alle
