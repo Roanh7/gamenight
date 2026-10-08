@@ -14,14 +14,14 @@ export default async function PlayerPage(props: PageProps<"/spelers/[username]">
   const { data } = await supabase
     .from("profiles")
     .select("*")
-    .ilike("username", decodeURIComponent(username))
+    .ilike("username", decodeURIComponent(username).replace(/[\\%_]/g, (c) => `\\${c}`))
     .maybeSingle();
   if (!data) notFound();
   if (data.id === me?.user.id) redirect("/account");
   return (
     <div>
       <PageHeader back="/ranking" kicker="SPELERSPROFIEL" title="" />
-      <PlayerProfile profile={data as Profile} isMe={false} />
+      <PlayerProfile profile={data as Profile} isMe={false} viewerId={me?.user.id} />
     </div>
   );
 }

@@ -11,6 +11,8 @@ import { GameIcon } from "@/components/GameIcon";
 import { MatchResults } from "@/components/MatchResults";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
+import { NightActions } from "@/components/NightActions";
+import { LiveRefresh } from "@/components/LiveRefresh";
 import { EmptyState, PageHeader, SectionTitle, StatusChip } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Gamenight" };
@@ -26,7 +28,8 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
     getGames(supabase),
   ]);
   if (!data || !me) notFound();
-  const { night, participants, votes, matches, results } = data;
+  const { night, participants, votes, matches, results, live } = data;
+  const hasLive = matches.some((m) => m.status === "live");
 
   const host = profiles.byId.get(night.host_id);
   const isHost = night.host_id === me.user.id;
@@ -40,6 +43,26 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
 
   const sortedGames = [...games.list].sort(
     (a, b) => (tally.counts.get(b.id) ?? 0) - (tally.counts.get(a.id) ?? 0) || a.name.localeCompare(b.name),
+  );
+
+  const matchesSection = matches.length > 0 && (
+        <>
+          {hasLive && <LiveRefresh />}
+          <SectionTitle>{hasLive ? "Nu live" : "Potjes van vanavond"}</SectionTitle>
+          <div className="grid gap-3">
+            {matches.map((m) => (
+              <MatchResults
+                key={m.id}
+                match={m}
+                game={games.byId.get(m.game_id)}
+                results={results.filter((r) => r.match_id === m.id)}
+                profiles={profiles.byId}
+                href={isHost ? `/agenda/${night.id}/host/potje/${m.id}` : undefined}
+                live={live.get(m.id)}
+              />
+            ))}
+          </div>
+        </>
   );
 
   return (
@@ -70,12 +93,27 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         {night.notes && (
           <p className="mt-3 whitespace-pre-line rounded-xl bg-cream px-3 py-2 text-sm">{night.notes}</p>
         )}
+        {(night.status === "planned" || night.status === "live") && (
+          <NightActions
+            nightId={night.id}
+            shareText={[
+              `🎮 ${night.title}`,
+              `📅 ${formatDateLong(night.starts_at)} om ${formatTime(night.starts_at)}`,
+              night.location ? `📍 ${night.location}` : null,
+              host ? `🛡️ Host: ${host.username}` : null,
+            ]
+              .filter(Boolean)
+              .join("\n")}
+          />
+        )}
         {isHost && (
           <Link href={`/agenda/${night.id}/host`} className="btn btn-yellow mt-4 w-full">
             🎮 Host dashboard
           </Link>
         )}
       </section>
+
+      {hasLive && matchesSection}
 
       {/* Deelnemers */}
       <SectionTitle>Wie komen er? ({participants.length})</SectionTitle>
@@ -202,24 +240,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         </section>
       )}
 
-      {/* Potjes */}
-      {matches.length > 0 && (
-        <>
-          <SectionTitle>Potjes van vanavond</SectionTitle>
-          <div className="grid gap-3">
-            {matches.map((m) => (
-              <MatchResults
-                key={m.id}
-                match={m}
-                game={games.byId.get(m.game_id)}
-                results={results.filter((r) => r.match_id === m.id)}
-                profiles={profiles.byId}
-                href={isHost ? `/agenda/${night.id}/host/potje/${m.id}` : undefined}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      {!hasLive && matchesSection}
     </div>
   );
 }

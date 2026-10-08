@@ -25,7 +25,7 @@ export function PageHeader({
           </Link>
         )}
         {kicker && <p className="pixel mb-1 text-[10px] uppercase text-red">{kicker}</p>}
-        <h1 className="truncate text-2xl font-black leading-tight">{title}</h1>
+        {title && <h1 className="truncate text-2xl font-black leading-tight">{title}</h1>}
       </div>
       {action}
     </header>

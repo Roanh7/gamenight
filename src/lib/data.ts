@@ -11,6 +11,7 @@ import type {
   Profile,
   Vote,
 } from "./types";
+import type { ResultRow } from "./stats";
 
 type DB = Awaited<ReturnType<typeof createClient>>;
 
@@ -61,15 +62,39 @@ export async function getNight(supabase: DB, id: string) {
     ]);
   if (!night) return null;
   const matchIds = (matches ?? []).map((m) => m.id);
-  const { data: results } = matchIds.length
-    ? await supabase.from("match_results").select("*").in("match_id", matchIds)
-    : { data: [] };
+  const liveIds = (matches ?? []).filter((m) => m.status === "live").map((m) => m.id);
+  const [{ data: results }, { data: livePlayers }, { data: liveScores }] = await Promise.all([
+    matchIds.length
+      ? supabase.from("match_results").select("*").in("match_id", matchIds)
+      : Promise.resolve({ data: [] }),
+    liveIds.length
+      ? supabase.from("match_players").select("match_id, user_id").in("match_id", liveIds)
+      : Promise.resolve({ data: [] }),
+    liveIds.length
+      ? supabase.from("score_entries").select("match_id, user_id, round, points").in("match_id", liveIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  // Live tussenstand per lopend potje
+  const live = new Map<string, { user_id: string; total: number; rounds: number }[]>();
+  for (const id of liveIds) {
+    const players = (livePlayers ?? []).filter((p) => p.match_id === id);
+    const scores = (liveScores ?? []).filter((s) => s.match_id === id);
+    live.set(
+      id,
+      players.map((p) => ({
+        user_id: p.user_id,
+        total: scores.filter((s) => s.user_id === p.user_id).reduce((t, s) => t + Number(s.points), 0),
+        rounds: Math.max(0, ...scores.map((s) => s.round)),
+      })),
+    );
+  }
   return {
     night: night as GameNight,
     participants: (participants ?? []) as Participant[],
     votes: (votes ?? []) as Vote[],
     matches: (matches ?? []) as Match[],
     results: (results ?? []) as MatchResult[],
+    live,
   };
 }
 
@@ -81,4 +106,16 @@ export function tallyVotes(votes: Vote[]) {
   const top = sorted[0]?.[1] ?? 0;
   const leaders = sorted.filter(([, c]) => c === top && top > 0).map(([g]) => g);
   return { counts, leaders, winner: leaders.length === 1 ? leaders[0] : null, total: votes.length };
+}
+
+/** Alle afgeronde resultaten, met het moment van afronden (voor seizoenen en onderlinge stand). */
+export async function getResults(supabase: DB) {
+  const { data } = await supabase
+    .from("match_results")
+    .select("*, matches!inner(finished_at)")
+    .limit(10000);
+  return (data ?? []).map((r) => {
+    const { matches, ...rest } = r as MatchResult & { matches: { finished_at: string | null } };
+    return { ...rest, finished_at: matches?.finished_at ?? new Date().toISOString() } as ResultRow;
+  });
 }

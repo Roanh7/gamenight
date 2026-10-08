@@ -15,9 +15,10 @@ type Input = {
   leaderboard: LeaderboardRow[]; // alle leaderboard-rijen (alle games)
   games: Game[];
   hostedNights: number; // afgeronde avonden als host
+  seasonTitles?: number; // aantal gewonnen seizoenen
 };
 
-export function computeAchievements({ userId, results, leaderboard, games, hostedNights }: Input) {
+export function computeAchievements({ userId, results, leaderboard, games, hostedNights, seasonTitles = 0 }: Input) {
   const wins = results.filter((r) => r.is_winner).length;
   const played = results.length;
   const distinctGames = new Set(results.map((r) => r.game_id)).size;
@@ -86,6 +87,13 @@ export function computeAchievements({ userId, results, leaderboard, games, hoste
       description: "Eindig gelijk op de eerste plek",
       icon: "medal",
       earned: sharedFirst >= 1,
+    },
+    {
+      id: "season",
+      title: "Seizoenskampioen",
+      description: "Eindig een seizoen als #1",
+      icon: "trophy",
+      earned: seasonTitles > 0,
     },
     {
       id: "champion",

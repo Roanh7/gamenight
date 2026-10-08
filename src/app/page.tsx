@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getActivity, getGames, getOverall, getProfiles, tallyVotes } from "@/lib/data";
+import { getActivity, getGames, getProfiles, getResults, tallyVotes } from "@/lib/data";
+import { currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
@@ -120,10 +121,10 @@ async function Dashboard({
   const supabase = await createClient();
   const since = hoursAgoIso(12);
 
-  const [profiles, games, overall, activity, nightsRes, lastMatchesRes] = await Promise.all([
+  const [profiles, games, results, activity, nightsRes, lastMatchesRes] = await Promise.all([
     getProfiles(supabase),
     getGames(supabase),
-    getOverall(supabase),
+    getResults(supabase),
     getActivity(supabase, 12),
     supabase
       .from("game_nights")
@@ -161,6 +162,8 @@ async function Dashboard({
     : { data: [] };
   const nightsById = new Map((feedNights ?? []).map((n) => [n.id, n]));
 
+  const season = currentSeason();
+  const overall = standings(filterSeason(results, season));
   const myOverall = overall.find((o) => o.user_id === userId);
   const tally = tallyVotes(nextVotes);
   const leadingGame = tally.winner ? games.byId.get(tally.winner) : undefined;
@@ -183,7 +186,7 @@ async function Dashboard({
         </h1>
         <div className="relative mt-3 flex flex-wrap gap-2">
           <span className="chip bg-paper text-ink">
-            🏆 {myOverall ? `#${myOverall.rank} algemeen` : "Nog geen ranking"}
+            🏆 {myOverall ? `#${myOverall.rank} in ${seasonLabel(season)}` : `Nog geen ranking in ${seasonLabel(season)}`}
           </span>
           {myOverall && (
             <span className="chip bg-paper text-ink">
@@ -307,7 +310,7 @@ async function Dashboard({
           </Link>
         }
       >
-        Top 3 algemeen
+        Top 3 seizoen {seasonLabel(season)}
       </SectionTitle>
       {overall.length > 0 ? (
         <div className="card p-3">

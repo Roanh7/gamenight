@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { History, Pencil, ScrollText, Trophy } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getProfiles } from "@/lib/data";
-import type { Game, LeaderboardRow, Match } from "@/lib/types";
+import { getProfiles, getResults } from "@/lib/data";
+import type { Game, Match } from "@/lib/types";
+import { filterSeason, seasonLabel, seasonsWithData, standings } from "@/lib/stats";
+import { SeasonTabs, parseSeason } from "@/components/SeasonTabs";
 import { formatDateShort, formatScore } from "@/lib/format";
 import { GameIcon } from "@/components/GameIcon";
 import { Leaderboard } from "@/components/Leaderboard";
@@ -19,9 +21,9 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const [{ data: gameData }, { data: lb }, { data: matchData }, profiles] = await Promise.all([
+  const [{ data: gameData }, allResults, { data: matchData }, profiles] = await Promise.all([
     supabase.from("games").select("*").eq("id", id).maybeSingle(),
-    supabase.from("game_leaderboard").select("*").eq("game_id", id).order("rank"),
+    getResults(supabase),
     supabase
       .from("matches")
       .select("*")
@@ -33,7 +35,10 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
   ]);
   if (!gameData) notFound();
   const game = gameData as Game;
-  const rows = (lb ?? []) as LeaderboardRow[];
+  const gameResults = allResults.filter((r) => r.game_id === id);
+  const seasons = seasonsWithData(gameResults);
+  const season = parseSeason(sp.seizoen, seasons);
+  const rows = standings(filterSeason(gameResults, season));
   const matches = (matchData ?? []) as Match[];
   const creator = game.created_by ? profiles.byId.get(game.created_by) : undefined;
 
@@ -82,7 +87,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
         <div className="mt-3 grid grid-cols-2 gap-3">
           {champion && (
             <div className="card bg-yellow p-3">
-              <p className="pixel text-[9px]">KAMPIOEN</p>
+              <p className="pixel text-[9px]">{season === "all" ? "KAMPIOEN" : `KAMPIOEN ${seasonLabel(season).toUpperCase()}`}</p>
               <div className="mt-2 flex items-center gap-2">
                 <Avatar name={champion.username} color={champion.avatar_color} size="sm" crown />
                 <span className="truncate font-black">{champion.username}</span>
@@ -105,10 +110,16 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
           <Trophy size={14} /> Leaderboard
         </span>
       </SectionTitle>
+      <SeasonTabs seasons={seasons} active={season} basePath={`/games/${id}`} />
+      <div className="mt-2" />
       {rows.length ? (
         <Leaderboard rows={rows} profiles={profiles.byId} meId={me?.user.id} />
       ) : (
-        <EmptyState icon={<Trophy size={32} />} title="Nog niet gespeeld" text="Na het eerste potje verschijnt hier de ranglijst." />
+        <EmptyState
+          icon={<Trophy size={32} />}
+          title={season === "all" ? "Nog niet gespeeld" : `Nog niet gespeeld in ${seasonLabel(season)}`}
+          text="Na het eerste potje verschijnt hier de ranglijst."
+        />
       )}
 
       <SectionTitle>

@@ -107,6 +107,10 @@ export default async function UitlegPage() {
               spelers kunnen meedoen aan potjes.
             </li>
             <li>Kun je toch niet? Tik op <b>Afmelden</b>.</li>
+            <li>
+              Met <b>Deel avond</b> stuur je de avond direct door in de groepsapp, en met{" "}
+              <b>Zet in agenda</b> komt hij in je iPhone-agenda, met een herinnering 2 uur van tevoren.
+            </li>
           </ul>
         </Section>
 
@@ -149,6 +153,10 @@ export default async function UitlegPage() {
               Foutje gemaakt? Met <b>Heropen dit potje</b> kun je de scores nog verbeteren.
             </li>
             <li>De host stokje doorgeven kan onder <b>Avond bewerken</b>.</li>
+            <li>
+              De rest kijkt <b>live mee</b>: op de pagina van de avond zie je tijdens een potje de tussenstand,
+              die zichzelf elke paar seconden ververst.
+            </li>
           </ul>
         </Section>
 
@@ -172,6 +180,12 @@ export default async function UitlegPage() {
           <p className="pt-1">
             Elke game heeft een eigen <b>leaderboard</b>, plus een <b>algemeen klassement</b> over alle
             games. Wie de meeste punten heeft staat bovenaan; bij gelijke punten telt het aantal zeges.
+          </p>
+          <p className="pt-1">
+            <b>Seizoenen:</b> elk kwartaal begint een nieuw seizoen (jan–mrt, apr–jun, jul–sep, okt–dec). Wie
+            aan het eind van een seizoen alleen bovenaan staat, krijgt voor altijd de titel{" "}
+            <b>🏆 Seizoenskampioen</b>. Onder <b>Ranking</b> kun je wisselen tussen het huidige seizoen, eerdere
+            seizoenen en <b>All-time</b>.
           </p>
         </Section>
 
@@ -206,9 +220,13 @@ export default async function UitlegPage() {
             </li>
             <li>
               Op je <b>Account</b> zie je je rankings per game en je <b>achievements</b>: Eerste zege,
-              Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish en Kampioen.
+              Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish, Seizoenskampioen en Kampioen.
             </li>
-            <li>Tik op een naam in een ranglijst om het profiel van die speler te bekijken.</li>
+            <li>
+              Tik op een naam in een ranglijst om het profiel van die speler te zien, inclusief jullie{" "}
+              <b>onderlinge stand</b>: hoe vaak jij hoger eindigde dan hij, en per game.
+            </li>
+            <li>Op je eigen account staat een overzicht van al je onderlinge standen.</li>
           </ul>
         </Section>
 
