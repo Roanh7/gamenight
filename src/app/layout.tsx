@@ -33,10 +33,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href="/" aria-label="Home">
                 <Logo />
               </Link>
-              <Link href="/account" className="flex items-center gap-2" aria-label="Mijn account">
-                <span className="hidden text-sm font-extrabold sm:inline">{me.profile.username}</span>
-                <Avatar name={me.profile.username} color={me.profile.avatar_color} size="sm" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/uitleg"
+                  aria-label="Uitleg"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-line bg-paper font-black"
+                >
+                  ?
+                </Link>
+                <Link href="/account" className="flex items-center gap-2" aria-label="Mijn account">
+                  <span className="hidden text-sm font-extrabold sm:inline">{me.profile.username}</span>
+                  <Avatar name={me.profile.username} color={me.profile.avatar_color} size="sm" />
+                </Link>
+              </div>
             </div>
           </header>
         )}

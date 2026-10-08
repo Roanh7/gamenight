@@ -80,6 +80,9 @@ function Landing() {
             </li>
           ))}
         </ol>
+        <Link href="/uitleg" className="btn btn-secondary btn-sm mt-4 w-full">
+          Lees de volledige uitleg →
+        </Link>
       </section>
 
       <section className="card mt-8 p-5 text-center">
