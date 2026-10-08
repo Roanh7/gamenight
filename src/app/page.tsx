@@ -86,7 +86,7 @@ function Landing() {
         <PixelController className="mx-auto mb-3 h-8 w-auto" />
         <p className="font-black">Titels, kroontjes en eeuwige roem</p>
         <p className="mt-1 text-sm text-muted">
-          Per game een eigen leaderboard. Wordt jij Kampioen Mario Kart?
+          Per game een eigen leaderboard. Word jij Kampioen Mario Kart?
         </p>
       </section>
 
