@@ -10,6 +10,7 @@ import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
 import { Leaderboard } from "@/components/Leaderboard";
 import { EmptyState, SectionTitle } from "@/components/ui";
+import { InstallHint } from "@/components/InstallHint";
 
 export default async function Home(props: PageProps<"/">) {
   const me = await getMe();
@@ -60,7 +61,11 @@ function Landing() {
         </div>
       </section>
 
-      <section className="mt-12">
+      <div className="mt-8">
+        <InstallHint />
+      </div>
+
+      <section className="mt-8">
         <h2 className="pixel mb-4 text-center text-[11px]">HOE WERKT HET?</h2>
         <ol className="space-y-3">
           {steps.map((s, i) => (
@@ -164,6 +169,8 @@ async function Dashboard({
 
   return (
     <div>
+      <InstallHint />
+
       {/* Begroeting */}
       <section className="card relative overflow-hidden bg-red p-5 text-white">
         <div

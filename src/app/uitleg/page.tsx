@@ -215,8 +215,9 @@ export default async function UitlegPage() {
         <Section id="tips" icon={Smartphone} color="bg-teal" title="8. Tips">
           <ul>
             <li>
-              <b>Zet de app op je beginscherm.</b> iPhone: Safari → deelknop → <i>Zet op beginscherm</i>.
-              Android: Chrome → ⋮ → <i>Toevoegen aan startscherm</i>.
+              <b>Zet de app op je beginscherm.</b> Open de site in Safari, tik op de deelknop (vierkantje met
+              pijltje omhoog), kies <i>Zet op beginscherm</i> en tik op <i>Voeg toe</i>. Je krijgt dan het
+              Game Night-icoon en de app opent zonder Safari-balken. Log daarna één keer opnieuw in.
             </li>
             <li>Je naam, kleur, bio en wachtwoord pas je aan onder <b>Account</b>.</li>
             <li>
