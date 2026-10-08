@@ -125,7 +125,7 @@ async function Dashboard({
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
-    getActivity(supabase, 12),
+    getActivity(supabase, 4),
     supabase
       .from("game_nights")
       .select("*")
@@ -297,7 +297,17 @@ async function Dashboard({
       )}
 
       {/* Nieuws */}
-      <SectionTitle>Latest news</SectionTitle>
+      <SectionTitle
+        action={
+          activity.length > 0 ? (
+            <Link href="/nieuws" className="text-xs font-extrabold text-muted hover:text-ink">
+              Alle nieuws →
+            </Link>
+          ) : undefined
+        }
+      >
+        Latest news
+      </SectionTitle>
       {activity.length > 0 ? (
         <ActivityFeed items={activity} profiles={profiles.byId} games={games.byId} nights={nightsById} />
       ) : (
