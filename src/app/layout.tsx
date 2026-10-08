@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   title: { default: "Game Night", template: "%s · Game Night" },
   description: "Plan gamenights, stem op games en houd de ranglijst bij met je vrienden.",
   appleWebApp: { capable: true, title: "Game Night", statusBarStyle: "default" },
+  // Oudere iPhones kijken alleen naar deze naam om zonder Safari-balken te openen
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
 export const viewport: Viewport = {
