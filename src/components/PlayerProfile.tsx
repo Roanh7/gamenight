@@ -63,7 +63,7 @@ export async function PlayerProfile({
       <section className="card overflow-hidden">
         <div className="h-14 border-b-2 border-line bg-red" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,.12) 14px 28px)" }} />
         <div className="-mt-10 px-5 pb-5">
-          <Avatar name={profile.username} color={profile.avatar_color} size="xl" crown={titles.length > 0} />
+          <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} size="xl" crown={titles.length > 0} />
           <h1 className="mt-2 text-2xl font-black">{profile.username}</h1>
           {profile.bio && <p className="mt-0.5 text-sm">{profile.bio}</p>}
           <p className="mt-1 text-xs font-bold text-muted">Speler sinds {since}</p>
@@ -110,7 +110,7 @@ export async function PlayerProfile({
               return (
                 <li key={h.opponent}>
                   <Link href={`/spelers/${p.username}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-cream">
-                    <Avatar name={p.username} color={p.avatar_color} size="sm" />
+                    <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
                     <span className="min-w-0 flex-1 truncate font-black">vs {p.username}</span>
                     <span className={`chip ${lead} pixel text-[10px]`}>
                       {h.wins}–{h.losses}

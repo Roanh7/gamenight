@@ -5,7 +5,8 @@ import { Check, Clock, Gamepad2, Hourglass, MapPin, Plus, Shield } from "lucide-
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getGames, getNight, getProfiles, tallyVotes } from "@/lib/data";
 import { formatDateLong, formatTime } from "@/lib/format";
-import { castVote, joinNight, leaveNight } from "../actions";
+import { computeRecap } from "@/lib/recap";
+import { castVote, joinNight, leaveNight, pickDate, takeOverHost, toggleDateVote } from "../actions";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
 import { MatchResults } from "@/components/MatchResults";
@@ -13,6 +14,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
 import { NightActions } from "@/components/NightActions";
 import { LiveRefresh } from "@/components/LiveRefresh";
+import { NightRecap } from "@/components/NightRecap";
+import { Celebrate } from "@/components/Celebrate";
 import { EmptyState, PageHeader, SectionTitle, StatusChip } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Gamenight" };
@@ -28,11 +31,16 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
     getGames(supabase),
   ]);
   if (!data || !me) notFound();
-  const { night, participants, votes, matches, results, live, liveTeams, teams } = data;
+  const { night, participants, votes, matches, results, live, liveTeams, teams, dateOptions } = data;
+  const recap = night.status === "finished" ? computeRecap(matches, results) : null;
+  const isPoll = night.date_poll && night.status === "planned";
+  const isPlanner = isPollPlanner(night, me.user.id);
+  const bestDate = Math.max(0, ...dateOptions.map((o) => o.voters.length));
   const hasLive = matches.some((m) => m.status === "live");
 
   const host = profiles.byId.get(night.host_id);
-  const isHost = night.host_id === me.user.id;
+  const cohost = night.cohost_id ? profiles.byId.get(night.cohost_id) : undefined;
+  const isHost = night.host_id === me.user.id || night.cohost_id === me.user.id;
   const mine = participants.find((p) => p.user_id === me.user.id);
   const myVotes = new Set(votes.filter((v) => v.user_id === me.user.id).map((v) => v.game_id));
   const tally = tallyVotes(votes);
@@ -81,7 +89,8 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1 text-sm font-bold">
             <p className="flex items-center gap-2">
-              <Clock size={15} /> {formatDateLong(night.starts_at)} · {formatTime(night.starts_at)}
+              <Clock size={15} />{" "}
+              {isPoll ? "📅 Datum nog kiezen" : `${formatDateLong(night.starts_at)} · ${formatTime(night.starts_at)}`}
             </p>
             {night.location && (
               <p className="flex items-center gap-2">
@@ -91,6 +100,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
             {host && (
               <p className="flex items-center gap-2">
                 <Shield size={15} /> Host: {host.username}
+                {cohost ? ` · co-host: ${cohost.username}` : ""}
               </p>
             )}
           </div>
@@ -102,9 +112,12 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         {(night.status === "planned" || night.status === "live") && (
           <NightActions
             nightId={night.id}
+            poll={isPoll}
             shareText={[
               `🎮 ${night.title}`,
-              `📅 ${formatDateLong(night.starts_at)} om ${formatTime(night.starts_at)}`,
+              isPoll
+                ? "📅 Datumprikker: geef aan wanneer je kunt!"
+                : `📅 ${formatDateLong(night.starts_at)} om ${formatTime(night.starts_at)}`,
               night.location ? `📍 ${night.location}` : null,
               host ? `🛡️ Host: ${host.username}` : null,
             ]
@@ -112,12 +125,97 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
               .join("\n")}
           />
         )}
-        {isHost && (
+        {isHost ? (
           <Link href={`/agenda/${night.id}/host`} className="btn btn-yellow mt-4 w-full">
-            🎮 Host dashboard
+            🎮 {night.host_id === me.user.id ? "Host dashboard" : "Host dashboard (co-host)"}
           </Link>
+        ) : (
+          mine?.status === "confirmed" &&
+          (night.status === "planned" || night.status === "live") && (
+            <form action={takeOverHost} className="mt-3">
+              <input type="hidden" name="night_id" value={night.id} />
+              <SubmitButton
+                className="btn btn-secondary btn-sm w-full"
+                pendingText="Overnemen…"
+                confirm={`Host overnemen van ${host?.username ?? "de host"}? Jij gaat dan de scores bijhouden.${cohost ? "" : ` ${host?.username ?? "De host"} wordt co-host.`}`}
+              >
+                🎮 Host overnemen
+              </SubmitButton>
+            </form>
+          )
         )}
       </section>
+
+      {sp.klaar && recap && <Celebrate kind="win" />}
+      {recap && <NightRecap recap={recap} profiles={profiles.byId} nightId={night.id} title={night.title} />}
+
+      {/* Datumprikker */}
+      {isPoll && (
+        <>
+          <SectionTitle>📅 Wanneer kan je?</SectionTitle>
+          <section className="card overflow-hidden">
+            <p className="border-b-2 border-line bg-cream px-4 py-2 text-xs font-bold text-muted">
+              Tik alle momenten aan waarop je kunt.
+              {isPlanner && " Jij kiest daarna de datum."}
+            </p>
+            <ul className="divide-y-2 divide-soft">
+              {dateOptions.map((o) => {
+                const mineDate = o.voters.includes(me.user.id);
+                const best = o.voters.length > 0 && o.voters.length === bestDate;
+                return (
+                  <li key={o.id} className={`px-4 py-3 ${best ? "bg-yellow-soft" : ""}`}>
+                    <form action={toggleDateVote}>
+                      <input type="hidden" name="night_id" value={night.id} />
+                      <input type="hidden" name="option_id" value={o.id} />
+                      <input type="hidden" name="voted" value={mineDate ? "1" : ""} />
+                      <button type="submit" aria-pressed={mineDate} className="flex w-full items-center gap-3 text-left">
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 border-line text-xs font-black ${mineDate ? "bg-green text-white" : "bg-paper"}`}
+                          aria-hidden
+                        >
+                          {mineDate ? "✓" : ""}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-black capitalize">
+                            {formatDateLong(o.starts_at)} {best && "👑"}
+                          </span>
+                          <span className="block text-xs font-bold text-muted">{formatTime(o.starts_at)}</span>
+                        </span>
+                        <span className="pixel text-xs">{o.voters.length}</span>
+                      </button>
+                    </form>
+                    {(o.voters.length > 0 || isPlanner) && (
+                      <div className="mt-2 flex items-center gap-2 pl-9">
+                        <div className="flex min-w-0 flex-1 -space-x-1">
+                          {o.voters.map((uid) => {
+                            const pr = profiles.byId.get(uid);
+                            return pr ? (
+                              <Avatar key={uid} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
+                            ) : null;
+                          })}
+                        </div>
+                        {isPlanner && (
+                          <form action={pickDate}>
+                            <input type="hidden" name="night_id" value={night.id} />
+                            <input type="hidden" name="option_id" value={o.id} />
+                            <SubmitButton
+                              className="btn btn-secondary btn-sm"
+                              pendingText="…"
+                              confirm={`${formatDateLong(o.starts_at)} om ${formatTime(o.starts_at)} kiezen als datum?`}
+                            >
+                              Kies deze
+                            </SubmitButton>
+                          </form>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        </>
+      )}
 
       {hasLive && matchesSection}
 
@@ -129,7 +227,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
             const pr = profiles.byId.get(p.user_id);
             return pr ? (
               <li key={p.user_id} className="chip bg-green-soft py-1 pl-1 text-sm">
-                <Avatar name={pr.username} color={pr.avatar_color} size="xs" />
+                <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
                 {pr.username}
                 <Check size={13} strokeWidth={3} />
               </li>
@@ -139,7 +237,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
             const pr = profiles.byId.get(p.user_id);
             return pr ? (
               <li key={p.user_id} className="chip bg-paper py-1 pl-1 text-sm text-muted">
-                <Avatar name={pr.username} color={pr.avatar_color} size="xs" />
+                <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
                 {pr.username}
                 <Hourglass size={13} strokeWidth={3} />
               </li>
@@ -241,7 +339,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                         <div className="mt-0.5 flex -space-x-1">
                           {voters.map((v) => {
                             const pr = profiles.byId.get(v.user_id);
-                            return pr ? <Avatar key={v.user_id} name={pr.username} color={pr.avatar_color} size="xs" /> : null;
+                            return pr ? <Avatar key={v.user_id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" /> : null;
                           })}
                         </div>
                       </div>
@@ -283,4 +381,8 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
       {!hasLive && matchesSection}
     </div>
   );
+}
+
+function isPollPlanner(night: { host_id: string; cohost_id: string | null; created_by: string | null }, uid: string) {
+  return night.host_id === uid || night.cohost_id === uid || night.created_by === uid;
 }

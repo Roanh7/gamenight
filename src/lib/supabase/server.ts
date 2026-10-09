@@ -35,7 +35,7 @@ export const getMe = cache(async () => {
   const user = { id: claims.sub as string, email: (claims.email as string | undefined) ?? "" };
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, avatar_color, bio, created_at")
+    .select("id, username, avatar_color, avatar_url, avatar_emoji, bio, created_at")
     .eq("id", user.id)
     .maybeSingle();
   if (!profile) return null;

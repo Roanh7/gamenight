@@ -1,17 +1,22 @@
 import Link from "next/link";
-import { CalendarPlus, Crown, Gamepad2, PartyPopper, Trophy, TrendingUp, Handshake } from "lucide-react";
+import { CalendarPlus, Crown, Flag, Gamepad2, PartyPopper, Shield, Trophy, TrendingUp, Handshake } from "lucide-react";
 import type { Activity, Game, GameNight, Profile } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import { Avatar } from "./Avatar";
+import { Reactions } from "./Reactions";
 
 type Props = {
   items: Activity[];
   profiles: Map<string, Profile>;
   games: Map<string, Game>;
   nights: Map<string, Pick<GameNight, "id" | "title">>;
+  me?: { id: string; name: string };
+  reactions?: Map<number, Record<string, { n: number; mine: boolean; names: string[] }>>;
 };
 
-export function ActivityFeed({ items, profiles, games, nights }: Props) {
+type RecapStat = { user_id: string; points: number; wins: number; played: number; last: number };
+
+export function ActivityFeed({ items, profiles, games, nights, me, reactions }: Props) {
   return (
     <ul className="card divide-y-2 divide-soft overflow-hidden">
       {items.map((a) => {
@@ -106,6 +111,62 @@ export function ActivityFeed({ items, profiles, games, nights }: Props) {
             }
             break;
           }
+          case "host_changed":
+            icon = <Shield size={16} />;
+            tone = "bg-yellow-soft";
+            text = (
+              <>
+                {name} is nu host van{" "}
+                {night ? (
+                  <Link href={`/agenda/${night.id}`} className="font-black underline decoration-2 underline-offset-2">
+                    {night.title}
+                  </Link>
+                ) : (
+                  "de avond"
+                )}
+              </>
+            );
+            break;
+          case "night_recap": {
+            icon = <Flag size={16} />;
+            tone = "bg-red-soft";
+            const stats = ((a.payload?.stats as RecapStat[]) ?? []).slice(0, 3);
+            const mvp = a.payload?.mvp ? profiles.get(String(a.payload.mvp)) : undefined;
+            const title = night?.title ?? String(a.payload?.title ?? "de avond");
+            text = (
+              <>
+                <b className="font-black">🏁 Recap: </b>
+                {a.night_id ? (
+                  <Link href={`/agenda/${a.night_id}#recap`} className="font-black underline decoration-2 underline-offset-2">
+                    {title}
+                  </Link>
+                ) : (
+                  title
+                )}
+                <br />
+                {mvp ? (
+                  <>
+                    MVP <b className="font-black">{mvp.username}</b> met {stats[0]?.points ?? 0} pt
+                  </>
+                ) : (
+                  <>Gedeelde eerste plek, geen MVP</>
+                )}{" "}
+                · {String(a.payload?.matches ?? 0)} potjes
+                <span className="mt-1.5 flex items-end gap-1.5">
+                  {stats.map((s, i) => {
+                    const p = profiles.get(s.user_id);
+                    return p ? (
+                      <span key={s.user_id} className="inline-flex items-center gap-1 rounded-full bg-cream py-0.5 pl-0.5 pr-2 text-xs font-black">
+                        <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" />
+                        {["🥇", "🥈", "🥉"][i]} {s.points}
+                      </span>
+                    ) : null;
+                  })}
+                </span>
+              </>
+            );
+            break;
+          }
           default:
             text = <>Er gebeurde iets</>;
         }
@@ -114,7 +175,7 @@ export function ActivityFeed({ items, profiles, games, nights }: Props) {
           <li key={a.id} className="flex items-start gap-3 px-4 py-3">
             <div className="relative">
               {actor ? (
-                <Avatar name={actor.username} color={actor.avatar_color} size="sm" />
+                <Avatar name={actor.username} color={actor.avatar_color} url={actor.avatar_url} emoji={actor.avatar_emoji} size="sm" />
               ) : (
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-line bg-soft">
                   {icon}
@@ -131,6 +192,9 @@ export function ActivityFeed({ items, profiles, games, nights }: Props) {
             <div className="min-w-0 flex-1">
               <p className="text-sm leading-snug">{text}</p>
               <p className="mt-0.5 text-xs text-muted">{timeAgo(a.created_at)}</p>
+              {me && (
+                <Reactions activityId={a.id} userId={me.id} myName={me.name} initial={reactions?.get(a.id) ?? {}} />
+              )}
             </div>
           </li>
         );

@@ -54,6 +54,7 @@ const TOC = [
   ["agenda", "Avond plannen"],
   ["stemmen", "Welke games?"],
   ["host", "De host"],
+  ["recap", "Recap"],
   ["soorten", "Soorten spellen"],
   ["punten", "Punten & ranking"],
   ["games", "Games"],
@@ -103,6 +104,11 @@ export default async function UitlegPage() {
               Ga naar <b>Agenda → Plan</b>. Kies een naam, datum, tijd, locatie en wie de <b>host</b> is.
             </li>
             <li>
+              Weet je nog niet wanneer? Kies <b>📅 Datumprikker</b> en geef 2 tot 5 momenten op. Iedereen tikt op
+              de avond aan wanneer hij kan; de populairste datum krijgt een 👑. De planner of host tikt daarna op{" "}
+              <b>Kies deze</b> en dan staat de datum vast.
+            </li>
+            <li>
               Kun je erbij zijn? Open de avond en tik op <b>✋ Ik doe mee!</b>
             </li>
             <li>
@@ -139,7 +145,8 @@ export default async function UitlegPage() {
 
         <Section id="host" icon={Shield} color="bg-yellow" title="4. De host">
           <p>
-            Elke avond heeft één host. Alleen de host ziet de knop <b>🎮 Host dashboard</b>. Daar kan hij:
+            Elke avond heeft één host, en eventueel een <b>co-host</b>. Alleen zij zien de knop{" "}
+            <b>🎮 Host dashboard</b>. Daar kunnen ze:
           </p>
           <ul>
             <li>
@@ -156,12 +163,24 @@ export default async function UitlegPage() {
               per speler, per team, of pas na afloop bij geheime rollen. Alles wordt meteen opgeslagen.
             </li>
             <li>
-              Op <b>🏁 Potje afronden</b> tikken als het klaar is. De punten gaan dan naar de ranglijst.
+              Op <b>🏁 Potje afronden</b> tikken als het klaar is. De punten gaan dan naar de ranglijst, en de
+              winnaar krijgt confetti en een overwinningsdeuntje 🎉.
             </li>
             <li>
               Foutje gemaakt? Met <b>Heropen dit potje</b> kun je de scores nog verbeteren.
             </li>
-            <li>De host stokje doorgeven kan onder <b>Avond bewerken</b>.</li>
+            <li>
+              Een <b>co-host</b> aanwijzen: tik bij een deelnemer op <b>Co-host</b>. Die kan precies hetzelfde als
+              de host, handig als jij zelf meespeelt of even weg moet.
+            </li>
+            <li>
+              Is de host er niet (of zijn telefoon is leeg)? Elke bevestigde speler kan op de avond op{" "}
+              <b>🎮 Host overnemen</b> tikken. De oude host wordt dan co-host.
+            </li>
+            <li>
+              Na het laatste potje tikt de host op <b>Avond afsluiten</b>. Dan verschijnt de{" "}
+              <a href="#recap" className="underline">recap</a>.
+            </li>
             <li>
               De rest kijkt <b>live mee</b>: op de pagina van de avond zie je tijdens een potje de tussenstand,
               die zichzelf elke paar seconden ververst.
@@ -169,7 +188,21 @@ export default async function UitlegPage() {
           </ul>
         </Section>
 
-        <Section id="soorten" icon={Users} color="bg-pink" title="5. Soorten spellen">
+        <Section id="recap" icon={Flag} color="bg-red" title="5. De recap">
+          <ul>
+            <li>
+              Zodra de host de avond afsluit, maakt de app een <b>🏁 recap</b>: de <b>MVP</b> van de avond (wie de
+              meeste punten pakte), de stand van de avond, wie de <b>meeste zeges</b> had en de{" "}
+              <b>🧂 pechvogel</b> (het vaakst laatst).
+            </li>
+            <li>Je ziet de recap op de pagina van de avond, en hij komt automatisch in het nieuws.</li>
+            <li>
+              Met <b>Deel recap-plaatje</b> maak je er een plaatje van om in de groepsapp te gooien.
+            </li>
+          </ul>
+        </Section>
+
+        <Section id="soorten" icon={Users} color="bg-pink" title="6. Soorten spellen">
           <p>Elke game is een van deze drie soorten. Dat kies je bij het toevoegen of bewerken van de game.</p>
           <div className="space-y-3 pt-1">
             <div className="rounded-xl border-2 border-line bg-blue-soft p-3">
@@ -212,7 +245,7 @@ export default async function UitlegPage() {
           </div>
         </Section>
 
-        <Section id="punten" icon={Trophy} color="bg-green" title="6. Punten & ranking">
+        <Section id="punten" icon={Trophy} color="bg-green" title="7. Punten & ranking">
           <p>Bij het afronden van een potje gebeurt dit:</p>
           <ul>
             <li>
@@ -242,7 +275,7 @@ export default async function UitlegPage() {
           </p>
         </Section>
 
-        <Section id="games" icon={Gamepad2} color="bg-orange" title="7. Games">
+        <Section id="games" icon={Gamepad2} color="bg-orange" title="8. Games">
           <ul>
             <li>
               Onder <b>Games</b> zie je alle spellen: welke soort, voor hoeveel spelers, hoe vaak gespeeld en wie
@@ -270,7 +303,7 @@ export default async function UitlegPage() {
           </ul>
         </Section>
 
-        <Section id="extra" icon={Crown} color="bg-purple" title="8. Players, nieuws & titels">
+        <Section id="extra" icon={Crown} color="bg-purple" title="9. Players, nieuws & titels">
           <ul>
             <li>
               Onder <b>Players</b> staan alle spelers, op volgorde van de stand van dit seizoen. Tik op iemand om
@@ -294,10 +327,14 @@ export default async function UitlegPage() {
               hij, ook per game.
             </li>
             <li>Op je eigen account staat een overzicht van al je onderlinge standen.</li>
+            <li>
+              Onder elk nieuwsbericht kun je <b>reageren</b> met een emoji (🔥 😂 👏 🧂 💀 👑). Tik op het
+              smiley-knopje; nog eens tikken op je emoji haalt hem weg.
+            </li>
           </ul>
         </Section>
 
-        <Section id="tips" icon={Smartphone} color="bg-teal" title="9. Tips">
+        <Section id="tips" icon={Smartphone} color="bg-teal" title="10. Tips">
           <ul>
             <li>
               <b>Zet de app op je beginscherm.</b> Open de site in Safari, tik op de deelknop (vierkantje met
@@ -305,7 +342,12 @@ export default async function UitlegPage() {
               Game Night-icoon en de app opent zonder Safari-balken. Log daarna één keer opnieuw in.
             </li>
             <li>
-              Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>.
+              Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>. Daar kies je ook je{" "}
+              <b>avatar</b>: een eigen foto, een emoji, of gewoon je letter.
+            </li>
+            <li>
+              Geen zin in geluidjes? Zet <b>🔊 Geluidjes bij winst</b> uit op je account. Dat geldt alleen voor
+              jouw telefoon.
             </li>
             <li>
               Rechtsboven zit ook het <b>?</b>-knopje: dat brengt je altijd terug naar deze uitleg.

@@ -12,6 +12,7 @@ import { Flash } from "@/components/Flash";
 import { Avatar } from "@/components/Avatar";
 import { PageHeader } from "@/components/ui";
 import { ScoreBoard } from "./ScoreBoard";
+import { Celebrate } from "@/components/Celebrate";
 import { TeamResult } from "./TeamResult";
 import { TeamScoreBoard } from "./TeamScoreBoard";
 
@@ -24,14 +25,14 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   const supabase = await createClient();
 
   const [{ data: night }, { data: matchData }, { data: mp }, { data: entries }, profiles] = await Promise.all([
-    supabase.from("game_nights").select("id, title, host_id").eq("id", id).maybeSingle(),
+    supabase.from("game_nights").select("id, title, host_id, cohost_id").eq("id", id).maybeSingle(),
     supabase.from("matches").select("*").eq("id", matchId).maybeSingle(),
     supabase.from("match_players").select("user_id, team").eq("match_id", matchId),
     supabase.from("score_entries").select("user_id, round, points").eq("match_id", matchId),
     getProfiles(supabase),
   ]);
   if (!night || !matchData || !me || matchData.night_id !== id) notFound();
-  if (night.host_id !== me.user.id) redirect(`/agenda/${id}`);
+  if (night.host_id !== me.user.id && night.cohost_id !== me.user.id) redirect(`/agenda/${id}`);
   const match = matchData as Match;
 
   const [{ data: gameData }, { data: teamScores }] = await Promise.all([
@@ -45,7 +46,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
     .filter((x) => profiles.byId.has(x.user_id))
     .map((x) => {
       const p = profiles.byId.get(x.user_id)!;
-      return { id: p.id, username: p.username, avatar_color: p.avatar_color, team: (x.team as string | null) ?? null };
+      return { id: p.id, username: p.username, avatar_color: p.avatar_color, avatar_url: p.avatar_url, avatar_emoji: p.avatar_emoji, team: (x.team as string | null) ?? null };
     });
   const teamOf = new Map(players.map((p) => [p.id, p.team]));
 
@@ -104,12 +105,13 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
         </>
       ) : (
         <>
+          {sp.klaar && <Celebrate kind={winner || teamWinners.length ? "win" : "draw"} />}
           <section className={`card mb-4 p-6 text-center ${sp.klaar ? "animate-pop" : ""} ${winner || teamWinners.length ? "bg-yellow" : "bg-soft"}`}>
             {winner ? (
               <>
                 <p className="pixel text-[10px]">WINNER!</p>
                 <div className="mt-3 flex justify-center">
-                  <Avatar name={winner.username} color={winner.avatar_color} size="xl" crown />
+                  <Avatar name={winner.username} color={winner.avatar_color} url={winner.avatar_url} emoji={winner.avatar_emoji} size="xl" crown />
                 </div>
                 <p className="mt-3 text-2xl font-black">{winner.username}</p>
                 <p className="text-sm font-bold">
@@ -122,7 +124,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
                 <p className="pixel text-[10px]">{match.winning_team ? `${match.winning_team.toUpperCase()} WINNEN!` : "TEAM WINS!"}</p>
                 <div className="mt-3 flex justify-center -space-x-2">
                   {teamWinners.map((p) => (
-                    <Avatar key={p.id} name={p.username} color={p.avatar_color} size="lg" crown />
+                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="lg" crown />
                   ))}
                 </div>
                 <p className="mt-3 text-xl font-black">{teamWinners.map((p) => p.username).join(" & ")}</p>

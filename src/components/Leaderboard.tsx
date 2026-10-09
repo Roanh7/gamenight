@@ -41,7 +41,7 @@ export function Leaderboard({
               }`}
             >
               <RankBadge rank={r.rank} />
-              <Avatar name={p.username} color={p.avatar_color} size="sm" crown={r.rank === 1} />
+              <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown={r.rank === 1} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-black">
                   {p.username}

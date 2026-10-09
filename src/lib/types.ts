@@ -14,6 +14,8 @@ export type Profile = {
   id: string;
   username: string;
   avatar_color: Color;
+  avatar_url: string | null;
+  avatar_emoji: string | null;
   bio: string | null;
   created_at: string;
 };
@@ -52,6 +54,8 @@ export type GameNight = {
   status: NightStatus;
   vote_mode: "vote" | "fixed";
   game_ids: string[];
+  cohost_id: string | null;
+  date_poll: boolean;
   created_by: string | null;
   created_at: string;
 };

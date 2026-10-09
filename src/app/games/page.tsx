@@ -70,7 +70,7 @@ export default async function GamesPage() {
                   </div>
                   {champ && (
                     <span className="flex flex-col items-center" title={`Kampioen: ${champ.username}`}>
-                      <Avatar name={champ.username} color={champ.avatar_color} size="sm" crown />
+                      <Avatar name={champ.username} color={champ.avatar_color} url={champ.avatar_url} emoji={champ.avatar_emoji} size="sm" crown />
                     </span>
                   )}
                   <ChevronRight size={18} className="shrink-0" />

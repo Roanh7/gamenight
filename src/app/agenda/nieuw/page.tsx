@@ -3,7 +3,7 @@ import { createClient, getMe } from "@/lib/supabase/server";
 import { getGames, getProfiles } from "@/lib/data";
 import { ProgramPicker } from "@/components/ProgramPicker";
 import { createNight } from "../actions";
-import { DateTimeField } from "@/components/DateTimeField";
+import { WhenPicker } from "@/components/WhenPicker";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
 import { PageHeader } from "@/components/ui";
@@ -27,12 +27,7 @@ export default async function NewNightPage(props: PageProps<"/agenda/nieuw">) {
           </label>
           <input id="title" name="title" className="input" placeholder="bijv. Mario Kart Madness" maxLength={80} required />
         </div>
-        <div>
-          <label className="label" htmlFor="starts_at">
-            Datum & tijd
-          </label>
-          <DateTimeField name="starts_at" />
-        </div>
+        <WhenPicker />
         <div>
           <label className="label" htmlFor="location">
             Locatie <span className="font-bold text-muted">(optioneel)</span>

@@ -35,8 +35,16 @@ function parseProgram(fd: FormData, back: string) {
 export async function createNight(formData: FormData) {
   const { supabase, user } = await requireUser();
   const title = str(formData, "title") || "Gamenight";
-  const startsAt = str(formData, "starts_at");
   const hostId = str(formData, "host_id") || user.id;
+  const poll = str(formData, "date_mode") === "poll";
+  const options = poll
+    ? [...new Set(formData.getAll("date_options").map(String).filter((d) => !Number.isNaN(Date.parse(d))))]
+        .map((d) => new Date(d).toISOString())
+        .sort()
+    : [];
+  if (poll && (options.length < 2 || options.length > 5))
+    fail("/agenda/nieuw", "Geef 2 tot 5 verschillende datums voor de datumprikker.");
+  const startsAt = poll ? options[0] : str(formData, "starts_at");
   if (!startsAt || Number.isNaN(Date.parse(startsAt))) fail("/agenda/nieuw", "Kies een datum en tijd.");
   const program = parseProgram(formData, "/agenda/nieuw");
 
@@ -49,11 +57,18 @@ export async function createNight(formData: FormData) {
       notes: str(formData, "notes") || null,
       host_id: hostId,
       created_by: user.id,
+      date_poll: poll,
       ...program,
     })
     .select("id")
     .single();
   if (error || !data) fail("/agenda/nieuw", "Opslaan lukte niet. Probeer het opnieuw.");
+  if (poll) {
+    const { error: optErr } = await supabase
+      .from("date_options")
+      .insert(options.map((starts_at) => ({ night_id: data.id, starts_at })));
+    if (optErr) fail(`/agenda/${data.id}`, "De datumopties opslaan lukte niet.");
+  }
 
   // Planner doet zelf ook mee (als hij niet de host is)
   if (hostId !== user.id) {
@@ -78,6 +93,10 @@ export async function updateNight(formData: FormData) {
       location: str(formData, "location") || null,
       notes: str(formData, "notes") || null,
       host_id: str(formData, "host_id"),
+      cohost_id: (() => {
+        const c = str(formData, "cohost_id");
+        return c && c !== str(formData, "host_id") ? c : null;
+      })(),
       ...program,
     })
     .eq("id", id);
@@ -91,9 +110,14 @@ export async function setNightStatus(formData: FormData) {
   const id = str(formData, "night_id");
   const status = str(formData, "status");
   if (!["planned", "live", "finished", "cancelled"].includes(status)) return;
-  const { error } = await supabase.from("game_nights").update({ status }).eq("id", id);
+  // Afronden gaat via de database: die zet de status én maakt de recap voor het nieuws.
+  const { error } =
+    status === "finished"
+      ? await supabase.rpc("finish_night", { p_night: id })
+      : await supabase.from("game_nights").update({ status }).eq("id", id);
   if (error) fail(`/agenda/${id}/host`, "Status wijzigen lukte niet.");
   revalidatePath("/", "layout");
+  if (status === "finished") redirect(`/agenda/${id}?klaar=1#recap`);
 }
 
 export async function deleteNight(formData: FormData) {
@@ -139,6 +163,26 @@ export async function castVote(formData: FormData) {
   }
   revalidatePath(`/agenda/${id}`);
   revalidatePath("/");
+}
+
+/* ---------- Host: co-host & overnemen ---------- */
+
+export async function setCohost(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const userId = str(formData, "user_id");
+  const { error } = await supabase.from("game_nights").update({ cohost_id: userId || null }).eq("id", id);
+  if (error) fail(`/agenda/${id}/host`, "Co-host instellen lukte niet.");
+  revalidatePath(`/agenda/${id}`, "layout");
+}
+
+export async function takeOverHost(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const { error } = await supabase.rpc("take_over_host", { p_night: id });
+  if (error) fail(`/agenda/${id}`, error.message);
+  revalidatePath("/", "layout");
+  redirect(`/agenda/${id}/host?ok=${encodeURIComponent("Jij bent nu de host")}`);
 }
 
 /* ---------- Host: deelnemers ---------- */
@@ -227,4 +271,38 @@ export async function reopenMatch(formData: FormData) {
   if (error) fail(`/agenda/${id}/host/potje/${matchId}`, error.message);
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}/host/potje/${matchId}`);
+}
+
+/* ---------- Datumprikker ---------- */
+
+export async function toggleDateVote(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const id = str(formData, "night_id");
+  const option = str(formData, "option_id");
+  const { error } = str(formData, "voted")
+    ? await supabase.from("date_votes").delete().eq("option_id", option).eq("user_id", user.id)
+    : await supabase.from("date_votes").insert({ option_id: option, user_id: user.id });
+  if (error && !error.message.includes("duplicate")) fail(`/agenda/${id}`, "Dat lukte niet. Is de datum al gekozen?");
+  revalidatePath(`/agenda/${id}`);
+}
+
+export async function pickDate(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const option = str(formData, "option_id");
+  const { data: opt } = await supabase
+    .from("date_options")
+    .select("starts_at")
+    .eq("id", option)
+    .eq("night_id", id)
+    .maybeSingle();
+  if (!opt) fail(`/agenda/${id}`, "Die datum bestaat niet (meer).");
+  const { data, error } = await supabase
+    .from("game_nights")
+    .update({ starts_at: opt.starts_at, date_poll: false })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) fail(`/agenda/${id}`, "Alleen de host of co-host kan de datum kiezen.");
+  revalidatePath("/", "layout");
+  redirect(`/agenda/${id}?ok=${encodeURIComponent("Datum gekozen! 📅")}`);
 }

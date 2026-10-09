@@ -7,6 +7,8 @@ import { logout } from "../(auth)/actions";
 import { changePassword, updateProfile } from "./actions";
 import { PlayerProfile } from "@/components/PlayerProfile";
 import { ColorPicker } from "@/components/ColorPicker";
+import { AvatarPicker } from "@/components/AvatarPicker";
+import { SoundToggle } from "@/components/Celebrate";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
 import { SectionTitle } from "@/components/ui";
@@ -25,6 +27,15 @@ export default async function AccountPage(props: PageProps<"/account">) {
       <PlayerProfile profile={profile} isMe />
 
       <SectionTitle>Gegevens</SectionTitle>
+      <section className="card mb-3 p-4">
+        <AvatarPicker
+          userId={me.user.id}
+          name={profile.username}
+          color={profile.avatar_color}
+          url={profile.avatar_url}
+          emoji={profile.avatar_emoji}
+        />
+      </section>
       <details className="card overflow-hidden">
         <summary className="cursor-pointer list-none px-4 py-3 font-black">✏️ Profiel bewerken</summary>
         <form action={updateProfile} className="space-y-4 border-t-2 border-line p-4">
@@ -70,6 +81,11 @@ export default async function AccountPage(props: PageProps<"/account">) {
           <SubmitButton pendingText="Wijzigen…">Wijzig wachtwoord</SubmitButton>
         </form>
       </details>
+
+      <div className="card mt-3 flex items-center justify-between gap-3 px-4 py-3">
+        <span className="font-black">🔊 Geluidjes bij winst</span>
+        <SoundToggle />
+      </div>
 
       <form action={logout} className="mt-6">
         <SubmitButton className="btn btn-secondary w-full" pendingText="Uitloggen…">

@@ -49,7 +49,7 @@ export default async function PlayersPage() {
                   ) : (
                     <span className="pixel flex h-8 w-8 shrink-0 items-center justify-center text-[11px] text-muted">–</span>
                   )}
-                  <Avatar name={p.username} color={p.avatar_color} size="md" crown={s?.rank === 1} />
+                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="md" crown={s?.rank === 1} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-black">
                       {p.username}

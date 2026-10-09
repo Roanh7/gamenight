@@ -56,7 +56,7 @@ export function MatchResults({
             return (
               <li key={r.user_id} className={`flex items-center gap-3 px-3 py-2 ${r.is_winner ? "bg-yellow-soft" : ""}`}>
                 <RankBadge rank={r.placement} />
-                <Avatar name={p?.username ?? "?"} color={p?.avatar_color} size="xs" crown={r.is_winner} />
+                <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} size="xs" crown={r.is_winner} />
                 <span className="min-w-0 flex-1 truncate font-bold">{p?.username ?? "Speler"}</span>
                 {gameType !== "solo" && teams?.get(r.user_id) && (
                   <span className={`chip ${r.is_winner ? "bg-yellow" : "bg-soft"}`}>{teams.get(r.user_id)}</span>
@@ -118,7 +118,7 @@ function LiveStanding({
           return (
             <li key={l.user_id} className={`flex items-center gap-3 px-3 py-2 ${crown ? "bg-yellow-soft" : ""}`}>
               <span className="pixel w-5 text-[10px] text-muted">{anyScore ? place(l.total) : "–"}</span>
-              <Avatar name={p?.username ?? "?"} color={p?.avatar_color} size="xs" crown={crown} />
+              <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} size="xs" crown={crown} />
               <span className="min-w-0 flex-1 truncate font-bold">{p?.username ?? "Speler"}</span>
               <span className="pixel text-xs">{formatScore(l.total)}</span>
             </li>
@@ -161,7 +161,7 @@ function LiveTeams({
               <span className="flex min-w-0 flex-1 -space-x-1.5">
                 {t.members.map((m) => {
                   const p = profiles.get(m);
-                  return p ? <Avatar key={m} name={p.username} color={p.avatar_color} size="xs" /> : null;
+                  return p ? <Avatar key={m} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" /> : null;
                 })}
               </span>
               <span className="pixel text-xs">{formatScore(t.total)}</span>

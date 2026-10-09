@@ -53,12 +53,13 @@ export async function getActivity(supabase: DB, limit = 15) {
 }
 
 export async function getNight(supabase: DB, id: string) {
-  const [{ data: night }, { data: participants }, { data: votes }, { data: matches }] =
+  const [{ data: night }, { data: participants }, { data: votes }, { data: matches }, { data: dateOptions }] =
     await Promise.all([
       supabase.from("game_nights").select("*").eq("id", id).maybeSingle(),
       supabase.from("participants").select("*").eq("night_id", id).order("created_at"),
       supabase.from("votes").select("*").eq("night_id", id),
       supabase.from("matches").select("*").eq("night_id", id).order("created_at"),
+      supabase.from("date_options").select("id, starts_at, date_votes(user_id)").eq("night_id", id).order("starts_at"),
     ]);
   if (!night) return null;
   const matchIds = (matches ?? []).map((m) => m.id);
@@ -125,6 +126,9 @@ export async function getNight(supabase: DB, id: string) {
     live,
     liveTeams,
     teams,
+    dateOptions: ((dateOptions ?? []) as { id: string; starts_at: string; date_votes: { user_id: string }[] }[]).map(
+      (o) => ({ id: o.id, starts_at: o.starts_at, voters: o.date_votes.map((v) => v.user_id) }),
+    ),
   };
 }
 
@@ -142,6 +146,24 @@ export function tallyVotes(votes: Vote[]) {
 /** De games van een avond op volgorde: vast programma, of meeste stemmen eerst. */
 export function nightGameOrder(night: { vote_mode: string; game_ids: string[] }, votes: Vote[]) {
   return night.vote_mode === "fixed" ? night.game_ids ?? [] : tallyVotes(votes).ranked;
+}
+
+/** Reacties per nieuwsbericht: per emoji het aantal, wie, en of ik al reageerde. */
+export async function getReactions(supabase: DB, activityIds: number[], meId: string, profiles: Map<string, Profile>) {
+  const out = new Map<number, Record<string, { n: number; mine: boolean; names: string[] }>>();
+  if (!activityIds.length) return out;
+  const { data } = await supabase.from("reactions").select("activity_id, user_id, emoji").in("activity_id", activityIds);
+  for (const r of (data ?? []) as { activity_id: number; user_id: string; emoji: string }[]) {
+    const m = out.get(r.activity_id) ?? {};
+    const e = m[r.emoji] ?? { n: 0, mine: false, names: [] };
+    e.n += 1;
+    e.mine ||= r.user_id === meId;
+    const name = profiles.get(r.user_id)?.username;
+    if (name) e.names.push(name);
+    m[r.emoji] = e;
+    out.set(r.activity_id, m);
+  }
+  return out;
 }
 
 /** Alle afgeronde resultaten, met het moment van afronden (voor seizoenen en onderlinge stand). */

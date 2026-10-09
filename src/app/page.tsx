@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getActivity, getGames, getProfiles, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
+import { getActivity, getGames, getProfiles, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
 import { currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
@@ -161,6 +161,7 @@ async function Dashboard({
     ? await supabase.from("game_nights").select("id, title").in("id", nightIds)
     : { data: [] };
   const nightsById = new Map((feedNights ?? []).map((n) => [n.id, n]));
+  const reactions = await getReactions(supabase, activity.map((a) => a.id), userId, profiles.byId);
 
   const season = currentSeason();
   const overall = standings(filterSeason(results, season));
@@ -216,18 +217,20 @@ async function Dashboard({
             <div className="min-w-0">
               <p className="truncate text-lg font-black">{next.title}</p>
               <p className="text-sm font-bold text-muted">
-                {formatDateLong(next.starts_at)} · {formatTime(next.starts_at)}
+                {next.date_poll && next.status === "planned"
+                  ? "📅 Datumprikker: geef aan wanneer je kunt"
+                  : `${formatDateLong(next.starts_at)} · ${formatTime(next.starts_at)}`}
               </p>
             </div>
             <span className={`chip ${next.status === "live" ? "bg-red text-white" : "bg-yellow"}`}>
-              {next.status === "live" ? "● LIVE" : countdown(next.starts_at)}
+              {next.status === "live" ? "● LIVE" : next.date_poll ? "Prikker" : countdown(next.starts_at)}
             </span>
           </div>
           <div className="mt-3 flex items-center justify-between gap-3">
             <div className="flex -space-x-1.5">
               {nextParticipants.slice(0, 7).map((p) => {
                 const pr = profiles.byId.get(p.user_id);
-                return pr ? <Avatar key={p.user_id} name={pr.username} color={pr.avatar_color} size="sm" /> : null;
+                return pr ? <Avatar key={p.user_id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="sm" /> : null;
               })}
             </div>
             <span className="text-xs font-bold text-muted">{nextParticipants.length} aangemeld</span>
@@ -323,7 +326,14 @@ async function Dashboard({
         Latest news
       </SectionTitle>
       {activity.length > 0 ? (
-        <ActivityFeed items={activity} profiles={profiles.byId} games={games.byId} nights={nightsById} />
+        <ActivityFeed
+          items={activity}
+          profiles={profiles.byId}
+          games={games.byId}
+          nights={nightsById}
+          me={{ id: userId, name: username }}
+          reactions={reactions}
+        />
       ) : (
         <EmptyState icon={<Newspaper size={32} />} title="Nog geen nieuws" text="Hier zie je straks wie er wint en stijgt." />
       )}

@@ -89,7 +89,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
             <div className="card bg-yellow p-3">
               <p className="pixel text-[9px]">{season === "all" ? "KAMPIOEN" : `KAMPIOEN ${seasonLabel(season).toUpperCase()}`}</p>
               <div className="mt-2 flex items-center gap-2">
-                <Avatar name={champion.username} color={champion.avatar_color} size="sm" crown />
+                <Avatar name={champion.username} color={champion.avatar_color} url={champion.avatar_url} emoji={champion.avatar_emoji} size="sm" crown />
                 <span className="truncate font-black">{champion.username}</span>
               </div>
             </div>
@@ -201,7 +201,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
                     <span className="flex-1 font-black">🏆 {m.winning_team ?? "Teamwinst"}</span>
                   ) : w ? (
                     <span className="flex min-w-0 flex-1 items-center gap-2 font-black">
-                      <Avatar name={w.username} color={w.avatar_color} size="xs" />
+                      <Avatar name={w.username} color={w.avatar_color} url={w.avatar_url} emoji={w.avatar_emoji} size="xs" />
                       <span className="truncate">{w.username}</span> 🏆
                     </span>
                   ) : (

@@ -76,7 +76,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             </>
           ) : champProfile ? (
             <div className="mt-2 flex items-center gap-3">
-              <Avatar name={champProfile.username} color={champProfile.avatar_color} size="md" crown />
+              <Avatar name={champProfile.username} color={champProfile.avatar_color} url={champProfile.avatar_url} emoji={champProfile.avatar_emoji} size="md" crown />
               <div>
                 <p className="text-lg font-black leading-tight">{champProfile.username}</p>
                 <p className="text-sm font-bold">Seizoenskampioen {seasonLabel(season)}</p>

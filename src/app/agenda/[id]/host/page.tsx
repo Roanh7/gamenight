@@ -10,6 +10,7 @@ import {
   confirmParticipant,
   deleteNight,
   removeParticipant,
+  setCohost,
   setNightStatus,
   startMatch,
   updateNight,
@@ -36,7 +37,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   ]);
   if (!data || !me) notFound();
   const { night, participants, votes, matches } = data;
-  if (night.host_id !== me.user.id) {
+  if (night.host_id !== me.user.id && night.cohost_id !== me.user.id) {
     redirect(`/agenda/${id}?fout=${encodeURIComponent("Alleen de host kan het host dashboard openen.")}`);
   }
 
@@ -137,7 +138,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                         className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-paper px-2 py-2 has-[:checked]:bg-green-soft"
                       >
                         <input type="checkbox" name="players" value={p.user_id} defaultChecked className="h-4 w-4 accent-[#22a04b]" />
-                        <Avatar name={pr.username} color={pr.avatar_color} size="xs" />
+                        <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
                         <span className="truncate text-sm font-bold">{pr.username}</span>
                       </label>
                     );
@@ -210,14 +211,27 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
           if (!pr) return null;
           return (
             <div key={p.user_id} className="flex items-center gap-3 px-3 py-2.5">
-              <Avatar name={pr.username} color={pr.avatar_color} size="sm" />
+              <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="sm" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-black">{pr.username}</p>
                 <p className="text-xs font-bold text-muted">
                   {p.status === "confirmed" ? "Bevestigd" : "Wacht op bevestiging"}
                   {p.user_id === night.host_id ? " · host" : ""}
+                  {p.user_id === night.cohost_id ? " · co-host" : ""}
                 </p>
               </div>
+              {p.status === "confirmed" && p.user_id !== night.host_id && (
+                <form action={setCohost}>
+                  <input type="hidden" name="night_id" value={id} />
+                  <input type="hidden" name="user_id" value={p.user_id === night.cohost_id ? "" : p.user_id} />
+                  <SubmitButton
+                    className={`btn btn-sm px-2 ${p.user_id === night.cohost_id ? "btn-yellow" : "btn-secondary"}`}
+                    pendingText="…"
+                  >
+                    <span className="text-xs">{p.user_id === night.cohost_id ? "Co-host ✓" : "Co-host"}</span>
+                  </SubmitButton>
+                </form>
+              )}
               {p.status === "pending" && (
                 <form action={confirmParticipant}>
                   <input type="hidden" name="night_id" value={id} />
@@ -227,7 +241,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                   </SubmitButton>
                 </form>
               )}
-              {p.user_id !== night.host_id && (
+              {p.user_id !== night.host_id && p.user_id !== night.cohost_id && (
                 <form action={removeParticipant}>
                   <input type="hidden" name="night_id" value={id} />
                   <input type="hidden" name="user_id" value={p.user_id} />
@@ -283,7 +297,20 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
             <label className="label" htmlFor="starts_at">
               Datum & tijd
             </label>
-            <DateTimeField name="starts_at" defaultValue={night.starts_at} />
+            {night.date_poll ? (
+              <>
+                <input type="hidden" name="starts_at" value={night.starts_at} />
+                <p className="rounded-xl bg-cream px-3 py-2 text-sm font-bold">
+                  📅 Datumprikker loopt nog. Kies de datum op de{" "}
+                  <a href={`/agenda/${id}`} className="underline">
+                    avondpagina
+                  </a>
+                  .
+                </p>
+              </>
+            ) : (
+              <DateTimeField name="starts_at" defaultValue={night.starts_at} />
+            )}
           </div>
           <div>
             <label className="label" htmlFor="location">
@@ -303,6 +330,20 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
               ))}
             </select>
             <p className="mt-1 text-xs text-muted">Let op: geef je de host door, dan verlies je dit dashboard.</p>
+          </div>
+          <div>
+            <label className="label" htmlFor="cohost_id">
+              Co-host <span className="font-bold text-muted">(optioneel)</span>
+            </label>
+            <select id="cohost_id" name="cohost_id" className="input" defaultValue={night.cohost_id ?? ""}>
+              <option value="">Geen co-host</option>
+              {profiles.list.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.username}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-muted">De co-host kan alles wat de host kan: scores invoeren, potjes starten en afronden.</p>
           </div>
           <ProgramPicker games={games.list} defaultMode={night.vote_mode} defaultGames={night.game_ids ?? []} />
           <div>
