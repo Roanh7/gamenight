@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getActivity, getGames, getProfiles, getResults, tallyVotes } from "@/lib/data";
+import { getActivity, getGames, getProfiles, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
 import { currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
@@ -166,8 +166,12 @@ async function Dashboard({
   const overall = standings(filterSeason(results, season));
   const myOverall = overall.find((o) => o.user_id === userId);
   const tally = tallyVotes(nextVotes);
-  const leadingGame = tally.winner ? games.byId.get(tally.winner) : undefined;
-  const myVote = nextVotes.find((v) => v.user_id === userId);
+  const isFixed = next?.vote_mode === "fixed";
+  const nextGames = (next ? nightGameOrder(next, nextVotes) : [])
+    .map((g) => games.byId.get(g))
+    .filter(Boolean)
+    .slice(0, 4) as typeof games.list;
+  const myVote = isFixed || nextVotes.some((v) => v.user_id === userId);
   const iJoined = nextParticipants.find((p) => p.user_id === userId);
 
   return (
@@ -229,13 +233,23 @@ async function Dashboard({
             <span className="text-xs font-bold text-muted">{nextParticipants.length} aangemeld</span>
           </div>
           <div className="mt-3 rounded-xl border-2 border-dashed border-line/40 bg-cream px-3 py-2 text-sm">
-            {leadingGame ? (
-              <span className="flex items-center gap-2 font-bold">
-                <GameIcon icon={leadingGame.icon} color={leadingGame.color} size="sm" />
-                {next.status === "planned" ? "Leidt in de stemming:" : "Gekozen:"} {leadingGame.name}
-              </span>
-            ) : tally.total > 0 ? (
-              <span className="font-bold">Gelijke stand in de stemming. Spannend!</span>
+            {nextGames.length ? (
+              <>
+                <p className="mb-1.5 text-xs font-black text-muted">
+                  {isFixed ? "Op het programma" : `Populairst in de stemming (${tally.voters} gestemd)`}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {nextGames.map((g) => (
+                    <span key={g.id} className="chip bg-paper py-1 pl-1">
+                      <GameIcon icon={g.icon} color={g.color} size="sm" />
+                      {g.name}
+                      {!isFixed && tally.counts.get(g.id) ? (
+                        <span className="text-muted">· {tally.counts.get(g.id)}</span>
+                      ) : null}
+                    </span>
+                  ))}
+                </div>
+              </>
             ) : (
               <span className="font-bold text-muted">Nog niemand gestemd</span>
             )}
@@ -244,7 +258,7 @@ async function Dashboard({
             <p className="mt-3 text-sm font-black text-red">
               {!iJoined ? "Meld je aan" : ""}
               {!iJoined && !myVote ? " & " : ""}
-              {!myVote ? "stem op een game" : ""} →
+              {!myVote ? "stem op games" : ""} →
             </p>
           )}
         </Link>

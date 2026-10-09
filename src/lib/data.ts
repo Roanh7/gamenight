@@ -128,14 +128,20 @@ export async function getNight(supabase: DB, id: string) {
   };
 }
 
-/** Telt stemmen en bepaalt de leider (null bij gelijke stand of geen stemmen). */
+/** Telt stemmen (iedereen mag op meerdere games stemmen). */
 export function tallyVotes(votes: Vote[]) {
   const counts = new Map<string, number>();
   for (const v of votes) counts.set(v.game_id, (counts.get(v.game_id) ?? 0) + 1);
-  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  const top = sorted[0]?.[1] ?? 0;
-  const leaders = sorted.filter(([, c]) => c === top && top > 0).map(([g]) => g);
-  return { counts, leaders, winner: leaders.length === 1 ? leaders[0] : null, total: votes.length };
+  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([g]) => g);
+  const top = counts.get(ranked[0]) ?? 0;
+  const leaders = ranked.filter((g) => counts.get(g) === top && top > 0);
+  const voters = new Set(votes.map((v) => v.user_id)).size;
+  return { counts, ranked, leaders, voters, total: votes.length };
+}
+
+/** De games van een avond op volgorde: vast programma, of meeste stemmen eerst. */
+export function nightGameOrder(night: { vote_mode: string; game_ids: string[] }, votes: Vote[]) {
+  return night.vote_mode === "fixed" ? night.game_ids ?? [] : tallyVotes(votes).ranked;
 }
 
 /** Alle afgeronde resultaten, met het moment van afronden (voor seizoenen en onderlinge stand). */

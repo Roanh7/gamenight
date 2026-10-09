@@ -52,7 +52,7 @@ function Section({
 const TOC = [
   ["start", "Beginnen"],
   ["agenda", "Avond plannen"],
-  ["stemmen", "Stemmen"],
+  ["stemmen", "Welke games?"],
   ["host", "De host"],
   ["soorten", "Soorten spellen"],
   ["punten", "Punten & ranking"],
@@ -117,17 +117,23 @@ export default async function UitlegPage() {
           </ul>
         </Section>
 
-        <Section id="stemmen" icon={Vote} color="bg-purple" title="3. Stemmen op de game">
+        <Section id="stemmen" icon={Vote} color="bg-purple" title="3. Welke games spelen we?">
+          <p>Op een avond spelen jullie meestal meerdere games. Bij het plannen kies je hoe die gekozen worden:</p>
           <ul>
-            <li>Op de pagina van een avond zie je alle games. Tik op een game om erop te stemmen.</li>
             <li>
-              Iedereen heeft <b>één stem</b>. Nog eens tikken trekt je stem in; op een andere game tikken
-              verplaatst hem.
+              <b>Iedereen stemt:</b> tik op de avond alle games aan waar je zin in hebt. Je mag op zoveel games
+              stemmen als je wilt; nog eens tikken trekt je stem in. De populairste games staan bovenaan (👑) en
+              die worden gespeeld.
             </li>
             <li>
-              De game met de <b>meeste stemmen</b> wint (👑). Bij een gelijke stand kiest de host.
+              <b>Vaste games:</b> de planner kiest zelf welke games er gespeeld worden, in een vaste volgorde. Dan
+              wordt er niet gestemd en zie je het <b>programma van de avond</b>.
             </li>
             <li>Zodra de host de avond start, sluit de stemming.</li>
+            <li>
+              Al gespeelde games krijgen een ✓. De host kan altijd ook een andere game starten, en het programma
+              aanpassen via <b>Avond bewerken</b>.
+            </li>
           </ul>
         </Section>
 

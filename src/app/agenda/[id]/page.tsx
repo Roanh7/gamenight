@@ -34,9 +34,13 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
   const host = profiles.byId.get(night.host_id);
   const isHost = night.host_id === me.user.id;
   const mine = participants.find((p) => p.user_id === me.user.id);
-  const myVote = votes.find((v) => v.user_id === me.user.id);
+  const myVotes = new Set(votes.filter((v) => v.user_id === me.user.id).map((v) => v.game_id));
   const tally = tallyVotes(votes);
-  const canVote = night.status === "planned";
+  const isFixed = night.vote_mode === "fixed";
+  const canVote = night.status === "planned" && !isFixed;
+  const playedIds = new Set(matches.filter((m) => m.status === "finished").map((m) => m.game_id));
+  const liveIds = new Set(matches.filter((m) => m.status === "live").map((m) => m.game_id));
+  const program = (night.game_ids ?? []).map((g) => games.byId.get(g)).filter(Boolean) as typeof games.list;
   const canJoin = night.status === "planned" || night.status === "live";
   const confirmed = participants.filter((p) => p.status === "confirmed");
   const pending = participants.filter((p) => p.status === "pending");
@@ -163,83 +167,117 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         )}
       </section>
 
-      {/* Stemmen */}
-      <SectionTitle>
-        {canVote ? "Stem op de game" : "Uitslag stemming"}
-      </SectionTitle>
-      {games.list.length === 0 ? (
-        <EmptyState
-          icon={<Gamepad2 size={32} />}
-          title="Nog geen games"
-          text="Voeg eerst games toe, dan kan er gestemd worden."
-          action={
-            <Link href="/games/nieuw" className="btn btn-primary btn-sm">
-              <Plus size={16} strokeWidth={3} /> Game toevoegen
-            </Link>
-          }
-        />
+      {/* Games van de avond */}
+      {isFixed ? (
+        <>
+          <SectionTitle>Programma van de avond</SectionTitle>
+          <ol className="card divide-y-2 divide-soft overflow-hidden">
+            {program.map((g, i) => (
+              <li key={g.id} className={`flex items-center gap-3 px-4 py-3 ${playedIds.has(g.id) ? "bg-cream" : ""}`}>
+                <span className="pixel w-5 text-[11px] text-muted">{i + 1}</span>
+                <GameIcon icon={g.icon} color={g.color} size="sm" />
+                <Link href={`/games/${g.id}`} className="min-w-0 flex-1 truncate font-black">
+                  {g.name}
+                </Link>
+                {liveIds.has(g.id) ? (
+                  <span className="chip bg-red text-white">● Live</span>
+                ) : playedIds.has(g.id) ? (
+                  <span className="chip bg-green-soft">✓ Gespeeld</span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-1.5 text-xs text-muted">De host heeft deze games gekozen. Er wordt niet gestemd.</p>
+        </>
       ) : (
-        <section className="card overflow-hidden">
-          <p className="border-b-2 border-line bg-cream px-4 py-2 text-xs font-bold text-muted">
-            {tally.total} {tally.total === 1 ? "stem" : "stemmen"} ·{" "}
-            {tally.winner
-              ? `${games.byId.get(tally.winner)?.name} ${canVote ? "leidt" : "wint"}`
-              : tally.total
-                ? "gelijke stand"
-                : "nog niemand gestemd"}
-            {canVote && " · tik om te stemmen"}
-          </p>
-          <ul className="divide-y-2 divide-soft">
-            {sortedGames.map((g) => {
-              const count = tally.counts.get(g.id) ?? 0;
-              const pct = tally.total ? Math.round((count / tally.total) * 100) : 0;
-              const voters = votes.filter((v) => v.game_id === g.id);
-              const isMine = myVote?.game_id === g.id;
-              const leading = tally.leaders.includes(g.id);
-              const inner = (
-                <div className="relative flex items-center gap-3 px-4 py-3">
-                  <div
-                    className={`absolute inset-y-0 left-0 ${leading ? "bg-yellow-soft" : "bg-soft/60"}`}
-                    style={{ width: `${pct}%` }}
-                    aria-hidden
-                  />
-                  <span className="relative">
-                    <GameIcon icon={g.icon} color={g.color} size="sm" />
-                  </span>
-                  <div className="relative min-w-0 flex-1 text-left">
-                    <p className="truncate font-black">
-                      {g.name} {leading && count > 0 && <span className="text-xs">👑</span>}
-                    </p>
-                    <div className="mt-0.5 flex -space-x-1">
-                      {voters.map((v) => {
-                        const pr = profiles.byId.get(v.user_id);
-                        return pr ? <Avatar key={v.user_id} name={pr.username} color={pr.avatar_color} size="xs" /> : null;
-                      })}
+        <>
+          <SectionTitle>{canVote ? "Op welke games heb je zin?" : "Uitslag stemming"}</SectionTitle>
+          {games.list.length === 0 ? (
+            <EmptyState
+              icon={<Gamepad2 size={32} />}
+              title="Nog geen games"
+              text="Voeg eerst games toe, dan kan er gestemd worden."
+              action={
+                <Link href="/games/nieuw" className="btn btn-primary btn-sm">
+                  <Plus size={16} strokeWidth={3} /> Game toevoegen
+                </Link>
+              }
+            />
+          ) : (
+            <section className="card overflow-hidden">
+              <p className="border-b-2 border-line bg-cream px-4 py-2 text-xs font-bold text-muted">
+                {tally.voters
+                  ? `${tally.voters} ${tally.voters === 1 ? "persoon heeft" : "mensen hebben"} gestemd`
+                  : "Nog niemand gestemd"}
+                {canVote && " · stem op zoveel games als je wilt, tik nog eens om je stem in te trekken"}
+              </p>
+              <ul className="divide-y-2 divide-soft">
+                {sortedGames.map((g) => {
+                  const count = tally.counts.get(g.id) ?? 0;
+                  const pct = tally.voters ? Math.round((count / tally.voters) * 100) : 0;
+                  const voters = votes.filter((v) => v.game_id === g.id);
+                  const isMine = myVotes.has(g.id);
+                  const leading = tally.leaders.includes(g.id);
+                  const inner = (
+                    <div className="relative flex items-center gap-3 px-4 py-3">
+                      <div
+                        className={`absolute inset-y-0 left-0 ${leading ? "bg-yellow-soft" : "bg-soft/60"}`}
+                        style={{ width: `${pct}%` }}
+                        aria-hidden
+                      />
+                      <span
+                        className={`relative flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 border-line text-xs font-black ${isMine ? "bg-red text-white" : "bg-paper"}`}
+                        aria-hidden
+                      >
+                        {isMine ? "✓" : ""}
+                      </span>
+                      <span className="relative">
+                        <GameIcon icon={g.icon} color={g.color} size="sm" />
+                      </span>
+                      <div className="relative min-w-0 flex-1 text-left">
+                        <p className="truncate font-black">
+                          {g.name} {leading && count > 0 && <span className="text-xs">👑</span>}
+                        </p>
+                        <div className="mt-0.5 flex -space-x-1">
+                          {voters.map((v) => {
+                            const pr = profiles.byId.get(v.user_id);
+                            return pr ? <Avatar key={v.user_id} name={pr.username} color={pr.avatar_color} size="xs" /> : null;
+                          })}
+                        </div>
+                      </div>
+                      {liveIds.has(g.id) ? (
+                        <span className="chip relative bg-red text-white">● Live</span>
+                      ) : playedIds.has(g.id) ? (
+                        <span className="chip relative bg-green-soft">✓</span>
+                      ) : null}
+                      <span className="pixel relative text-xs">{count}</span>
                     </div>
-                  </div>
-                  <span className="pixel relative text-xs">{count}</span>
-                  {isMine && <span className="chip relative bg-red text-white">Jouw stem</span>}
-                </div>
-              );
-              return (
-                <li key={g.id}>
-                  {canVote ? (
-                    <form action={castVote}>
-                      <input type="hidden" name="night_id" value={night.id} />
-                      <input type="hidden" name="game_id" value={g.id} />
-                      <input type="hidden" name="current" value={myVote?.game_id ?? ""} />
-                      <button type="submit" className="block w-full transition-colors hover:bg-cream">
-                        {inner}
-                      </button>
-                    </form>
-                  ) : (
-                    inner
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+                  );
+                  return (
+                    <li key={g.id}>
+                      {canVote ? (
+                        <form action={castVote}>
+                          <input type="hidden" name="night_id" value={night.id} />
+                          <input type="hidden" name="game_id" value={g.id} />
+                          <input type="hidden" name="voted" value={isMine ? "1" : ""} />
+                          <button
+                            type="submit"
+                            aria-pressed={isMine}
+                            className="block w-full transition-colors hover:bg-cream"
+                          >
+                            {inner}
+                          </button>
+                        </form>
+                      ) : (
+                        inner
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+        </>
       )}
 
       {!hasLive && matchesSection}

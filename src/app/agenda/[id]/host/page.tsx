@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Check, ChevronRight, Flag, Play, UserPlus, X } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getGames, getNight, getProfiles, tallyVotes } from "@/lib/data";
+import { getGames, getNight, getProfiles, nightGameOrder, tallyVotes } from "@/lib/data";
 import {
   addParticipant,
   confirmAll,
@@ -18,6 +18,7 @@ import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
 import { SubmitButton } from "@/components/SubmitButton";
 import { DateTimeField } from "@/components/DateTimeField";
+import { ProgramPicker } from "@/components/ProgramPicker";
 import { Flash } from "@/components/Flash";
 import { PageHeader, SectionTitle, StatusChip } from "@/components/ui";
 
@@ -43,7 +44,14 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   const pending = participants.filter((p) => p.status === "pending");
   const confirmed = participants.filter((p) => p.status === "confirmed");
   const notJoined = profiles.list.filter((p) => !participants.some((x) => x.user_id === p.id));
-  const defaultGame = tally.winner ?? tally.leaders[0] ?? games.list[0]?.id;
+  // Volgorde: programma of meeste stemmen eerst; standaard de eerste die nog niet gespeeld is
+  const order = nightGameOrder(night, votes).filter((g) => games.byId.has(g));
+  const playedIds = new Set(matches.map((m) => m.game_id));
+  const defaultGame = order.find((g) => !playedIds.has(g)) ?? order[0] ?? games.list[0]?.id;
+  const gameOptions = [
+    ...order.map((g) => games.byId.get(g)!),
+    ...games.list.filter((g) => !order.includes(g.id)),
+  ];
 
   return (
     <div>
@@ -102,17 +110,20 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                   Game
                 </label>
                 <select id="game_id" name="game_id" className="input" defaultValue={defaultGame}>
-                  {games.list.map((g) => (
+                  {gameOptions.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
-                      {tally.counts.get(g.id) ? ` · ${tally.counts.get(g.id)} stem(men)` : ""}
-                      {tally.winner === g.id ? " 👑" : ""}
+                      {night.vote_mode === "fixed" && order.includes(g.id) ? ` · programma #${order.indexOf(g.id) + 1}` : ""}
+                      {night.vote_mode === "vote" && tally.counts.get(g.id) ? ` · ${tally.counts.get(g.id)} stem(men)` : ""}
+                      {playedIds.has(g.id) ? " · ✓ gespeeld" : ""}
                     </option>
                   ))}
                 </select>
-                {tally.leaders.length > 1 && (
-                  <p className="mt-1 text-xs font-bold text-muted">Gelijke stand in de stemming: jij als host beslist.</p>
-                )}
+                <p className="mt-1 text-xs font-bold text-muted">
+                  {night.vote_mode === "fixed"
+                    ? "De games van het programma staan bovenaan."
+                    : "De games met de meeste stemmen staan bovenaan. Je kunt elke game kiezen."}
+                </p>
               </div>
               <fieldset>
                 <legend className="label">Spelers</legend>
@@ -293,6 +304,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
             </select>
             <p className="mt-1 text-xs text-muted">Let op: geef je de host door, dan verlies je dit dashboard.</p>
           </div>
+          <ProgramPicker games={games.list} defaultMode={night.vote_mode} defaultGames={night.game_ids ?? []} />
           <div>
             <label className="label" htmlFor="notes">
               Notities

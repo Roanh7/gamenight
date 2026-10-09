@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getProfiles } from "@/lib/data";
+import { getGames, getProfiles } from "@/lib/data";
+import { ProgramPicker } from "@/components/ProgramPicker";
 import { createNight } from "../actions";
 import { DateTimeField } from "@/components/DateTimeField";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -13,7 +14,7 @@ export default async function NewNightPage(props: PageProps<"/agenda/nieuw">) {
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const profiles = await getProfiles(supabase);
+  const [profiles, games] = await Promise.all([getProfiles(supabase), getGames(supabase)]);
 
   return (
     <div>
@@ -52,6 +53,7 @@ export default async function NewNightPage(props: PageProps<"/agenda/nieuw">) {
           </select>
           <p className="mt-1 text-xs text-muted">De host bevestigt deelnemers en houdt de scores bij.</p>
         </div>
+        <ProgramPicker games={games.list} />
         <div>
           <label className="label" htmlFor="notes">
             Notities <span className="font-bold text-muted">(optioneel)</span>

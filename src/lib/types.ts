@@ -50,6 +50,8 @@ export type GameNight = {
   notes: string | null;
   host_id: string;
   status: NightStatus;
+  vote_mode: "vote" | "fixed";
+  game_ids: string[];
   created_by: string | null;
   created_at: string;
 };

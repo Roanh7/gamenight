@@ -23,12 +23,22 @@ async function requireUser() {
 
 /* ---------- Avond plannen / wijzigen ---------- */
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function parseProgram(fd: FormData, back: string) {
+  const vote_mode = str(fd, "vote_mode") === "fixed" ? "fixed" : "vote";
+  const game_ids = [...new Set(fd.getAll("game_ids").map(String).filter((g) => UUID.test(g)))];
+  if (vote_mode === "fixed" && game_ids.length === 0) fail(back, "Kies minimaal één game voor de avond.");
+  return { vote_mode, game_ids: vote_mode === "fixed" ? game_ids : [] };
+}
+
 export async function createNight(formData: FormData) {
   const { supabase, user } = await requireUser();
   const title = str(formData, "title") || "Gamenight";
   const startsAt = str(formData, "starts_at");
   const hostId = str(formData, "host_id") || user.id;
   if (!startsAt || Number.isNaN(Date.parse(startsAt))) fail("/agenda/nieuw", "Kies een datum en tijd.");
+  const program = parseProgram(formData, "/agenda/nieuw");
 
   const { data, error } = await supabase
     .from("game_nights")
@@ -39,6 +49,7 @@ export async function createNight(formData: FormData) {
       notes: str(formData, "notes") || null,
       host_id: hostId,
       created_by: user.id,
+      ...program,
     })
     .select("id")
     .single();
@@ -58,6 +69,7 @@ export async function updateNight(formData: FormData) {
   const startsAt = str(formData, "starts_at");
   const back = `/agenda/${id}/host`;
   if (!startsAt || Number.isNaN(Date.parse(startsAt))) fail(back, "Kies een datum en tijd.");
+  const program = parseProgram(formData, back);
   const { error } = await supabase
     .from("game_nights")
     .update({
@@ -66,6 +78,7 @@ export async function updateNight(formData: FormData) {
       location: str(formData, "location") || null,
       notes: str(formData, "notes") || null,
       host_id: str(formData, "host_id"),
+      ...program,
     })
     .eq("id", id);
   if (error) fail(back, "Wijzigen lukte niet.");
@@ -117,14 +130,12 @@ export async function castVote(formData: FormData) {
   const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
   const gameId = str(formData, "game_id");
-  const current = str(formData, "current");
-  if (current === gameId) {
-    await supabase.from("votes").delete().eq("night_id", id).eq("user_id", user.id);
+  if (str(formData, "voted") === "1") {
+    await supabase.from("votes").delete().eq("night_id", id).eq("user_id", user.id).eq("game_id", gameId);
   } else {
-    const { error } = await supabase
-      .from("votes")
-      .upsert({ night_id: id, user_id: user.id, game_id: gameId }, { onConflict: "night_id,user_id" });
-    if (error) fail(`/agenda/${id}`, "Stemmen kan alleen zolang de avond nog gepland is.");
+    const { error } = await supabase.from("votes").insert({ night_id: id, user_id: user.id, game_id: gameId });
+    if (error && !error.message.includes("duplicate"))
+      fail(`/agenda/${id}`, "Stemmen kan alleen zolang de avond nog gepland is.");
   }
   revalidatePath(`/agenda/${id}`);
   revalidatePath("/");
