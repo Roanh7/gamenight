@@ -273,6 +273,59 @@ begin
   end;
   reset role;
 
+  -- 25. Vaste teams met score per team
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ua::text, true);
+  set local role authenticated;
+  insert into public.games (name, created_by, game_type) values ('ZzDertig', ua, 'teams') returning id into g2;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  insert into public.matches (night_id, game_id) values (n1, g2) returning id into m2;
+  insert into public.match_players (match_id, user_id) values (m2, ua), (m2, ub), (m2, uc);
+  begin
+    perform public.finalize_teams_match(m2);
+    rep := rep || E'FAIL 25 afronden zonder teams toegestaan\n';
+  exception when others then rep := rep || E'OK 25 eerst teams verdelen\n';
+  end;
+  update public.match_players set team = 'Rood' where match_id = m2 and user_id in (ua, ub);
+  update public.match_players set team = 'Blauw' where match_id = m2 and user_id = uc;
+  insert into public.team_scores (match_id, team, round, points) values (m2, 'Rood', 1, 3), (m2, 'Rood', 2, 4), (m2, 'Blauw', 1, 5);
+  insert into public.team_scores (match_id, team, round, points) values (m2, 'Blauw', 2, 1)
+    on conflict (match_id, team, round) do update set points = excluded.points;
+  reset role;
+
+  perform set_config('request.jwt.claims', json_build_object('sub', uc, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', uc::text, true);
+  set local role authenticated;
+  begin
+    insert into public.team_scores (match_id, team, round, points) values (m2, 'Blauw', 3, 50);
+    rep := rep || E'FAIL 25b niet-host kon teamscore invoeren\n';
+  exception when others then rep := rep || E'OK 25b niet-host kan geen teamscore invoeren\n';
+  end;
+  update public.match_players set team = 'Rood' where match_id = m2 and user_id = uc;
+  get diagnostics cnt = row_count;
+  rep := rep || case when cnt = 0 then 'OK' else 'FAIL' end || E' 25c niet-host kan niet van team wisselen\n';
+  reset role;
+
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  perform public.finalize_teams_match(m2);
+  insert into public.matches (night_id, game_id) values (n1, g2) returning id into m1;
+  insert into public.match_players (match_id, user_id, team) values (m1, ua, 'Rood'), (m1, ub, 'Blauw'), (m1, uc, 'Blauw');
+  insert into public.team_scores (match_id, team, round, points) values (m1, 'Rood', 1, 5), (m1, 'Blauw', 1, 5);
+  perform public.finalize_teams_match(m1);
+  reset role;
+  select string_agg(p.username || ':' || r.total || '/#' || r.placement || '/' || r.league_points || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
+    into t from public.match_results r join public.profiles p on p.id = r.user_id where r.match_id = m2;
+  select t || ' | team=' || coalesce(winning_team, '-') || ' draw=' || is_draw::text into t from public.matches where id = m2;
+  rep := rep || case when t = 'ZzTestA:7/#1/10/WIN, ZzTestB:7/#1/10/WIN, ZzTestC:6/#2/6 | team=Rood draw=false' then 'OK' else 'FAIL' end
+         || ' 25d Rood wint: ' || t || E'\n';
+  select is_draw::text || '/' || (select count(*) from public.match_results where match_id = m1 and is_winner) into t from public.matches where id = m1;
+  rep := rep || case when t = 'true/0' then 'OK' else 'FAIL' end || ' 25e teams gelijk = geen winnaar (' || t || E')\n';
+
   -- 22. Niet ingelogd
   set local role anon;
   begin

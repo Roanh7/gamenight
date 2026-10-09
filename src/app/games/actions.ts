@@ -37,6 +37,8 @@ function parseGame(fd: FormData) {
   const icon = str(fd, "icon");
   const max = str(fd, "max_players");
   const min = Math.max(1, Number(str(fd, "min_players")) || 2);
+  const typeRaw = str(fd, "game_type");
+  const gameType = typeRaw === "teams" || typeRaw === "roles" ? typeRaw : "solo";
   return {
     name: str(fd, "name"),
     icon: GAME_ICON_KEYS.includes(icon) ? icon : "gamepad",
@@ -48,8 +50,9 @@ function parseGame(fd: FormData) {
     scoring_mode: str(fd, "scoring_mode") === "lowest_wins" ? "lowest_wins" : "highest_wins",
     placement_points: placement.map((v) => v ?? 0),
     participation_points: Math.max(0, Math.round(Number(str(fd, "participation_points")) || 0)),
-    is_team: fd.get("is_team") === "on",
-    teams: fd.get("is_team") === "on" ? parseTeams(str(fd, "teams")) : [],
+    game_type: gameType,
+    is_team: gameType === "roles",
+    teams: gameType === "solo" ? [] : parseTeams(str(fd, "teams")),
   };
 }
 
@@ -91,5 +94,5 @@ export async function deleteGame(formData: FormData) {
       `/games/${id}/bewerken?fout=${encodeURIComponent("Alleen wie de game toevoegde kan hem verwijderen, en alleen als er nog niet mee gespeeld is.")}`,
     );
   revalidatePath("/", "layout");
-  redirect("/ranking");
+  redirect("/games");
 }

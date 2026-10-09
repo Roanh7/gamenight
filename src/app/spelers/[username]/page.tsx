@@ -20,7 +20,7 @@ export default async function PlayerPage(props: PageProps<"/spelers/[username]">
   if (data.id === me?.user.id) redirect("/account");
   return (
     <div>
-      <PageHeader back="/ranking" kicker="SPELERSPROFIEL" title="" />
+      <PageHeader back="/spelers" kicker="SPELERSPROFIEL" title="" />
       <PlayerProfile profile={data as Profile} isMe={false} viewerId={me?.user.id} />
     </div>
   );

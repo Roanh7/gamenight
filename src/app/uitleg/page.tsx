@@ -89,7 +89,8 @@ export default async function UitlegPage() {
             </li>
             <li>Na het aanmelden ben je meteen binnen; je hoeft geen mail te bevestigen.</li>
             <li>
-              Onderin zie je de menubalk: <b>Home</b>, <b>Agenda</b>, <b>Ranking</b> en <b>Account</b>.
+              Onderin zie je de menubalk: <b>Home</b>, <b>Agenda</b>, <b>Games</b>, <b>Players</b> en{" "}
+              <b>Ranking</b>. Je eigen account open je via je rondje rechtsboven.
             </li>
           </ul>
         </Section>
@@ -175,6 +176,11 @@ export default async function UitlegPage() {
             <li>
               Eindig je gelijk, dan deel je de plek en krijg je dezelfde punten. Bij een{" "}
               <b>gelijke stand bovenaan is er geen winnaar</b> 🤝.
+            </li>
+            <li>
+              <b>Teams</b> (bijv. 30 seconds): de host verdeelt bij de start de spelers over de teams en houdt de
+              score per team bij. Iedereen in het winnende team krijgt de punten van de 1e plek, het tweede team die
+              van de 2e plek, enzovoort.
             </li>
             <li>
               <b>Teamspellen met geheime rollen</b> (Weerwolven, Secret Hitler, Undercover) werken anders. Tijdens

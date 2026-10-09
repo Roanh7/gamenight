@@ -19,6 +19,7 @@ export type Profile = {
 };
 
 export type GameTeam = { name: string; points: number };
+export type GameType = "solo" | "teams" | "roles";
 
 export type Game = {
   id: string;
@@ -33,6 +34,7 @@ export type Game = {
   placement_points: number[];
   participation_points: number;
   is_team: boolean;
+  game_type: GameType;
   teams: GameTeam[];
   created_by: string | null;
   created_at: string;

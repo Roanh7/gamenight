@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDownWideNarrow, ArrowUpWideNarrow, Plus, Trophy, Users, X } from "lucide-react";
-import type { Color, Game, GameTeam } from "@/lib/types";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Plus, Trophy, Users, VenetianMask, X } from "lucide-react";
+import type { Color, Game, GameTeam, GameType } from "@/lib/types";
 import { GAME_ICONS, GameIcon } from "@/components/GameIcon";
 import { ColorPicker } from "@/components/ColorPicker";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -21,7 +21,8 @@ export function GameForm({
   const [icon, setIcon] = useState(game?.icon ?? "gamepad");
   const [mode, setMode] = useState<Game["scoring_mode"]>(game?.scoring_mode ?? "highest_wins");
   const points = game?.placement_points ?? [10, 6, 4, 2, 1];
-  const [isTeam, setIsTeam] = useState(game?.is_team ?? false);
+  const [gameType, setGameType] = useState<GameType>(game?.game_type ?? (game?.is_team ? "roles" : "solo"));
+  const isTeam = gameType === "roles";
   const [teams, setTeams] = useState<GameTeam[]>(
     game?.teams?.length
       ? game.teams
@@ -98,30 +99,73 @@ export function GameForm({
         </div>
 
         {/* Soort spel */}
-        <input type="hidden" name="is_team" value={isTeam ? "on" : ""} />
-        <div className="grid grid-cols-2 gap-2">
+        <input type="hidden" name="game_type" value={gameType} />
+        <div className="grid grid-cols-3 gap-2">
           {(
             [
-              [false, "Ieder voor zich", "Punten tellen, bijv. Mario Kart, 30 seconds", Trophy],
-              [true, "Teams & rollen", "Rollen pas na afloop bekend, bijv. Weerwolven", Users],
+              ["solo", "Ieder voor zich", "bijv. Mario Kart, Smash", Trophy],
+              ["teams", "Teams", "Vaste teams, bijv. 30 seconds", Users],
+              ["roles", "Geheime rollen", "bijv. Weerwolven", VenetianMask],
             ] as const
           ).map(([val, label, hint, Icon]) => (
             <button
-              key={label}
+              key={val}
               type="button"
-              onClick={() => setIsTeam(val)}
-              aria-pressed={isTeam === val}
-              className={`rounded-xl border-2 border-line p-3 text-left ${isTeam === val ? "bg-purple text-white shadow-[0_3px_0_var(--color-line)]" : "bg-paper"}`}
+              onClick={() => setGameType(val)}
+              aria-pressed={gameType === val}
+              className={`rounded-xl border-2 border-line p-2.5 text-left ${gameType === val ? "bg-purple text-white shadow-[0_3px_0_var(--color-line)]" : "bg-paper"}`}
             >
               <Icon size={20} strokeWidth={2.5} />
               <p className="mt-1 text-sm font-black leading-tight">{label}</p>
-              <p className={`text-xs ${isTeam === val ? "opacity-80" : "text-muted"}`}>{hint}</p>
+              <p className={`text-[11px] leading-tight ${gameType === val ? "opacity-80" : "text-muted"}`}>{hint}</p>
             </button>
           ))}
         </div>
 
         {/* Teams */}
         <input type="hidden" name="teams" value={JSON.stringify(teams)} />
+        {gameType === "teams" && (
+          <div>
+            <span className="label">Teamnamen</span>
+            <div className="flex flex-wrap gap-2">
+              {teams.map((t, i) => (
+                <div key={i} className="flex items-center gap-1">
+                  <input
+                    className="input min-h-[40px] w-32 py-1.5"
+                    value={t.name}
+                    maxLength={30}
+                    placeholder={`Team ${i + 1}`}
+                    aria-label={`Naam team ${i + 1}`}
+                    onChange={(e) => setTeams(teams.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
+                  />
+                  {teams.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setTeams(teams.filter((_, j) => j !== i))}
+                      className="btn btn-secondary btn-sm h-10 w-10 px-0"
+                      aria-label="Team verwijderen"
+                    >
+                      <X size={14} strokeWidth={3} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {teams.length < 6 && (
+                <button
+                  type="button"
+                  onClick={() => setTeams([...teams, { name: `Team ${String.fromCharCode(65 + teams.length)}`, points: 0 }])}
+                  className="btn btn-secondary btn-sm"
+                >
+                  <Plus size={14} strokeWidth={3} /> Team
+                </button>
+              )}
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              Bij de start van een potje verdeelt de host de spelers over deze teams. De score houd je per team bij;
+              iedereen in het winnende team krijgt de punten van de 1e plek.
+            </p>
+          </div>
+        )}
         {isTeam && (
           <div>
             <span className="label">Teams & punten bij winst</span>

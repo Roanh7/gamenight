@@ -63,7 +63,7 @@ export async function getNight(supabase: DB, id: string) {
   if (!night) return null;
   const matchIds = (matches ?? []).map((m) => m.id);
   const liveIds = (matches ?? []).filter((m) => m.status === "live").map((m) => m.id);
-  const [{ data: results }, { data: livePlayers }, { data: liveScores }] = await Promise.all([
+  const [{ data: results }, { data: livePlayers }, { data: liveScores }, { data: liveTeamScores }] = await Promise.all([
     matchIds.length
       ? supabase.from("match_results").select("*").in("match_id", matchIds)
       : Promise.resolve({ data: [] }),
@@ -73,7 +73,28 @@ export async function getNight(supabase: DB, id: string) {
     liveIds.length
       ? supabase.from("score_entries").select("match_id, user_id, round, points").in("match_id", liveIds)
       : Promise.resolve({ data: [] }),
+    liveIds.length
+      ? supabase.from("team_scores").select("match_id, team, round, points").in("match_id", liveIds)
+      : Promise.resolve({ data: [] }),
   ]);
+  // Live tussenstand per team (speltype "teams")
+  const liveTeams = new Map<string, { team: string; total: number; members: string[] }[]>();
+  for (const id of liveIds) {
+    const members = ((livePlayers ?? []) as { match_id: string; user_id: string; team: string | null }[]).filter(
+      (p) => p.match_id === id && p.team,
+    );
+    const names = [...new Set(members.map((m) => m.team as string))];
+    liveTeams.set(
+      id,
+      names.map((team) => ({
+        team,
+        members: members.filter((m) => m.team === team).map((m) => m.user_id),
+        total: (liveTeamScores ?? [])
+          .filter((s) => s.match_id === id && s.team === team)
+          .reduce((t, s) => t + Number(s.points), 0),
+      })),
+    );
+  }
   // Rollen per potje (teamspellen)
   const teams = new Map<string, Map<string, string | null>>();
   for (const p of (livePlayers ?? []) as { match_id: string; user_id: string; team: string | null }[]) {
@@ -102,6 +123,7 @@ export async function getNight(supabase: DB, id: string) {
     matches: (matches ?? []) as Match[],
     results: (results ?? []) as MatchResult[],
     live,
+    liveTeams,
     teams,
   };
 }

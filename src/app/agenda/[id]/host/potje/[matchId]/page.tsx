@@ -13,6 +13,7 @@ import { Avatar } from "@/components/Avatar";
 import { PageHeader } from "@/components/ui";
 import { ScoreBoard } from "./ScoreBoard";
 import { TeamResult } from "./TeamResult";
+import { TeamScoreBoard } from "./TeamScoreBoard";
 
 export const metadata: Metadata = { title: "Scores" };
 
@@ -33,8 +34,12 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   if (night.host_id !== me.user.id) redirect(`/agenda/${id}`);
   const match = matchData as Match;
 
-  const { data: gameData } = await supabase.from("games").select("*").eq("id", match.game_id).maybeSingle();
+  const [{ data: gameData }, { data: teamScores }] = await Promise.all([
+    supabase.from("games").select("*").eq("id", match.game_id).maybeSingle(),
+    supabase.from("team_scores").select("team, round, points").eq("match_id", matchId),
+  ]);
   const game = gameData as Game | null;
+  const gameType = game?.game_type ?? (game?.is_team ? "roles" : "solo");
 
   const players = (mp ?? [])
     .filter((x) => profiles.byId.has(x.user_id))
@@ -62,7 +67,16 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
 
       {match.status === "live" ? (
         <>
-          {game?.is_team ? (
+          {gameType === "teams" ? (
+            <TeamScoreBoard
+              matchId={match.id}
+              nightId={id}
+              players={players}
+              teamNames={(game?.teams ?? []).map((t) => t.name)}
+              initialEntries={(teamScores ?? []).map((e) => ({ ...e, points: Number(e.points) }))}
+              lowestWins={game?.scoring_mode === "lowest_wins"}
+            />
+          ) : gameType === "roles" && game ? (
             <TeamResult
               matchId={match.id}
               nightId={id}
@@ -77,7 +91,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             players={players}
             initialEntries={(entries ?? []).map((e) => ({ ...e, points: Number(e.points) }))}
             lowestWins={game?.scoring_mode === "lowest_wins"}
-            isTeam={game?.is_team ?? false}
+            isTeam={false}
           />
           )}
           <form action={deleteMatch} className="mt-8">

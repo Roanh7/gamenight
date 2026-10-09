@@ -10,7 +10,7 @@ export default async function NewGamePage(props: PageProps<"/games/nieuw">) {
   const sp = await props.searchParams;
   return (
     <div>
-      <PageHeader back="/ranking" kicker="NIEUWE GAME" title="Game toevoegen" />
+      <PageHeader back="/games" kicker="NIEUWE GAME" title="Game toevoegen" />
       <Flash sp={sp} />
       <GameForm action={createGame} submitLabel="▶ Game toevoegen" />
     </div>

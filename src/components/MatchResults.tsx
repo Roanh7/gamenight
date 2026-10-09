@@ -12,6 +12,7 @@ export function MatchResults({
   profiles,
   href,
   live,
+  liveTeams,
   teams,
 }: {
   match: Match;
@@ -21,8 +22,10 @@ export function MatchResults({
   href?: string;
   live?: { user_id: string; total: number; rounds: number }[];
   teams?: Map<string, string | null>;
+  liveTeams?: { team: string; total: number; members: string[] }[];
 }) {
-  const isTeamGame = game?.is_team ?? false;
+  const gameType = game?.game_type ?? (game?.is_team ? "roles" : "solo");
+  const isTeamGame = gameType === "roles";
   const sorted = [...results].sort((a, b) => a.placement - b.placement);
   const header = (
     <div className="flex items-center gap-3 border-b-2 border-line bg-cream px-3 py-2.5">
@@ -55,16 +58,21 @@ export function MatchResults({
                 <RankBadge rank={r.placement} />
                 <Avatar name={p?.username ?? "?"} color={p?.avatar_color} size="xs" crown={r.is_winner} />
                 <span className="min-w-0 flex-1 truncate font-bold">{p?.username ?? "Speler"}</span>
-                {isTeamGame && teams?.get(r.user_id) ? (
+                {gameType !== "solo" && teams?.get(r.user_id) && (
                   <span className={`chip ${r.is_winner ? "bg-yellow" : "bg-soft"}`}>{teams.get(r.user_id)}</span>
-                ) : (
-                  <span className="text-sm font-black">{formatScore(r.total)}</span>
                 )}
+                {!isTeamGame && <span className="text-sm font-black">{formatScore(r.total)}</span>}
                 <span className="w-12 text-right text-xs font-black text-green">+{r.league_points} pt</span>
               </li>
             );
           })}
         </ol>
+      ) : gameType === "teams" ? (
+        liveTeams && liveTeams.length > 0 ? (
+          <LiveTeams teams={liveTeams} profiles={profiles} lowestWins={game?.scoring_mode === "lowest_wins"} />
+        ) : (
+          <p className="px-3 py-3 text-sm font-bold text-muted">De host verdeelt de teams…</p>
+        )
       ) : isTeamGame ? (
         <p className="px-3 py-3 text-sm font-bold text-muted">🤫 Rollen zijn geheim. De uitslag volgt na afloop.</p>
       ) : live && live.length > 0 ? (
@@ -120,6 +128,48 @@ function LiveStanding({
       <p className="border-t-2 border-soft px-3 py-1.5 text-[11px] font-bold text-muted">
         {rounds > 0 ? `Na ronde ${rounds}` : "Nog geen punten"} · ververst automatisch
       </p>
+    </div>
+  );
+}
+
+function LiveTeams({
+  teams,
+  profiles,
+  lowestWins,
+}: {
+  teams: { team: string; total: number; members: string[] }[];
+  profiles: Map<string, Profile>;
+  lowestWins: boolean;
+}) {
+  const better = (a: number, b: number) => (lowestWins ? a < b : a > b);
+  const place = (t: number) => 1 + teams.filter((x) => better(x.total, t)).length;
+  const anyScore = teams.some((t) => t.total !== 0);
+  const leaders = teams.filter((t) => place(t.total) === 1);
+  const sorted = [...teams].sort((a, b) => place(a.total) - place(b.total));
+  return (
+    <div>
+      <ol className="divide-y-2 divide-soft">
+        {sorted.map((t) => {
+          const crown = anyScore && leaders.length === 1 && leaders[0].team === t.team;
+          return (
+            <li key={t.team} className={`flex items-center gap-3 px-3 py-2 ${crown ? "bg-yellow-soft" : ""}`}>
+              <span className="pixel w-5 text-[10px] text-muted">{anyScore ? place(t.total) : "–"}</span>
+              <span className="chip bg-paper">
+                {crown ? "👑 " : ""}
+                {t.team}
+              </span>
+              <span className="flex min-w-0 flex-1 -space-x-1.5">
+                {t.members.map((m) => {
+                  const p = profiles.get(m);
+                  return p ? <Avatar key={m} name={p.username} color={p.avatar_color} size="xs" /> : null;
+                })}
+              </span>
+              <span className="pixel text-xs">{formatScore(t.total)}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="border-t-2 border-soft px-3 py-1.5 text-[11px] font-bold text-muted">Ververst automatisch</p>
     </div>
   );
 }

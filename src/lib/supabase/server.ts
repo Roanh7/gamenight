@@ -29,10 +29,10 @@ export async function createClient() {
 /** Huidige gebruiker + profiel (één keer per request). */
 export const getMe = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) return null;
+  const user = { id: claims.sub as string, email: (claims.email as string | undefined) ?? "" };
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, username, avatar_color, bio, created_at")

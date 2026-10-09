@@ -56,7 +56,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
   return (
     <div>
       <PageHeader
-        back="/ranking"
+        back="/games"
         kicker="GAME"
         title={game.name}
         action={
@@ -128,7 +128,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
         </span>
       </SectionTitle>
       <section className="card space-y-3 p-4 text-sm">
-        {game.is_team ? (
+        {(game.game_type ?? (game.is_team ? "roles" : "solo")) === "roles" ? (
           <>
             <p>
               <b>Teamspel met geheime rollen.</b> Na afloop tikt de host per speler de rol aan en kiest hij welk team
@@ -151,6 +151,13 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
         ) : (
           <>
             <p>
+              {game.game_type === "teams" && (
+                <>
+                  <b>Teamspel.</b> De host verdeelt de spelers over{" "}
+                  {game.teams?.length ? game.teams.map((t) => t.name).join(", ") : "teams"} en houdt de score per team
+                  bij. Iedereen in een team krijgt de punten van de plek van zijn team.{" "}
+                </>
+              )}
               <b>{game.scoring_mode === "lowest_wins" ? "Laagste" : "Hoogste"} totaalscore wint.</b> Bij gelijke stand
               bovenaan is er geen winnaar.
             </p>
