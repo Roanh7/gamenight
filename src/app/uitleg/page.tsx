@@ -343,7 +343,7 @@ export default async function UitlegPage() {
             </li>
             <li>
               Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>. Daar kies je ook je{" "}
-              <b>avatar</b>: een eigen foto, een emoji, of gewoon je letter.
+              <b>avatar</b>: een emoji, of gewoon je letter.
             </li>
             <li>
               Geen zin in geluidjes? Zet <b>🔊 Geluidjes bij winst</b> uit op je account. Dat geldt alleen voor

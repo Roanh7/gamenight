@@ -32,7 +32,6 @@ export default async function AccountPage(props: PageProps<"/account">) {
           userId={me.user.id}
           name={profile.username}
           color={profile.avatar_color}
-          url={profile.avatar_url}
           emoji={profile.avatar_emoji}
         />
       </section>
