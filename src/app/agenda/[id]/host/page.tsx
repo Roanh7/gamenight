@@ -113,13 +113,13 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                     {tonight.map((g) => (
                       <label
                         key={g.id}
-                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-paper px-2 py-2 has-[:checked]:bg-yellow has-[:checked]:shadow-[0_3px_0_var(--color-line)]"
+                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-paper px-2 py-2 has-[:checked]:bg-yellow has-[:checked]:text-night has-[:checked]:shadow-[0_3px_0_var(--color-line)]"
                       >
                         <input type="radio" name="game_id" value={g.id} defaultChecked={g.id === defaultGame} required className="sr-only" />
                         <GameIcon icon={g.icon} color={g.color} size="sm" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-black">{g.name}</span>
-                          <span className="block text-[11px] font-bold text-muted">
+                          <span className="block text-[11px] font-bold opacity-70">
                             {liveIds.has(g.id)
                               ? "● nu live"
                               : playedIds.has(g.id)

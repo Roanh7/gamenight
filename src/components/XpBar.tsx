@@ -16,7 +16,7 @@ export function XpBar({ info, compact }: { info: XpInfo; compact?: boolean }) {
         {Array.from({ length: blocks }, (_, i) => (
           <span
             key={i}
-            className={`h-2.5 flex-1 border-2 border-line ${i < filled ? "bg-green" : "bg-paper"}`}
+            className={`h-2.5 flex-1 border-2 border-line ${i < filled ? "bg-green" : "bg-soft"}`}
           />
         ))}
       </div>

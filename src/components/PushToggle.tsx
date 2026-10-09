@@ -110,7 +110,8 @@ export function PushToggle() {
   if (state === "denied")
     return (
       <p className="text-sm">
-        Meldingen zijn geblokkeerd. Zet ze aan via <b>Instellingen → Meldingen → Game Night</b> op je iPhone.
+        Meldingen zijn geblokkeerd voor Game Night. Op je iPhone zet je ze aan via{" "}
+        <b>Instellingen → Meldingen → Game Night</b>.
       </p>
     );
 
