@@ -13,6 +13,7 @@ import {
   setCohost,
   setNightStatus,
   startMatch,
+  addGameToNight,
   updateNight,
 } from "../../actions";
 import { Avatar } from "@/components/Avatar";
@@ -45,14 +46,16 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   const pending = participants.filter((p) => p.status === "pending");
   const confirmed = participants.filter((p) => p.status === "confirmed");
   const notJoined = profiles.list.filter((p) => !participants.some((x) => x.user_id === p.id));
-  // Volgorde: programma of meeste stemmen eerst; standaard de eerste die nog niet gespeeld is
+  // De games van vanavond: nog niet gespeeld eerst. De host kiest zelf welke nu.
   const order = nightGameOrder(night, votes).filter((g) => games.byId.has(g));
-  const playedIds = new Set(matches.map((m) => m.game_id));
-  const defaultGame = order.find((g) => !playedIds.has(g)) ?? order[0] ?? games.list[0]?.id;
-  const gameOptions = [
-    ...order.map((g) => games.byId.get(g)!),
-    ...games.list.filter((g) => !order.includes(g.id)),
-  ];
+  const playedIds = new Set(matches.filter((m) => m.status === "finished").map((m) => m.game_id));
+  const liveIds = new Set(matches.filter((m) => m.status === "live").map((m) => m.game_id));
+  const tonight = [...order.filter((g) => !playedIds.has(g)), ...order.filter((g) => playedIds.has(g))].map(
+    (g) => games.byId.get(g)!,
+  );
+  const picked = typeof sp.game === "string" && order.includes(sp.game) ? sp.game : undefined;
+  const defaultGame = picked ?? tonight[0]?.id;
+  const notTonight = games.list.filter((g) => !order.includes(g.id));
 
   return (
     <div>
@@ -94,11 +97,12 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
       {/* Nieuw potje */}
       {(night.status === "live" || night.status === "planned") && (
         <>
+          <div id="potje" className="scroll-mt-20" />
           <SectionTitle>Nieuw potje starten</SectionTitle>
           {games.list.length === 0 ? (
             <p className="card p-4 text-sm font-bold">
               Er zijn nog geen games.{" "}
-              <Link href="/games/nieuw" className="text-red underline">
+              <Link href={`/games/nieuw?avond=${id}`} className="text-red underline">
                 Voeg er een toe
               </Link>
               .
@@ -106,26 +110,39 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
           ) : (
             <form action={startMatch} className="card space-y-4 p-4">
               <input type="hidden" name="night_id" value={id} />
-              <div>
-                <label className="label" htmlFor="game_id">
-                  Game
-                </label>
-                <select id="game_id" name="game_id" className="input" defaultValue={defaultGame}>
-                  {gameOptions.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name}
-                      {night.vote_mode === "fixed" && order.includes(g.id) ? ` · programma #${order.indexOf(g.id) + 1}` : ""}
-                      {night.vote_mode === "vote" && tally.counts.get(g.id) ? ` · ${tally.counts.get(g.id)} stem(men)` : ""}
-                      {playedIds.has(g.id) ? " · ✓ gespeeld" : ""}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs font-bold text-muted">
-                  {night.vote_mode === "fixed"
-                    ? "De games van het programma staan bovenaan."
-                    : "De games met de meeste stemmen staan bovenaan. Je kunt elke game kiezen."}
-                </p>
-              </div>
+              <fieldset>
+                <legend className="label">Welke game spelen we nu?</legend>
+                {tonight.length ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {tonight.map((g) => (
+                      <label
+                        key={g.id}
+                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-paper px-2 py-2 has-[:checked]:bg-yellow has-[:checked]:shadow-[0_3px_0_var(--color-line)]"
+                      >
+                        <input type="radio" name="game_id" value={g.id} defaultChecked={g.id === defaultGame} required className="sr-only" />
+                        <GameIcon icon={g.icon} color={g.color} size="sm" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-black">{g.name}</span>
+                          <span className="block text-[11px] font-bold text-muted">
+                            {liveIds.has(g.id)
+                              ? "● nu live"
+                              : playedIds.has(g.id)
+                                ? "✓ al gespeeld"
+                                : night.vote_mode === "vote" && tally.counts.get(g.id)
+                                  ? `${tally.counts.get(g.id)} stem(men)`
+                                  : "nog niet gespeeld"}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rounded-xl bg-cream px-3 py-2 text-sm font-bold">
+                    Er zijn nog geen games voor vanavond. Zet er hieronder een bij.
+                  </p>
+                )}
+                <p className="mt-1.5 text-xs font-bold text-muted">Tik de game aan die jullie nu gaan spelen. De volgorde maakt niet uit.</p>
+              </fieldset>
               <fieldset>
                 <legend className="label">Spelers</legend>
                 <div className="grid grid-cols-2 gap-2">
@@ -148,11 +165,33 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                   <p className="mt-2 text-xs font-bold text-red">Bevestig eerst minimaal 2 deelnemers hieronder.</p>
                 )}
               </fieldset>
-              <SubmitButton className="btn btn-primary w-full" pendingText="Starten…">
+              <SubmitButton className="btn btn-primary w-full" pendingText="Starten…" disabled={!tonight.length}>
                 <Play size={18} strokeWidth={3} /> Start potje & tel scores
               </SubmitButton>
             </form>
           )}
+          <section className="card mt-3 p-4">
+            <p className="label">➕ Nog een game erbij voor vanavond</p>
+            {notTonight.length > 0 && (
+              <form action={addGameToNight} className="flex items-center gap-2">
+                <input type="hidden" name="night_id" value={id} />
+                <select name="game_id" aria-label="Game kiezen" className="input min-w-0 flex-1">
+                  {notTonight.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+                <SubmitButton className="btn btn-secondary shrink-0" pendingText="…">
+                  Voeg toe
+                </SubmitButton>
+              </form>
+            )}
+            <Link href={`/games/nieuw?avond=${id}`} className="mt-2 inline-flex items-center gap-1 text-sm font-black text-red underline">
+              Staat de game er niet tussen? Maak hem nu aan
+            </Link>
+            <p className="mt-1 text-xs text-muted">Er hoeft niks opnieuw: de game komt er gewoon bij.</p>
+          </section>
         </>
       )}
 

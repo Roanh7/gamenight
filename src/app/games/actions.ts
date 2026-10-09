@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { appendToProgram } from "@/lib/program";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { COLORS } from "@/lib/types";
@@ -63,14 +64,21 @@ export async function createGame(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const game = parseGame(formData);
-  if (!game.name) redirect(`/games/nieuw?fout=${encodeURIComponent("Geef de game een naam.")}`);
+  const nightId = String(formData.get("night_id") ?? "");
+  const back = nightId ? `/games/nieuw?avond=${nightId}&` : "/games/nieuw?";
+  if (!game.name) redirect(`${back}fout=${encodeURIComponent("Geef de game een naam.")}`);
   const { data, error } = await supabase
     .from("games")
     .insert({ ...game, created_by: user.id })
     .select("id")
     .single();
-  if (error || !data) redirect(`/games/nieuw?fout=${encodeURIComponent("Opslaan lukte niet.")}`);
+  if (error || !data) redirect(`${back}fout=${encodeURIComponent("Opslaan lukte niet.")}`);
   revalidatePath("/", "layout");
+  // Gemaakt vanuit het host dashboard: meteen terug naar de avond, met deze game klaargezet
+  if (/^[0-9a-f-]{36}$/i.test(nightId)) {
+    await appendToProgram(supabase, nightId, data.id);
+    redirect(`/agenda/${nightId}/host?game=${data.id}&ok=${encodeURIComponent("Game gemaakt en toegevoegd aan de avond!")}#potje`);
+  }
   redirect(`/games/${data.id}?ok=${encodeURIComponent("Game toegevoegd!")}`);
 }
 

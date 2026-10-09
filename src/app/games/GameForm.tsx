@@ -13,10 +13,12 @@ export function GameForm({
   action,
   game,
   submitLabel,
+  nightId,
 }: {
   action: (fd: FormData) => Promise<void>;
   game?: Game;
   submitLabel: string;
+  nightId?: string;
 }) {
   const [icon, setIcon] = useState(game?.icon ?? "gamepad");
   const [mode, setMode] = useState<Game["scoring_mode"]>(game?.scoring_mode ?? "highest_wins");
@@ -34,6 +36,7 @@ export function GameForm({
 
   return (
     <form action={action} className="space-y-5">
+      {nightId && <input type="hidden" name="night_id" value={nightId} />}
       {game && <input type="hidden" name="game_id" value={game.id} />}
 
       <section className="card space-y-4 p-5">

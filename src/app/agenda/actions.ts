@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { appendToProgram } from "@/lib/program";
 
 function str(fd: FormData, key: string) {
   return String(fd.get(key) ?? "").trim();
@@ -97,7 +98,7 @@ export async function updateNight(formData: FormData) {
         const c = str(formData, "cohost_id");
         return c && c !== str(formData, "host_id") ? c : null;
       })(),
-      ...program,
+      ...(program.vote_mode === "vote" ? { vote_mode: "vote" } : program),
     })
     .eq("id", id);
   if (error) fail(back, "Wijzigen lukte niet.");
@@ -247,8 +248,9 @@ export async function startMatch(formData: FormData) {
     fail(back, "Spelers toevoegen lukte niet.");
   }
 
-  // Avond automatisch op 'live' zetten
+  // Avond automatisch op 'live' zetten, en een game die nog niet bij de avond hoorde komt erbij
   await supabase.from("game_nights").update({ status: "live" }).eq("id", id).eq("status", "planned");
+  await appendToProgram(supabase, id, gameId);
 
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}/host/potje/${match.id}`);
@@ -305,4 +307,18 @@ export async function pickDate(formData: FormData) {
   if (error || !data?.length) fail(`/agenda/${id}`, "Alleen de host of co-host kan de datum kiezen.");
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}?ok=${encodeURIComponent("Datum gekozen! 📅")}`);
+}
+
+/* ---------- Game toevoegen tijdens de avond ---------- */
+
+export async function addGameToNight(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const gameId = str(formData, "game_id");
+  const back = `/agenda/${id}/host`;
+  if (!UUID.test(gameId)) fail(back, "Kies een game.");
+  const ok = await appendToProgram(supabase, id, gameId);
+  if (!ok) fail(back, "Toevoegen lukte niet.");
+  revalidatePath("/", "layout");
+  redirect(`${back}?game=${gameId}&ok=${encodeURIComponent("Game toegevoegd aan de avond!")}#potje`);
 }

@@ -53,9 +53,16 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
   const confirmed = participants.filter((p) => p.status === "confirmed");
   const pending = participants.filter((p) => p.status === "pending");
 
+  const extraIds = new Set(night.game_ids ?? []);
   const sortedGames = [...games.list].sort(
-    (a, b) => (tally.counts.get(b.id) ?? 0) - (tally.counts.get(a.id) ?? 0) || a.name.localeCompare(b.name),
+    (a, b) =>
+      (tally.counts.get(b.id) ?? 0) - (tally.counts.get(a.id) ?? 0) ||
+      Number(extraIds.has(b.id)) - Number(extraIds.has(a.id)) ||
+      a.name.localeCompare(b.name),
   );
+  // Vaste selectie: wat nu live is eerst, dan wat nog moet, dan wat al gespeeld is
+  const rank = (g: string) => (liveIds.has(g) ? 0 : playedIds.has(g) ? 2 : 1);
+  const programSorted = [...program].sort((a, b) => rank(a.id) - rank(b.id));
 
   const matchesSection = matches.length > 0 && (
         <>
@@ -268,11 +275,10 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
       {/* Games van de avond */}
       {isFixed ? (
         <>
-          <SectionTitle>Programma van de avond</SectionTitle>
-          <ol className="card divide-y-2 divide-soft overflow-hidden">
-            {program.map((g, i) => (
+          <SectionTitle>Games van vanavond</SectionTitle>
+          <ul className="card divide-y-2 divide-soft overflow-hidden">
+            {programSorted.map((g) => (
               <li key={g.id} className={`flex items-center gap-3 px-4 py-3 ${playedIds.has(g.id) ? "bg-cream" : ""}`}>
-                <span className="pixel w-5 text-[11px] text-muted">{i + 1}</span>
                 <GameIcon icon={g.icon} color={g.color} size="sm" />
                 <Link href={`/games/${g.id}`} className="min-w-0 flex-1 truncate font-black">
                   {g.name}
@@ -284,8 +290,15 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                 ) : null}
               </li>
             ))}
-          </ol>
-          <p className="mt-1.5 text-xs text-muted">De host heeft deze games gekozen. Er wordt niet gestemd.</p>
+          </ul>
+          <p className="mt-1.5 text-xs text-muted">
+            De host heeft deze games gekozen; jullie spelen ze in de volgorde die je wilt.
+          </p>
+          {isHost && (night.status === "planned" || night.status === "live") && (
+            <Link href={`/agenda/${night.id}/host#potje`} className="btn btn-secondary btn-sm mt-2 w-full">
+              ➕ Nog een game toevoegen
+            </Link>
+          )}
         </>
       ) : (
         <>
@@ -335,6 +348,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                       <div className="relative min-w-0 flex-1 text-left">
                         <p className="truncate font-black">
                           {g.name} {leading && count > 0 && <span className="text-xs">👑</span>}
+                          {extraIds.has(g.id) && <span className="chip ml-1 bg-blue-soft text-[10px]">➕ erbij gezet</span>}
                         </p>
                         <div className="mt-0.5 flex -space-x-1">
                           {voters.map((v) => {
@@ -374,6 +388,11 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                 })}
               </ul>
             </section>
+          )}
+          {isHost && night.status === "live" && (
+            <Link href={`/agenda/${night.id}/host#potje`} className="btn btn-secondary btn-sm mt-2 w-full">
+              ➕ Nog een game toevoegen
+            </Link>
           )}
         </>
       )}

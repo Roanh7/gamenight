@@ -239,7 +239,7 @@ async function Dashboard({
             {nextGames.length ? (
               <>
                 <p className="mb-1.5 text-xs font-black text-muted">
-                  {isFixed ? "Op het programma" : `Populairst in de stemming (${tally.voters} gestemd)`}
+                  {isFixed ? "Games van de avond" : `Populairst in de stemming (${tally.voters} gestemd)`}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {nextGames.map((g) => (

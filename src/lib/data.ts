@@ -143,9 +143,15 @@ export function tallyVotes(votes: Vote[]) {
   return { counts, ranked, leaders, voters, total: votes.length };
 }
 
-/** De games van een avond op volgorde: vast programma, of meeste stemmen eerst. */
+/**
+ * De games van een avond: bij een vaste selectie de gekozen games, bij stemmen de games met stemmen
+ * (meeste eerst) plus games die de host er later bij heeft gezet.
+ */
 export function nightGameOrder(night: { vote_mode: string; game_ids: string[] }, votes: Vote[]) {
-  return night.vote_mode === "fixed" ? night.game_ids ?? [] : tallyVotes(votes).ranked;
+  const extra = night.game_ids ?? [];
+  if (night.vote_mode === "fixed") return extra;
+  const ranked = tallyVotes(votes).ranked;
+  return [...ranked, ...extra.filter((g) => !ranked.includes(g))];
 }
 
 /** Reacties per nieuwsbericht: per emoji het aantal, wie, en of ik al reageerde. */

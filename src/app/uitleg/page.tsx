@@ -132,13 +132,19 @@ export default async function UitlegPage() {
               die worden gespeeld.
             </li>
             <li>
-              <b>Vaste games:</b> de planner kiest zelf welke games er gespeeld worden, in een vaste volgorde. Dan
-              wordt er niet gestemd en zie je het <b>programma van de avond</b>.
+              <b>Vaste games:</b> de planner kiest zelf welke games er gespeeld worden. Dan wordt er niet gestemd en
+              zie je op de avond de <b>games van vanavond</b>.
             </li>
             <li>Zodra de host de avond start, sluit de stemming.</li>
             <li>
-              Al gespeelde games krijgen een ✓. De host kan altijd ook een andere game starten, en het programma
-              aanpassen via <b>Avond bewerken</b>.
+              <b>De volgorde maakt niet uit.</b> Bij <b>Nieuw potje starten</b> tikt de host gewoon de game aan die
+              jullie nu gaan spelen. Al gespeelde games krijgen een ✓.
+            </li>
+            <li>
+              <b>Halverwege toch nog een andere game?</b> Er hoeft niks opnieuw. De host kiest in het host dashboard
+              bij <b>➕ Nog een game erbij voor vanavond</b> een game en tikt op <b>Voeg toe</b>. Staat de game nog
+              niet in de app, tik dan op <b>Maak hem nu aan</b>: na het opslaan ben je meteen terug bij de avond, met
+              de nieuwe game klaargezet.
             </li>
           </ul>
         </Section>
@@ -156,7 +162,7 @@ export default async function UitlegPage() {
               De avond <b>starten</b>, <b>afsluiten</b> of <b>afgelasten</b>
             </li>
             <li>
-              Een <b>potje starten</b>: kies de game en vink aan wie er meedoet
+              Een <b>potje starten</b>: tik de game aan die jullie nu spelen en vink aan wie er meedoet. Ook halverwege de avond een game <b>erbij zetten</b>
             </li>
             <li>
               De score bijhouden. Hoe dat gaat hangt af van de <a href="#soorten" className="underline">soort spel</a>:

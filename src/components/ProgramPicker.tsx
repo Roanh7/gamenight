@@ -31,7 +31,7 @@ export function ProgramPicker({
         {(
           [
             ["vote", "Iedereen stemt", "Op meerdere games; de populairste spelen we", Vote],
-            ["fixed", "Ik kies de games", "Vast programma, geen stemming", ListChecks],
+            ["fixed", "Ik kies de games", "Vaste selectie, geen stemming", ListChecks],
           ] as const
         ).map(([val, label, hint, Icon]) => (
           <button
@@ -69,9 +69,9 @@ export function ProgramPicker({
                         <GameIcon icon={g.icon} color={g.color} size="sm" />
                         <span className="min-w-0 flex-1 truncate font-black">{g.name}</span>
                         <span
-                          className={`pixel flex h-7 w-7 items-center justify-center rounded-lg border-2 border-line text-[10px] ${on ? "bg-green text-white" : "bg-paper"}`}
+                          className={`flex h-7 w-7 items-center justify-center rounded-lg border-2 border-line text-sm font-black ${on ? "bg-green text-white" : "bg-paper"}`}
                         >
-                          {on ? pos + 1 : ""}
+                          {on ? "✓" : ""}
                         </span>
                       </button>
                     </li>
@@ -79,7 +79,7 @@ export function ProgramPicker({
                 })}
               </ul>
               <p className="mt-2 text-xs text-muted">
-                Tik de games aan in de volgorde waarin je ze wilt spelen. {picked.length} gekozen.
+                Tik de games aan die jullie willen spelen. Welke wanneer, kies je op de avond zelf. {picked.length} gekozen.
               </p>
             </>
           )}
