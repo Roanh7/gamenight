@@ -265,7 +265,7 @@ async function Dashboard({
       {lastMatches.length > 0 && (
         <>
           <SectionTitle>Laatst gespeeld</SectionTitle>
-          <ul className="grid gap-2">
+          <ul className="grid grid-cols-1 gap-2 [&>li]:min-w-0">
             {lastMatches.map((m) => {
               const g = games.byId.get(m.game_id);
               const w = m.winner_id ? profiles.byId.get(m.winner_id) : undefined;

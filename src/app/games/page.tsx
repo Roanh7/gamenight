@@ -48,7 +48,7 @@ export default async function GamesPage() {
       />
 
       {sorted.length ? (
-        <ul className="grid gap-3">
+        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">
           {sorted.map((g) => {
             const t = TYPE_LABEL[typeOf(g)];
             const count = played.get(g.id) ?? 0;

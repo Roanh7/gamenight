@@ -105,7 +105,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
 
       <SectionTitle>Per game</SectionTitle>
       {sortedGames.length ? (
-        <ul className="grid gap-3">
+        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">
           {sortedGames.map((g) => {
             const gRows = boards.get(g.id) ?? [];
             const href = season === currentSeason() ? `/games/${g.id}` : `/games/${g.id}?seizoen=${season}`;

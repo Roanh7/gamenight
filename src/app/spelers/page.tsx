@@ -32,7 +32,7 @@ export default async function PlayersPage() {
       <p className="-mt-3 mb-4 text-sm font-bold text-muted">Gesorteerd op de stand van seizoen {seasonLabel(season)}.</p>
 
       {players.length ? (
-        <ul className="grid gap-2.5">
+        <ul className="grid grid-cols-1 gap-2.5 [&>li]:min-w-0">
           {players.map((p) => {
             const s = seasonRows.find((x) => x.user_id === p.id);
             const a = allTime.find((x) => x.user_id === p.id);

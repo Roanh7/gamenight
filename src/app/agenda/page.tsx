@@ -60,7 +60,7 @@ export default async function AgendaPage() {
       />
 
       {upcoming.length ? (
-        <ul className="grid gap-3">{upcoming.map(card)}</ul>
+        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">{upcoming.map(card)}</ul>
       ) : (
         <EmptyState
           icon={<CalendarDays size={32} />}
@@ -77,7 +77,7 @@ export default async function AgendaPage() {
       {past.length > 0 && (
         <>
           <SectionTitle>Geweest</SectionTitle>
-          <ul className="grid gap-3">{past.map(card)}</ul>
+          <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">{past.map(card)}</ul>
         </>
       )}
     </div>
