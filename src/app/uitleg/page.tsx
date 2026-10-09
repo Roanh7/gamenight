@@ -10,6 +10,7 @@ import {
   Shield,
   Smartphone,
   Trophy,
+  Users,
   Vote,
   type LucideIcon,
 } from "lucide-react";
@@ -53,9 +54,10 @@ const TOC = [
   ["agenda", "Avond plannen"],
   ["stemmen", "Stemmen"],
   ["host", "De host"],
+  ["soorten", "Soorten spellen"],
   ["punten", "Punten & ranking"],
   ["games", "Games"],
-  ["extra", "Nieuws & titels"],
+  ["extra", "Players & nieuws"],
   ["tips", "Tips"],
 ];
 
@@ -144,8 +146,8 @@ export default async function UitlegPage() {
               Een <b>potje starten</b>: kies de game en vink aan wie er meedoet
             </li>
             <li>
-              Per <b>ronde</b> de punten invoeren met de <b>+ / –</b> knoppen of door een getal te typen.
-              Totalen tellen automatisch op en de live stand loopt mee. Alles wordt meteen opgeslagen.
+              De score bijhouden. Hoe dat gaat hangt af van de <a href="#soorten" className="underline">soort spel</a>:
+              per speler, per team, of pas na afloop bij geheime rollen. Alles wordt meteen opgeslagen.
             </li>
             <li>
               Op <b>🏁 Potje afronden</b> tikken als het klaar is. De punten gaan dan naar de ranglijst.
@@ -161,7 +163,50 @@ export default async function UitlegPage() {
           </ul>
         </Section>
 
-        <Section id="punten" icon={Trophy} color="bg-green" title="5. Punten & ranking">
+        <Section id="soorten" icon={Users} color="bg-pink" title="5. Soorten spellen">
+          <p>Elke game is een van deze drie soorten. Dat kies je bij het toevoegen of bewerken van de game.</p>
+          <div className="space-y-3 pt-1">
+            <div className="rounded-xl border-2 border-line bg-blue-soft p-3">
+              <p className="font-black">🏆 Ieder voor zich</p>
+              <p className="text-sm">bijv. Smash, Paco, Mario Kart</p>
+              <ul className="mt-1.5">
+                <li>De host voert per ronde de punten van elke speler in, met + / – of door te typen.</li>
+                <li>De totalen tellen vanzelf op; de rest kijkt live mee.</li>
+                <li>Je krijgt ranglijstpunten voor je eindplek.</li>
+              </ul>
+            </div>
+            <div className="rounded-xl border-2 border-line bg-green-soft p-3">
+              <p className="font-black">👥 Teams</p>
+              <p className="text-sm">bijv. 30 seconds, Pictionary</p>
+              <ul className="mt-1.5">
+                <li>
+                  Bij de start verdeelt de host de spelers over de teams, zelf of met <b>Willekeurig</b>.
+                </li>
+                <li>De host voert per ronde de score per team in; de rest kijkt live mee.</li>
+                <li>
+                  Iedereen in het winnende team krijgt de punten van de 1e plek, het tweede team die van de 2e
+                  plek, enzovoort.
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-xl border-2 border-line bg-purple-soft p-3">
+              <p className="font-black">🎭 Geheime rollen</p>
+              <p className="text-sm">bijv. Weerwolven, Secret Hitler, Undercover</p>
+              <ul className="mt-1.5">
+                <li>Tijdens het spel vult de host niks in. Rollen blijven geheim.</li>
+                <li>
+                  Na afloop tikt de host per speler de rol aan (bijv. Dorp of Weerwolf) en kiest hij welk team won.
+                </li>
+                <li>
+                  Iedereen in het winnende team krijgt de punten van dat team. Het kleine, lastige team levert meer
+                  op. Wie verliest krijgt alleen de meedoen-bonus.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </Section>
+
+        <Section id="punten" icon={Trophy} color="bg-green" title="6. Punten & ranking">
           <p>Bij het afronden van een potje gebeurt dit:</p>
           <ul>
             <li>
@@ -177,17 +222,7 @@ export default async function UitlegPage() {
               Eindig je gelijk, dan deel je de plek en krijg je dezelfde punten. Bij een{" "}
               <b>gelijke stand bovenaan is er geen winnaar</b> 🤝.
             </li>
-            <li>
-              <b>Teams</b> (bijv. 30 seconds): de host verdeelt bij de start de spelers over de teams en houdt de
-              score per team bij. Iedereen in het winnende team krijgt de punten van de 1e plek, het tweede team die
-              van de 2e plek, enzovoort.
-            </li>
-            <li>
-              <b>Teamspellen met geheime rollen</b> (Weerwolven, Secret Hitler, Undercover) werken anders. Tijdens
-              het spel vult de host niks in. Na afloop tikt hij per speler de rol aan (bijv. Dorp of Weerwolf) en
-              kiest hij welk team won. Iedereen in dat team krijgt de punten van het team; het kleine, lastige team
-              levert meer op. Wie verliest krijgt alleen de meedoen-bonus.
-            </li>
+            <li>Bij teams en geheime rollen krijgt iedereen in hetzelfde team dezelfde punten en zege.</li>
           </ul>
           <p className="pt-1">
             Elke game heeft een eigen <b>leaderboard</b>, plus een <b>algemeen klassement</b> over alle
@@ -201,14 +236,19 @@ export default async function UitlegPage() {
           </p>
         </Section>
 
-        <Section id="games" icon={Gamepad2} color="bg-orange" title="6. Games toevoegen">
+        <Section id="games" icon={Gamepad2} color="bg-orange" title="7. Games">
           <ul>
             <li>
-              Ga naar <b>Ranking → + Game</b>. Kies een naam, icoon en kleur.
+              Onder <b>Games</b> zie je alle spellen: welke soort, voor hoeveel spelers, hoe vaak gespeeld en wie
+              de kampioen is 👑.
             </li>
             <li>
-              Stel de <b>scoreregels</b> in: hoogste of laagste score wint, en hoeveel punten elke plek
-              oplevert.
+              Nieuwe game? Tik op <b>Games → + Game</b>. Kies een naam, icoon, kleur en de{" "}
+              <a href="#soorten" className="underline">soort spel</a>.
+            </li>
+            <li>
+              Stel de <b>scoreregels</b> in: hoogste of laagste score wint en hoeveel punten elke plek oplevert. Bij
+              teams geef je de teamnamen op; bij geheime rollen de teams of rollen met hun punten.
             </li>
             <li>
               Schrijf eventueel <b>huisregels</b> op (bijv. &quot;4 races, 150cc&quot;).
@@ -217,39 +257,53 @@ export default async function UitlegPage() {
               Op de pagina van een game zie je het leaderboard, de regels, de <b>kampioen</b>, het{" "}
               <b>record</b> en alle eerdere potjes.
             </li>
-            <li>Regels aanpassen geldt alleen voor nieuwe potjes; oude punten blijven staan.</li>
+            <li>
+              Aanpassen kan via het potloodje op de pagina van de game. Dat geldt alleen voor nieuwe potjes; oude
+              punten blijven staan.
+            </li>
           </ul>
         </Section>
 
-        <Section id="extra" icon={Crown} color="bg-pink" title="7. Nieuws, titels & achievements">
+        <Section id="extra" icon={Crown} color="bg-purple" title="8. Players, nieuws & titels">
           <ul>
             <li>
+              Onder <b>Players</b> staan alle spelers, op volgorde van de stand van dit seizoen. Tik op iemand om
+              zijn profiel te zien.
+            </li>
+            <li>
               <Newspaper size={14} className="mr-1 inline" />
-              Op <b>Home</b> staat het <b>nieuws</b>: wie er won, wie stijgt en wie er nieuw #1 is.
+              Op <b>Home</b> staan de 4 nieuwste berichten: wie er won, wie stijgt en wie er nieuw #1 is. Via{" "}
+              <b>Alle nieuws →</b> zie je de rest.
             </li>
             <li>
               Sta je #1 in een game, dan krijg je de titel <b>👑 Kampioen [game]</b> op je profiel.
             </li>
             <li>
-              Op je <b>Account</b> zie je je rankings per game en je <b>achievements</b>: Eerste zege,
+              Op je <b>account</b> (je rondje rechtsboven) zie je je rankings per game en je{" "}
+              <b>achievements</b>: Eerste zege,
               Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish, Seizoenskampioen en Kampioen.
             </li>
             <li>
-              Tik op een naam in een ranglijst om het profiel van die speler te zien, inclusief jullie{" "}
-              <b>onderlinge stand</b>: hoe vaak jij hoger eindigde dan hij, en per game.
+              Op het profiel van een ander zie je jullie <b>onderlinge stand</b>: hoe vaak jij hoger eindigde dan
+              hij, ook per game.
             </li>
             <li>Op je eigen account staat een overzicht van al je onderlinge standen.</li>
           </ul>
         </Section>
 
-        <Section id="tips" icon={Smartphone} color="bg-teal" title="8. Tips">
+        <Section id="tips" icon={Smartphone} color="bg-teal" title="9. Tips">
           <ul>
             <li>
               <b>Zet de app op je beginscherm.</b> Open de site in Safari, tik op de deelknop (vierkantje met
               pijltje omhoog), kies <i>Zet op beginscherm</i> en tik op <i>Voeg toe</i>. Je krijgt dan het
               Game Night-icoon en de app opent zonder Safari-balken. Log daarna één keer opnieuw in.
             </li>
-            <li>Je naam, kleur, bio en wachtwoord pas je aan onder <b>Account</b>.</li>
+            <li>
+              Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>.
+            </li>
+            <li>
+              Rechtsboven zit ook het <b>?</b>-knopje: dat brengt je altijd terug naar deze uitleg.
+            </li>
             <li>
               Laat de site een week niemand open, dan gaat hij even &quot;slapen&quot;. Roan kan hem met één
               klik weer wekken; er gaat niets verloren.
