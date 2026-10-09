@@ -57,8 +57,8 @@ begin
   get diagnostics cnt = row_count;
   rep := rep || case when cnt = 0 then 'OK' else 'FAIL' end || E' 6b C kan zichzelf niet bevestigen\n';
   insert into public.votes (night_id, user_id, game_id) values (n1, uc, g2);
-  insert into public.votes (night_id, user_id, game_id) values (n1, uc, g1)
-    on conflict (night_id, user_id) do update set game_id = excluded.game_id;
+  insert into public.votes (night_id, user_id, game_id) values (n1, uc, g1);
+  delete from public.votes where night_id = n1 and user_id = uc and game_id = g2;
   reset role;
 
   -- 7. A stemt
@@ -66,10 +66,20 @@ begin
   perform set_config('request.jwt.claim.sub', ua::text, true);
   set local role authenticated;
   insert into public.votes (night_id, user_id, game_id) values (n1, ua, g1);
+  insert into public.votes (night_id, user_id, game_id) values (n1, ua, g2);
+  select count(*) into cnt from public.votes where night_id = n1 and user_id = ua;
+  rep := rep || case when cnt = 2 then 'OK' else 'FAIL' end || E' 7 stemmen op meerdere games mag\n';
   begin
-    insert into public.votes (night_id, user_id, game_id) values (n1, ua, g2);
-    rep := rep || E'FAIL 7 dubbel stemmen toegestaan\n';
-  exception when others then rep := rep || E'OK 7 maar een stem per persoon\n';
+    insert into public.votes (night_id, user_id, game_id) values (n1, ua, g1);
+    rep := rep || E'FAIL 7a twee keer op dezelfde game toegestaan\n';
+  exception when others then rep := rep || E'OK 7a niet twee keer op dezelfde game\n';
+  end;
+  insert into public.game_nights (title, starts_at, host_id, created_by, vote_mode, game_ids)
+  values ('ZzVast', now() + interval '2 day', ua, ua, 'fixed', array[g1, g2]) returning id into m1;
+  begin
+    insert into public.votes (night_id, user_id, game_id) values (m1, ua, g1);
+    rep := rep || E'FAIL 7c stemmen bij vaste games toegestaan\n';
+  exception when others then rep := rep || E'OK 7c geen stemming bij vaste games\n';
   end;
   begin
     insert into public.matches (night_id, game_id) values (n1, g1);
@@ -78,7 +88,7 @@ begin
   end;
   reset role;
   select count(*) into cnt from public.votes where night_id = n1 and game_id = g1;
-  rep := rep || case when cnt = 2 then 'OK' else 'FAIL' end || E' 7b stemmen geteld (stem van C verplaatst)\n';
+  rep := rep || case when cnt = 2 then 'OK' else 'FAIL' end || E' 7b stemmen geteld (stem van C ingetrokken)\n';
 
   -- 9. Host B: bevestigen, A toevoegen, starten, potje 1 (hoogste wint)
   perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
@@ -106,7 +116,7 @@ begin
   perform set_config('request.jwt.claim.sub', uc::text, true);
   set local role authenticated;
   begin
-    update public.votes set game_id = g2 where night_id = n1 and user_id = uc;
+    delete from public.votes where night_id = n1 and user_id = uc;
     get diagnostics cnt = row_count;
     rep := rep || case when cnt = 0 then 'OK' else 'FAIL' end || E' 11 stemmen dicht zodra avond live is\n';
   exception when others then rep := rep || E'OK 11 stemmen dicht zodra avond live is\n';
