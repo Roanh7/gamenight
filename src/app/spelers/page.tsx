@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ChevronRight, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getProfiles, getResults } from "@/lib/data";
 import { currentSeason, filterSeason, seasonChampions, seasonLabel, standings } from "@/lib/stats";
 import { Avatar } from "@/components/Avatar";
-import { EmptyState, PageHeader, RankBadge } from "@/components/ui";
+import { EmptyState, PageHeader } from "@/components/ui";
+import { SOFT_BG, safeColor } from "@/lib/colors";
 
 export const metadata: Metadata = { title: "Players" };
 
@@ -29,50 +30,60 @@ export default async function PlayersPage() {
   return (
     <div>
       <PageHeader kicker="PLAYERS" title={`${players.length} spelers`} />
-      <p className="-mt-3 mb-4 text-sm font-bold text-muted">Gesorteerd op de stand van seizoen {seasonLabel(season)}.</p>
+      <p className="-mt-3 mb-4 text-sm font-bold text-muted">Tik op een speler voor zijn profiel. Volgorde: stand van seizoen {seasonLabel(season)}.</p>
 
       {players.length ? (
-        <ul className="grid grid-cols-1 gap-2.5 [&>li]:min-w-0">
-          {players.map((p) => {
-            const s = seasonRows.find((x) => x.user_id === p.id);
-            const a = allTime.find((x) => x.user_id === p.id);
-            const titles = titlesOf(p.id);
-            const isMe = p.id === me?.user.id;
-            return (
-              <li key={p.id}>
-                <Link
-                  href={isMe ? "/account" : `/spelers/${p.username}`}
-                  className={`card flex items-center gap-3 p-3 transition-transform active:translate-y-[2px] ${isMe ? "bg-yellow-soft" : ""}`}
-                >
-                  {s ? (
-                    <RankBadge rank={s.rank} />
-                  ) : (
-                    <span className="pixel flex h-8 w-8 shrink-0 items-center justify-center text-[11px] text-muted">–</span>
-                  )}
-                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="md" crown={s?.rank === 1} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-black">
-                      {p.username}
-                      {isMe && <span className="ml-1 text-xs font-bold text-muted">(jij)</span>}
-                      {titles > 0 && <span className="ml-1 text-xs">{"🏆".repeat(Math.min(titles, 3))}</span>}
-                    </p>
-                    <p className="truncate text-xs font-bold text-muted">
-                      {p.bio ? `${p.bio} · ` : ""}
-                      {a ? `${a.wins} ${a.wins === 1 ? "zege" : "zeges"} · ${a.played} gespeeld` : "Nog niet gespeeld"}
-                    </p>
-                  </div>
-                  {s && (
-                    <span className="text-right">
-                      <span className="pixel text-[12px]">{s.points}</span>
-                      <span className="ml-1 text-[10px] font-black text-muted">PT</span>
+        <section className="rounded-2xl border-2 border-line bg-ink px-3 pb-4 pt-3 shadow-[0_4px_0_var(--color-line)]">
+          <p className="pixel mb-3 text-center text-[11px] text-yellow">
+            CHOOSE YOUR PLAYER <span className="blink">▶</span>
+          </p>
+          <ul className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-3 [&>li]:min-w-0">
+            {players.map((p) => {
+              const s = seasonRows.find((x) => x.user_id === p.id);
+              const a = allTime.find((x) => x.user_id === p.id);
+              const titles = titlesOf(p.id);
+              const isMe = p.id === me?.user.id;
+              const color = safeColor(p.avatar_color);
+              return (
+                <li key={p.id} className="flex">
+                  <Link
+                    href={isMe ? "/account" : `/spelers/${p.username}`}
+                    className={`relative flex w-full flex-col items-center px-2 pb-2.5 pt-3 text-center transition-transform active:translate-y-[2px] ${SOFT_BG[color]} ${isMe ? "pixel-frame-me" : "pixel-frame"}`}
+                  >
+                    <span className="pixel absolute left-1.5 top-1.5 text-[9px] text-ink/70">
+                      {s ? `#${s.rank}` : "–"}
                     </span>
-                  )}
-                  <ChevronRight size={18} className="shrink-0" />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                    {isMe && (
+                      <span className="pixel absolute right-1 top-1 bg-red px-1 text-[8px] leading-[14px] text-white">1P</span>
+                    )}
+                    <span className={isMe || s?.rank === 1 ? "animate-bob" : ""}>
+                      <Avatar
+                        name={p.username}
+                        color={p.avatar_color}
+                        url={p.avatar_url}
+                        emoji={p.avatar_emoji}
+                        size="xl"
+                        crown={s?.rank === 1}
+                      />
+                    </span>
+                    <span className="pixel mt-2.5 block w-full truncate text-[10px] uppercase">{p.username}</span>
+                    {p.bio && <span className="mt-1 line-clamp-1 text-[11px] font-bold text-ink/70">{p.bio}</span>}
+                    <span className="mt-2 grid w-full grid-cols-2 gap-1 text-[10px] font-black">
+                      <span className="rounded bg-paper/80 px-1 py-0.5">
+                        <span className="pixel block text-[9px]">{s ? s.points : 0}</span>PT
+                      </span>
+                      <span className="rounded bg-paper/80 px-1 py-0.5">
+                        <span className="pixel block text-[9px]">{a ? a.wins : 0}</span>
+                        {a?.wins === 1 ? "ZEGE" : "ZEGES"}
+                      </span>
+                    </span>
+                    {titles > 0 && <span className="mt-1 text-xs">{"🏆".repeat(Math.min(titles, 3))}</span>}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ) : (
         <EmptyState icon={<Users size={32} />} title="Nog geen spelers" />
       )}

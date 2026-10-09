@@ -29,6 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="nl">
       <body className="min-h-dvh antialiased">
+        <div className="pixel-sky" aria-hidden />
         {me && (
           <header className="sticky top-0 z-30 border-b-2 border-line bg-cream/90 backdrop-blur">
             <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-4">
