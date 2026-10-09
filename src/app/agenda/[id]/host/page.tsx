@@ -8,19 +8,15 @@ import {
   addParticipant,
   confirmAll,
   confirmParticipant,
-  deleteNight,
   removeParticipant,
   setCohost,
   setNightStatus,
   startMatch,
   addGameToNight,
-  updateNight,
 } from "../../actions";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
 import { SubmitButton } from "@/components/SubmitButton";
-import { DateTimeField } from "@/components/DateTimeField";
-import { ProgramPicker } from "@/components/ProgramPicker";
 import { Flash } from "@/components/Flash";
 import { PageHeader, SectionTitle, StatusChip } from "@/components/ui";
 
@@ -320,90 +316,10 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
 
       {/* Avond bewerken */}
       <SectionTitle>Avond bewerken</SectionTitle>
-      <details className="card group overflow-hidden">
-        <summary className="cursor-pointer list-none px-4 py-3 font-black">
-          ✏️ Naam, datum, locatie of host wijzigen
-        </summary>
-        <form action={updateNight} className="space-y-4 border-t-2 border-line p-4">
-          <input type="hidden" name="night_id" value={id} />
-          <div>
-            <label className="label" htmlFor="title">
-              Naam
-            </label>
-            <input id="title" name="title" className="input" defaultValue={night.title} maxLength={80} required />
-          </div>
-          <div>
-            <label className="label" htmlFor="starts_at">
-              Datum & tijd
-            </label>
-            {night.date_poll ? (
-              <>
-                <input type="hidden" name="starts_at" value={night.starts_at} />
-                <p className="rounded-xl bg-cream px-3 py-2 text-sm font-bold">
-                  📅 Datumprikker loopt nog. Kies de datum op de{" "}
-                  <a href={`/agenda/${id}`} className="underline">
-                    avondpagina
-                  </a>
-                  .
-                </p>
-              </>
-            ) : (
-              <DateTimeField name="starts_at" defaultValue={night.starts_at} />
-            )}
-          </div>
-          <div>
-            <label className="label" htmlFor="location">
-              Locatie
-            </label>
-            <input id="location" name="location" className="input" defaultValue={night.location ?? ""} maxLength={120} />
-          </div>
-          <div>
-            <label className="label" htmlFor="host_id">
-              Host
-            </label>
-            <select id="host_id" name="host_id" className="input" defaultValue={night.host_id}>
-              {profiles.list.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.username}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-xs text-muted">Let op: geef je de host door, dan verlies je dit dashboard.</p>
-          </div>
-          <div>
-            <label className="label" htmlFor="cohost_id">
-              Co-host <span className="font-bold text-muted">(optioneel)</span>
-            </label>
-            <select id="cohost_id" name="cohost_id" className="input" defaultValue={night.cohost_id ?? ""}>
-              <option value="">Geen co-host</option>
-              {profiles.list.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.username}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-xs text-muted">De co-host kan alles wat de host kan: scores invoeren, potjes starten en afronden.</p>
-          </div>
-          <ProgramPicker games={games.list} defaultMode={night.vote_mode} defaultGames={night.game_ids ?? []} />
-          <div>
-            <label className="label" htmlFor="notes">
-              Notities
-            </label>
-            <textarea id="notes" name="notes" className="input" defaultValue={night.notes ?? ""} maxLength={1000} />
-          </div>
-          <SubmitButton pendingText="Opslaan…">Opslaan</SubmitButton>
-        </form>
-      </details>
-
-      <form action={deleteNight} className="mt-6">
-        <input type="hidden" name="night_id" value={id} />
-        <SubmitButton
-          className="btn btn-secondary btn-sm w-full text-red"
-          confirm="Deze avond en alle potjes ervan definitief verwijderen? De punten verdwijnen ook van de ranglijst."
-        >
-          Avond verwijderen
-        </SubmitButton>
-      </form>
+      <Link href={`/agenda/${id}/bewerken`} className="card flex items-center gap-3 px-4 py-3 font-black hover:bg-cream">
+        ✏️ <span className="flex-1">Naam, datum, locatie, host of games wijzigen</span>
+        <ChevronRight size={18} strokeWidth={3} />
+      </Link>
     </div>
   );
 }

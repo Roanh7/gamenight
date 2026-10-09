@@ -132,8 +132,13 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
               .join("\n")}
           />
         )}
+        {isPlanner && (night.status === "planned" || night.status === "live") && (
+          <Link href={`/agenda/${night.id}/bewerken`} className="btn btn-secondary btn-sm mt-3 w-full">
+            ✏️ Avond bewerken
+          </Link>
+        )}
         {isHost ? (
-          <Link href={`/agenda/${night.id}/host`} className="btn btn-yellow mt-4 w-full">
+          <Link href={`/agenda/${night.id}/host`} className="btn btn-yellow mt-3 w-full">
             🎮 {night.host_id === me.user.id ? "Host dashboard" : "Host dashboard (co-host)"}
           </Link>
         ) : (

@@ -83,10 +83,10 @@ export async function updateNight(formData: FormData) {
   const { supabase } = await requireUser();
   const id = str(formData, "night_id");
   const startsAt = str(formData, "starts_at");
-  const back = `/agenda/${id}/host`;
+  const back = `/agenda/${id}/bewerken`;
   if (!startsAt || Number.isNaN(Date.parse(startsAt))) fail(back, "Kies een datum en tijd.");
   const program = parseProgram(formData, back);
-  const { error } = await supabase
+  const { data: saved, error } = await supabase
     .from("game_nights")
     .update({
       title: str(formData, "title") || "Gamenight",
@@ -100,8 +100,9 @@ export async function updateNight(formData: FormData) {
       })(),
       ...(program.vote_mode === "vote" ? { vote_mode: "vote" } : program),
     })
-    .eq("id", id);
-  if (error) fail(back, "Wijzigen lukte niet.");
+    .eq("id", id)
+    .select("id");
+  if (error || !saved?.length) fail(back, "Wijzigen lukte niet.");
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}?ok=${encodeURIComponent("Avond bijgewerkt")}`);
 }
@@ -125,7 +126,7 @@ export async function deleteNight(formData: FormData) {
   const { supabase } = await requireUser();
   const id = str(formData, "night_id");
   const { error } = await supabase.from("game_nights").delete().eq("id", id);
-  if (error) fail(`/agenda/${id}/host`, "Verwijderen lukte niet.");
+  if (error) fail(`/agenda/${id}/bewerken`, "Verwijderen lukte niet.");
   revalidatePath("/", "layout");
   redirect("/agenda");
 }

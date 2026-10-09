@@ -117,6 +117,11 @@ export default async function UitlegPage() {
             </li>
             <li>Kun je toch niet? Tik op <b>Afmelden</b>.</li>
             <li>
+              <b>Iets veranderen?</b> De host, co-host en wie de avond gepland heeft zien op de avond de knop{" "}
+              <b>✏️ Avond bewerken</b>. Daar pas je de naam, datum, tijd, locatie, host, co-host, games en notities
+              aan. Alles wat er al was (aanmeldingen, stemmen, potjes) blijft gewoon staan.
+            </li>
+            <li>
               Met <b>Deel avond</b> stuur je de avond direct door in de groepsapp, en met{" "}
               <b>Zet in agenda</b> komt hij in je iPhone-agenda, met een herinnering 2 uur van tevoren.
             </li>
