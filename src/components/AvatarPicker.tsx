@@ -6,7 +6,37 @@ import { RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "./Avatar";
 
-const EMOJIS = ["👾", "🎮", "🕹️", "👑", "🔥", "😎", "🤖", "👻", "🐸", "🦊", "🐼", "🦁", "🐙", "🦄", "🍕", "🌮", "⚡", "💎", "🎯", "🃏", "🎲", "🏆", "🚀", "💀"];
+/** Emoji's per categorie (allemaal standaard iPhone-emoji's). */
+const GROUPS: { label: string; emojis: string[] }[] = [
+  {
+    label: "🎮 Gaming",
+    emojis: ["👾", "🎮", "🕹️", "🎲", "🃏", "♟️", "🎯", "🏆", "🥇", "👑", "💎", "⭐", "🌟", "🍄", "🪙", "💣", "🛡️", "⚔️", "🗡️", "🏹", "🧩", "🎰", "🚀", "🛸"],
+  },
+  {
+    label: "😎 Koppies",
+    emojis: ["😎", "🤓", "🥸", "🤠", "🥳", "😈", "👿", "🤡", "👻", "💀", "☠️", "👽", "🤖", "🎃", "😤", "🤯", "🥶", "🥵", "😏", "🫡", "🤫", "🧐", "😴", "🤑", "🙃", "😵‍💫", "🫠", "🤪", "😇", "🫥"],
+  },
+  {
+    label: "🦸 Figuren",
+    emojis: ["🥷", "🧙", "🧛", "🧟", "🧞", "🧜", "🧚", "🦸", "🦹", "🤴", "👸", "🕵️", "👨‍🚀", "👨‍🍳", "👨‍🎤", "🧑‍💻", "💂", "🎅", "🤺", "🏄", "🏂", "🧗", "🏋️", "⛹️"],
+  },
+  {
+    label: "🦊 Dieren",
+    emojis: ["🐸", "🦊", "🐼", "🦁", "🐯", "🐻", "🐨", "🐵", "🙈", "🐶", "🐱", "🐭", "🐰", "🐷", "🐮", "🐔", "🐧", "🦉", "🦅", "🦆", "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🦋", "🐌", "🐢", "🐍", "🦖", "🦕", "🐙", "🦑", "🦀", "🐠", "🐬", "🐳", "🦈", "🐊", "🦍", "🦥", "🦦", "🦩", "🐉", "🐲"],
+  },
+  {
+    label: "🍕 Eten",
+    emojis: ["🍕", "🌮", "🌯", "🍔", "🍟", "🌭", "🍗", "🥩", "🍣", "🍜", "🍝", "🥨", "🧀", "🥑", "🌶️", "🍉", "🍓", "🍌", "🍍", "🥥", "🍩", "🍪", "🎂", "🍦", "🍿", "🧃", "☕", "🧋", "🍺", "🥤"],
+  },
+  {
+    label: "⚽ Sport",
+    emojis: ["⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏓", "🏸", "🥊", "🥋", "⛳", "🎳", "🏒", "🛹", "🏎️", "🏁", "🚴", "🏊", "⛷️", "🎿"],
+  },
+  {
+    label: "🔥 Overig",
+    emojis: ["🔥", "⚡", "💥", "✨", "🌈", "☄️", "🌙", "☀️", "🌊", "❄️", "🌵", "🌴", "🍀", "🌻", "🌹", "💯", "❤️‍🔥", "💜", "🖤", "🎸", "🎧", "🎤", "📸", "🧠", "👀", "💪", "🤘", "✌️", "🫶", "🪩", "🧸", "🎈", "🧨", "🗿", "🏴‍☠️", "🚨"],
+  },
+];
 
 /** Kies een emoji als avatar, of gewoon je letter. */
 export function AvatarPicker({
@@ -22,6 +52,7 @@ export function AvatarPicker({
 }) {
   const router = useRouter();
   const [current, setCurrent] = useState(emoji);
+  const [tab, setTab] = useState(() => Math.max(0, GROUPS.findIndex((g) => emoji && g.emojis.includes(emoji))));
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -53,15 +84,31 @@ export function AvatarPicker({
           </button>
         )}
       </div>
+
       <p className="mb-1.5 mt-3 text-xs font-bold text-muted">Kies een emoji:</p>
-      <div className="grid grid-cols-8 gap-1.5">
-        {EMOJIS.map((em) => (
+      <div className="-mx-1 mb-2 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist">
+        {GROUPS.map((g, i) => (
+          <button
+            key={g.label}
+            type="button"
+            role="tab"
+            aria-selected={tab === i}
+            onClick={() => setTab(i)}
+            className={`chip shrink-0 px-3 py-1 text-xs ${tab === i ? "bg-ink text-white" : "bg-paper"}`}
+          >
+            {g.label}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-8 gap-1.5" role="tabpanel">
+        {GROUPS[tab].emojis.map((em) => (
           <button
             key={em}
             type="button"
             disabled={pending}
             onClick={() => save(em)}
             aria-pressed={current === em}
+            aria-label={`Kies ${em}`}
             className={`flex aspect-square items-center justify-center rounded-lg border-2 text-xl ${
               current === em ? "border-line bg-yellow" : "border-transparent bg-cream hover:border-line"
             }`}
