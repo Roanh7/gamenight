@@ -253,3 +253,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-bob { animation: none; }
 }
+
+/* Achtergrond van het keuzescherm: diepblauw met pixelraster */
+.select-screen {
+  background-color: #2a3a8f;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 2px, transparent 2px);
+  background-size: 16px 16px;
+}

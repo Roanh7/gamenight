@@ -33,7 +33,7 @@ export default async function PlayersPage() {
       <p className="-mt-3 mb-4 text-sm font-bold text-muted">Tik op een speler voor zijn profiel. Volgorde: stand van seizoen {seasonLabel(season)}.</p>
 
       {players.length ? (
-        <section className="rounded-2xl border-2 border-line bg-ink px-3 pb-4 pt-3 shadow-[0_4px_0_var(--color-line)]">
+        <section className="select-screen rounded-2xl border-2 border-line px-3 pb-4 pt-3 shadow-[0_4px_0_var(--color-line)]">
           <p className="pixel mb-3 text-center text-[11px] text-yellow">
             CHOOSE YOUR PLAYER <span className="blink">▶</span>
           </p>
