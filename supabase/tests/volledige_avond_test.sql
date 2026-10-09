@@ -336,6 +336,102 @@ begin
   select is_draw::text || '/' || (select count(*) from public.match_results where match_id = m1 and is_winner) into t from public.matches where id = m1;
   rep := rep || case when t = 'true/0' then 'OK' else 'FAIL' end || ' 25e teams gelijk = geen winnaar (' || t || E')\n';
 
+  -- 26. Co-host en host overnemen
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  update public.game_nights set cohost_id = uc where id = n1;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', uc, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', uc::text, true);
+  set local role authenticated;
+  insert into public.matches (night_id, game_id) values (n1, g1) returning id into m1;
+  insert into public.match_players (match_id, user_id) values (m1, ua), (m1, uc);
+  insert into public.score_entries (match_id, user_id, round, points) values (m1, ua, 1, 1), (m1, uc, 1, 9);
+  perform public.finalize_match(m1);
+  reset role;
+  select status into t from public.matches where id = m1;
+  rep := rep || case when t = 'finished' then 'OK' else 'FAIL' end || E' 26 co-host kan potje starten en afronden\n';
+
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ua::text, true);
+  set local role authenticated;
+  perform public.take_over_host(n1);
+  reset role;
+  select (host_id = ua)::text || '/' || (cohost_id = uc)::text into t from public.game_nights where id = n1;
+  rep := rep || case when t = 'true/true' then 'OK' else 'FAIL' end || ' 26b host overgenomen, co-host blijft (' || t || E')\n';
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  begin
+    insert into public.matches (night_id, game_id) values (n1, g1);
+    rep := rep || E'FAIL 26c oude host (geen co-host meer) kon nog potje starten\n';
+  exception when others then rep := rep || E'OK 26c oude host zonder rol heeft geen hostrechten meer\n';
+  end;
+  reset role;
+
+  -- 27. Avond afsluiten met recap
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ua::text, true);
+  set local role authenticated;
+  perform public.finish_night(n1);
+  perform public.finish_night(n1);
+  reset role;
+  select count(*) into cnt from public.activity where night_id = n1 and type = 'night_recap';
+  rep := rep || case when cnt = 1 then 'OK' else 'FAIL' end || E' 27 precies een recap in het nieuws\n';
+  select (payload ->> 'matches') || ' potjes, ' || jsonb_array_length(payload -> 'stats') || ' spelers, mvp=' ||
+         coalesce((select username from public.profiles where id = (payload ->> 'mvp')::uuid), 'geen')
+    into t from public.activity where night_id = n1 and type = 'night_recap';
+  rep := rep || case when t like '% potjes, 3 spelers, mvp=%' then 'OK' else 'FAIL' end || ' 27b recap: ' || t || E'\n';
+
+  -- 28. Reacties
+  select id into cnt from public.activity where night_id = n1 and type = 'night_recap';
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  insert into public.reactions (activity_id, user_id, emoji) values (cnt, ub, '🔥'), (cnt, ub, '😂');
+  begin
+    insert into public.reactions (activity_id, user_id, emoji) values (cnt, ua, '🔥');
+    rep := rep || E'FAIL 28 reactie namens ander toegestaan\n';
+  exception when others then rep := rep || E'OK 28 geen reacties namens anderen\n';
+  end;
+  delete from public.reactions where activity_id = cnt and emoji = '😂';
+  reset role;
+  select string_agg(emoji, '') into t from public.reactions where activity_id = cnt;
+  rep := rep || case when t = '🔥' then 'OK' else 'FAIL' end || ' 28b reactie toevoegen en weghalen (' || coalesce(t, '-') || E')\n';
+
+  -- 29. Datumprikker
+  perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ub::text, true);
+  set local role authenticated;
+  insert into public.game_nights (title, starts_at, host_id, created_by, date_poll)
+  values ('ZzPrik', now() + interval '3 day', ub, ub, true) returning id into n1;
+  insert into public.date_options (night_id, starts_at) values (n1, now() + interval '3 day'), (n1, now() + interval '4 day');
+  reset role;
+  select id into m1 from public.date_options where night_id = n1 order by starts_at limit 1;
+  perform set_config('request.jwt.claims', json_build_object('sub', uc, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', uc::text, true);
+  set local role authenticated;
+  insert into public.date_votes (option_id, user_id) values (m1, uc);
+  begin
+    insert into public.date_options (night_id, starts_at) values (n1, now() + interval '9 day');
+    rep := rep || E'FAIL 29 iedereen kon datumoptie toevoegen\n';
+  exception when others then rep := rep || E'OK 29 alleen planner voegt datums toe\n';
+  end;
+  reset role;
+  select count(*) into cnt from public.date_votes where option_id = m1;
+  rep := rep || case when cnt = 1 then 'OK' else 'FAIL' end || E' 29b beschikbaarheid doorgeven werkt\n';
+  update public.game_nights set date_poll = false where id = n1;
+  perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claim.sub', ua::text, true);
+  set local role authenticated;
+  begin
+    insert into public.date_votes (option_id, user_id) values (m1, ua);
+    rep := rep || E'FAIL 29c stemmen na vastzetten datum toegestaan\n';
+  exception when others then rep := rep || E'OK 29c datum vast = prikker dicht\n';
+  end;
+  reset role;
+
   -- 22. Niet ingelogd
   set local role anon;
   begin
