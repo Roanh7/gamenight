@@ -36,7 +36,7 @@ function Section({
     <section id={id} className="card scroll-mt-20 p-5">
       <div className="mb-3 flex items-center gap-3">
         <span
-          className={`${color} ${color === "bg-yellow" ? "text-ink" : "text-white"} flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-line`}
+          className={`${color} ${color === "bg-yellow" ? "text-night" : "text-white"} flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-line`}
         >
           <Icon size={20} strokeWidth={2.5} />
         </span>

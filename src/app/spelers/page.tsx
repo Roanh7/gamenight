@@ -7,13 +7,19 @@ import { currentSeason, filterSeason, seasonChampions, seasonLabel, standings } 
 import { Avatar } from "@/components/Avatar";
 import { EmptyState, PageHeader } from "@/components/ui";
 import { SOFT_BG, safeColor } from "@/lib/colors";
+import { computeXp, getAttendance } from "@/lib/xp";
 
 export const metadata: Metadata = { title: "Players" };
 
 export default async function PlayersPage() {
   const me = await getMe();
   const supabase = await createClient();
-  const [profiles, results] = await Promise.all([getProfiles(supabase), getResults(supabase)]);
+  const [profiles, results, attendance] = await Promise.all([
+    getProfiles(supabase),
+    getResults(supabase),
+    getAttendance(supabase),
+  ]);
+  const xpOf = computeXp(results, attendance);
 
   const season = currentSeason();
   const seasonRows = standings(filterSeason(results, season));
@@ -67,6 +73,9 @@ export default async function PlayersPage() {
                       />
                     </span>
                     <span className="pixel mt-2.5 block w-full truncate text-[10px] uppercase">{p.username}</span>
+                    <span className="pixel mt-1 text-[8px] text-ink/70">
+                      LV {xpOf(p.id).level} · {xpOf(p.id).title.toUpperCase()}
+                    </span>
                     {p.bio && <span className="mt-1 line-clamp-1 text-[11px] font-bold text-ink/70">{p.bio}</span>}
                     <span className="mt-2 grid w-full grid-cols-2 gap-1 text-[10px] font-black">
                       <span className="rounded bg-paper/80 px-1 py-0.5">

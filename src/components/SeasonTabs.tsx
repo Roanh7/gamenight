@@ -21,7 +21,7 @@ export function SeasonTabs({
           href={key === now ? basePath : `${basePath}?seizoen=${key}`}
           scroll={false}
           aria-current={active === key ? "page" : undefined}
-          className={`chip shrink-0 px-3 py-1.5 text-sm ${active === key ? "bg-ink text-white" : "bg-paper"}`}
+          className={`chip shrink-0 px-3 py-1.5 text-sm ${active === key ? "bg-night text-white" : "bg-paper"}`}
         >
           {label}
         </Link>

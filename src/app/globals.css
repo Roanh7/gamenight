@@ -7,6 +7,8 @@
   --color-muted: #6e6879;
   --color-line: #1e1b2b;
   --color-soft: #ebe4d6;
+  --color-night: #1e1b2b; /* altijd donker: tekst op geel, donkere vlakken */
+  --color-field: #ffffff;
 
   --color-red: #e4002b;
   --color-red-soft: #ffe1e6;
@@ -100,7 +102,7 @@ body {
   }
   .btn-yellow {
     background: var(--color-yellow);
-    color: var(--color-ink);
+    color: var(--color-night);
   }
   .btn-sm {
     min-height: 36px;
@@ -118,7 +120,8 @@ body {
     width: 100%;
     min-height: 46px;
     padding: 0.6rem 0.85rem;
-    background: white;
+    background: var(--color-field);
+    color: var(--color-ink);
     border: 2px solid var(--color-line);
     border-radius: 12px;
     font-size: 16px; /* voorkomt inzoomen op iPhone */
@@ -261,4 +264,73 @@ body {
     linear-gradient(rgba(255, 255, 255, 0.06) 2px, transparent 2px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.06) 2px, transparent 2px);
   background-size: 16px 16px;
+}
+
+/* ---------- Nachtmodus ----------
+   Volgt de iPhone (licht/donker), tenzij je op je account zelf iets kiest. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-cream: #16141f;
+  --color-paper: #24212f;
+  --color-soft: #34304a;
+  --color-ink: #f3eee3;
+  --color-muted: #aaa3b9;
+  --color-line: #050409;
+  --color-field: #2c2939;
+  --color-red-soft: #4a1a26;
+  --color-blue-soft: #1d2a55;
+  --color-green-soft: #173d26;
+  --color-yellow-soft: #43380f;
+  --color-purple-soft: #2f2452;
+  --color-orange-soft: #4a2a12;
+  --color-pink-soft: #4a1d36;
+  --color-teal-soft: #123f3e;
+}
+:root[data-theme="dark"] {
+  .pixel-sky::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 100 75' shape-rendering='crispEdges'%3E%3Crect x='20' y='10' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='11' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='18' y='12' width='2' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='12' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='21' y='12' width='2' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='13' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='14' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='63' y='26' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='62' y='27' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='63' y='27' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='64' y='27' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='63' y='28' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='85' y='62' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='84' y='63' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='85' y='63' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='86' y='63' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='85' y='64' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='31' y='58' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='30' y='59' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='31' y='59' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='32' y='59' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='31' y='60' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='30' y='6' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='80' y='20' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='12' y='44' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='55' y='60' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='90' y='52' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='70' y='8' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='40' y='30' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='4' y='20' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3C/svg%3E");
+    opacity: 0.8;
+    animation-duration: 240s;
+  }
+  .pixel-sky::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='55' viewBox='0 0 56 11' shape-rendering='crispEdges'%3E%3Crect x='10' y='0' width='4' height='1' fill='%232f5a3d'/%3E%3Crect x='8' y='1' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='10' y='1' width='5' height='1' fill='%231c3326'/%3E%3Crect x='15' y='1' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='38' y='1' width='4' height='1' fill='%232f5a3d'/%3E%3Crect x='6' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='8' y='2' width='9' height='1' fill='%231c3326'/%3E%3Crect x='17' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='35' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='37' y='2' width='5' height='1' fill='%231c3326'/%3E%3Crect x='42' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='4' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='6' y='3' width='5' height='1' fill='%231c3326'/%3E%3Crect x='11' y='3' width='1' height='1' fill='%2324402f'/%3E%3Crect x='12' y='3' width='7' height='1' fill='%231c3326'/%3E%3Crect x='19' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='33' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='35' y='3' width='10' height='1' fill='%231c3326'/%3E%3Crect x='45' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='4' y='4' width='13' height='1' fill='%231c3326'/%3E%3Crect x='17' y='4' width='1' height='1' fill='%2324402f'/%3E%3Crect x='18' y='4' width='3' height='1' fill='%231c3326'/%3E%3Crect x='21' y='4' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='31' y='4' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='33' y='4' width='3' height='1' fill='%231c3326'/%3E%3Crect x='36' y='4' width='1' height='1' fill='%2324402f'/%3E%3Crect x='37' y='4' width='11' height='1' fill='%231c3326'/%3E%3Crect x='48' y='4' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='3' y='5' width='4' height='1' fill='%231c3326'/%3E%3Crect x='7' y='5' width='1' height='1' fill='%2324402f'/%3E%3Crect x='8' y='5' width='13' height='1' fill='%231c3326'/%3E%3Crect x='21' y='5' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='29' y='5' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='31' y='5' width='14' height='1' fill='%231c3326'/%3E%3Crect x='45' y='5' width='1' height='1' fill='%2324402f'/%3E%3Crect x='46' y='5' width='5' height='1' fill='%231c3326'/%3E%3Crect x='51' y='5' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='1' y='6' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='2' y='6' width='21' height='1' fill='%231c3326'/%3E%3Crect x='23' y='6' width='6' height='1' fill='%232f5a3d'/%3E%3Crect x='29' y='6' width='25' height='1' fill='%231c3326'/%3E%3Crect x='54' y='6' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='0' y='7' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='1' y='7' width='10' height='1' fill='%231c3326'/%3E%3Crect x='11' y='7' width='1' height='1' fill='%2324402f'/%3E%3Crect x='12' y='7' width='23' height='1' fill='%231c3326'/%3E%3Crect x='35' y='7' width='1' height='1' fill='%2324402f'/%3E%3Crect x='36' y='7' width='19' height='1' fill='%231c3326'/%3E%3Crect x='55' y='7' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='0' y='8' width='56' height='1' fill='%231c3326'/%3E%3Crect x='0' y='9' width='5' height='1' fill='%231c3326'/%3E%3Crect x='5' y='9' width='1' height='1' fill='%2324402f'/%3E%3Crect x='6' y='9' width='20' height='1' fill='%231c3326'/%3E%3Crect x='26' y='9' width='1' height='1' fill='%2324402f'/%3E%3Crect x='27' y='9' width='19' height='1' fill='%231c3326'/%3E%3Crect x='46' y='9' width='1' height='1' fill='%2324402f'/%3E%3Crect x='47' y='9' width='9' height='1' fill='%231c3326'/%3E%3Crect x='0' y='10' width='56' height='1' fill='%231c3326'/%3E%3C/svg%3E");
+  }
+  /* Op felle vlakken blijft de tekst donker */
+  .bg-yellow, .bg-\[\#d9dde6\], .bg-\[\#f0b98a\] {
+    color: var(--color-night);
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-cream: #16141f;
+    --color-paper: #24212f;
+    --color-soft: #34304a;
+    --color-ink: #f3eee3;
+    --color-muted: #aaa3b9;
+    --color-line: #050409;
+    --color-field: #2c2939;
+    --color-red-soft: #4a1a26;
+    --color-blue-soft: #1d2a55;
+    --color-green-soft: #173d26;
+    --color-yellow-soft: #43380f;
+    --color-purple-soft: #2f2452;
+    --color-orange-soft: #4a2a12;
+    --color-pink-soft: #4a1d36;
+    --color-teal-soft: #123f3e;
+  }
+  :root:not([data-theme="light"]) {
+    .pixel-sky::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 100 75' shape-rendering='crispEdges'%3E%3Crect x='20' y='10' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='11' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='18' y='12' width='2' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='12' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='21' y='12' width='2' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='13' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='20' y='14' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='63' y='26' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='62' y='27' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='63' y='27' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='64' y='27' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='63' y='28' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='85' y='62' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='84' y='63' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='85' y='63' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='86' y='63' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='85' y='64' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='31' y='58' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='30' y='59' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='31' y='59' width='1' height='1' fill='%23fff6d6'/%3E%3Crect x='32' y='59' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='31' y='60' width='1' height='1' fill='%23ffe9a8'/%3E%3Crect x='30' y='6' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='80' y='20' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='12' y='44' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='55' y='60' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='90' y='52' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='70' y='8' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='40' y='30' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3Crect x='4' y='20' width='1' height='1' fill='%23cfc6e8' opacity='0.7'/%3E%3C/svg%3E");
+      opacity: 0.8;
+      animation-duration: 240s;
+    }
+    .pixel-sky::after {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='55' viewBox='0 0 56 11' shape-rendering='crispEdges'%3E%3Crect x='10' y='0' width='4' height='1' fill='%232f5a3d'/%3E%3Crect x='8' y='1' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='10' y='1' width='5' height='1' fill='%231c3326'/%3E%3Crect x='15' y='1' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='38' y='1' width='4' height='1' fill='%232f5a3d'/%3E%3Crect x='6' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='8' y='2' width='9' height='1' fill='%231c3326'/%3E%3Crect x='17' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='35' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='37' y='2' width='5' height='1' fill='%231c3326'/%3E%3Crect x='42' y='2' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='4' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='6' y='3' width='5' height='1' fill='%231c3326'/%3E%3Crect x='11' y='3' width='1' height='1' fill='%2324402f'/%3E%3Crect x='12' y='3' width='7' height='1' fill='%231c3326'/%3E%3Crect x='19' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='33' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='35' y='3' width='10' height='1' fill='%231c3326'/%3E%3Crect x='45' y='3' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='4' y='4' width='13' height='1' fill='%231c3326'/%3E%3Crect x='17' y='4' width='1' height='1' fill='%2324402f'/%3E%3Crect x='18' y='4' width='3' height='1' fill='%231c3326'/%3E%3Crect x='21' y='4' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='31' y='4' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='33' y='4' width='3' height='1' fill='%231c3326'/%3E%3Crect x='36' y='4' width='1' height='1' fill='%2324402f'/%3E%3Crect x='37' y='4' width='11' height='1' fill='%231c3326'/%3E%3Crect x='48' y='4' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='3' y='5' width='4' height='1' fill='%231c3326'/%3E%3Crect x='7' y='5' width='1' height='1' fill='%2324402f'/%3E%3Crect x='8' y='5' width='13' height='1' fill='%231c3326'/%3E%3Crect x='21' y='5' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='29' y='5' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='31' y='5' width='14' height='1' fill='%231c3326'/%3E%3Crect x='45' y='5' width='1' height='1' fill='%2324402f'/%3E%3Crect x='46' y='5' width='5' height='1' fill='%231c3326'/%3E%3Crect x='51' y='5' width='2' height='1' fill='%232f5a3d'/%3E%3Crect x='1' y='6' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='2' y='6' width='21' height='1' fill='%231c3326'/%3E%3Crect x='23' y='6' width='6' height='1' fill='%232f5a3d'/%3E%3Crect x='29' y='6' width='25' height='1' fill='%231c3326'/%3E%3Crect x='54' y='6' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='0' y='7' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='1' y='7' width='10' height='1' fill='%231c3326'/%3E%3Crect x='11' y='7' width='1' height='1' fill='%2324402f'/%3E%3Crect x='12' y='7' width='23' height='1' fill='%231c3326'/%3E%3Crect x='35' y='7' width='1' height='1' fill='%2324402f'/%3E%3Crect x='36' y='7' width='19' height='1' fill='%231c3326'/%3E%3Crect x='55' y='7' width='1' height='1' fill='%232f5a3d'/%3E%3Crect x='0' y='8' width='56' height='1' fill='%231c3326'/%3E%3Crect x='0' y='9' width='5' height='1' fill='%231c3326'/%3E%3Crect x='5' y='9' width='1' height='1' fill='%2324402f'/%3E%3Crect x='6' y='9' width='20' height='1' fill='%231c3326'/%3E%3Crect x='26' y='9' width='1' height='1' fill='%2324402f'/%3E%3Crect x='27' y='9' width='19' height='1' fill='%231c3326'/%3E%3Crect x='46' y='9' width='1' height='1' fill='%2324402f'/%3E%3Crect x='47' y='9' width='9' height='1' fill='%231c3326'/%3E%3Crect x='0' y='10' width='56' height='1' fill='%231c3326'/%3E%3C/svg%3E");
+    }
+    /* Op felle vlakken blijft de tekst donker */
+    .bg-yellow, .bg-\[\#d9dde6\], .bg-\[\#f0b98a\] {
+      color: var(--color-night);
+    }
+  }
 }

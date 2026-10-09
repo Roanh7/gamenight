@@ -11,7 +11,7 @@ import { Avatar } from "@/components/Avatar";
 type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
 type Entry = { team: string; round: number; points: number };
 
-const TEAM_COLORS = ["bg-red text-white", "bg-blue text-white", "bg-green text-white", "bg-yellow text-ink", "bg-purple text-white", "bg-orange text-white"];
+const TEAM_COLORS = ["bg-red text-white", "bg-blue text-white", "bg-green text-white", "bg-yellow text-night", "bg-purple text-white", "bg-orange text-white"];
 
 export function TeamScoreBoard({
   matchId,
@@ -212,7 +212,7 @@ export function TeamScoreBoard({
     <div>
       {/* Live stand per team */}
       <section className="card overflow-hidden">
-        <div className="flex items-center justify-between border-b-2 border-line bg-ink px-4 py-2 text-white">
+        <div className="flex items-center justify-between border-b-2 border-line bg-night px-4 py-2 text-white">
           <span className="pixel text-[10px]">LIVE STAND</span>
           <span className="text-xs font-bold opacity-80">
             {saving === "saving" && "Opslaan…"}

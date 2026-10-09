@@ -94,7 +94,7 @@ export function AvatarPicker({
             role="tab"
             aria-selected={tab === i}
             onClick={() => setTab(i)}
-            className={`chip shrink-0 px-3 py-1 text-xs ${tab === i ? "bg-ink text-white" : "bg-paper"}`}
+            className={`chip shrink-0 px-3 py-1 text-xs ${tab === i ? "bg-night text-white" : "bg-paper"}`}
           >
             {g.label}
           </button>

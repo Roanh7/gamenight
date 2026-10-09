@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getGames, getLeaderboards, getOverall, getProfiles, getResults } from "@/lib/data";
 import { allHeadToHeads, headToHead, seasonChampions, seasonLabel, type HeadToHead } from "@/lib/stats";
 import { computeAchievements } from "@/lib/achievements";
+import { computeXp, getAttendance } from "@/lib/xp";
+import { XpBar } from "./XpBar";
 import type { Game, Profile } from "@/lib/types";
 import { Avatar } from "./Avatar";
 import { GameIcon } from "./GameIcon";
@@ -21,7 +23,7 @@ export async function PlayerProfile({
   viewerId?: string;
 }) {
   const supabase = await createClient();
-  const [games, boards, overall, allResults, profiles, { count: hosted }] = await Promise.all([
+  const [games, boards, overall, allResults, profiles, { count: hosted }, attendance] = await Promise.all([
     getGames(supabase),
     getLeaderboards(supabase),
     getOverall(supabase),
@@ -32,7 +34,9 @@ export async function PlayerProfile({
       .select("id", { count: "exact", head: true })
       .eq("host_id", profile.id)
       .eq("status", "finished"),
+    getAttendance(supabase),
   ]);
+  const xp = computeXp(allResults, attendance)(profile.id);
   const results = allResults.filter((r) => r.user_id === profile.id);
   const seasonTitles = [...seasonChampions(allResults).entries()]
     .filter(([, u]) => u === profile.id)
@@ -67,6 +71,9 @@ export async function PlayerProfile({
           <h1 className="mt-2 text-2xl font-black">{profile.username}</h1>
           {profile.bio && <p className="mt-0.5 text-sm">{profile.bio}</p>}
           <p className="mt-1 text-xs font-bold text-muted">Speler sinds {since}</p>
+          <div className="mt-3">
+            <XpBar info={xp} />
+          </div>
           {titles.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {titles.map((t) => (
@@ -197,7 +204,7 @@ function VersusCard({ h, games }: { h: HeadToHead; games: Map<string, Game> }) {
     h.wins > h.losses ? "Jij hebt de overhand 😎" : h.wins < h.losses ? "Je staat achter… revanche? 😤" : "Helemaal gelijk! 🤝";
   return (
     <div className="card overflow-hidden">
-      <div className="grid grid-cols-3 items-center bg-ink px-4 py-4 text-center text-white">
+      <div className="grid grid-cols-3 items-center bg-night px-4 py-4 text-center text-white">
         <div>
           <p className="pixel text-2xl text-yellow">{h.wins}</p>
           <p className="mt-1 text-[11px] font-black uppercase opacity-80">Gewonnen</p>

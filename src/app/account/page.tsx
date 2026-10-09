@@ -9,6 +9,7 @@ import { PlayerProfile } from "@/components/PlayerProfile";
 import { ColorPicker } from "@/components/ColorPicker";
 import { AvatarPicker } from "@/components/AvatarPicker";
 import { SoundToggle } from "@/components/Celebrate";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
 import { SectionTitle } from "@/components/ui";
@@ -80,6 +81,12 @@ export default async function AccountPage(props: PageProps<"/account">) {
           <SubmitButton pendingText="Wijzigen…">Wijzig wachtwoord</SubmitButton>
         </form>
       </details>
+
+      <div className="card mt-3 px-4 py-3">
+        <p className="mb-2 font-black">🌙 Weergave</p>
+        <ThemeToggle />
+        <p className="mt-2 text-xs text-muted">Auto volgt je iPhone: is die donker, dan krijg je de nachtmodus.</p>
+      </div>
 
       <div className="card mt-3 flex items-center justify-between gap-3 px-4 py-3">
         <span className="font-black">🔊 Geluidjes bij winst</span>

@@ -6,6 +6,7 @@ import { currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
+import { computeXp, getAttendance } from "@/lib/xp";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
@@ -72,7 +73,7 @@ function Landing() {
           {steps.map((s, i) => (
             <li key={s.title} className="card flex items-center gap-4 p-4">
               <span
-                className={`${s.color} ${s.color === "bg-yellow" ? "text-ink" : "text-white"} flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-line`}
+                className={`${s.color} ${s.color === "bg-yellow" ? "text-night" : "text-white"} flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-line`}
               >
                 <s.icon size={24} strokeWidth={2.5} />
               </span>
@@ -121,7 +122,7 @@ async function Dashboard({
   const supabase = await createClient();
   const since = hoursAgoIso(12);
 
-  const [profiles, games, results, activity, nightsRes, lastMatchesRes] = await Promise.all([
+  const [profiles, games, results, activity, nightsRes, lastMatchesRes, attendance] = await Promise.all([
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
@@ -138,7 +139,9 @@ async function Dashboard({
       .eq("status", "finished")
       .order("finished_at", { ascending: false })
       .limit(3),
+    getAttendance(supabase),
   ]);
+  const myXp = computeXp(results, attendance)(userId);
 
   const upcoming = (nightsRes.data ?? []) as GameNight[];
   const next = upcoming.find((n) => n.status === "live") ?? upcoming[0];
@@ -190,6 +193,9 @@ async function Dashboard({
           {welcome ? `Welkom, ${username}!` : `Hoi ${username}!`}
         </h1>
         <div className="relative mt-3 flex flex-wrap gap-2">
+          <Link href="/uitleg#xp" className="chip pixel bg-yellow text-[9px] text-night">
+            LV {myXp.level} · {myXp.xp} XP
+          </Link>
           <span className="chip bg-paper text-ink">
             🏆 {myOverall ? `#${myOverall.rank} in ${seasonLabel(season)}` : `Nog geen ranking in ${seasonLabel(season)}`}
           </span>

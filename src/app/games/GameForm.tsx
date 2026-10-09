@@ -61,7 +61,7 @@ export function GameForm({
                 aria-label={label}
                 aria-pressed={icon === key}
                 className={`flex aspect-square items-center justify-center rounded-xl border-2 border-line ${
-                  icon === key ? "bg-ink text-white" : "bg-paper"
+                  icon === key ? "bg-night text-white" : "bg-paper"
                 }`}
               >
                 <Icon size={20} strokeWidth={2.5} />

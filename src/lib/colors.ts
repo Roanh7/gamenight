@@ -27,7 +27,7 @@ export const TEXT_ON: Record<Color, string> = {
   red: "text-white",
   blue: "text-white",
   green: "text-white",
-  yellow: "text-ink",
+  yellow: "text-night",
   purple: "text-white",
   orange: "text-white",
   pink: "text-white",

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import "@fontsource-variable/nunito";
 import "@fontsource/press-start-2p/400.css";
 import "./globals.css";
@@ -17,17 +18,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f6f1e7",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f1e7" },
+    { media: "(prefers-color-scheme: dark)", color: "#16141f" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const me = await getMe();
+  const [me, jar] = await Promise.all([getMe(), cookies()]);
+  const theme = jar.get("gn-theme")?.value;
 
   return (
-    <html lang="nl">
+    <html lang="nl" data-theme={theme === "light" || theme === "dark" ? theme : undefined}>
       <body className="min-h-dvh antialiased">
         <div className="pixel-sky" aria-hidden />
         {me && (
