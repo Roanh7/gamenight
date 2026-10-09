@@ -9,12 +9,14 @@ import {
   Newspaper,
   Shield,
   Smartphone,
+  Star,
   Trophy,
   Users,
   Vote,
   type LucideIcon,
 } from "lucide-react";
 import { getMe } from "@/lib/supabase/server";
+import { XP_RULES } from "@/lib/xp";
 import { PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Uitleg" };
@@ -59,6 +61,7 @@ const TOC = [
   ["punten", "Punten & ranking"],
   ["games", "Games"],
   ["extra", "Players & nieuws"],
+  ["xp", "Levels & XP"],
   ["tips", "Tips"],
 ];
 
@@ -345,7 +348,31 @@ export default async function UitlegPage() {
           </ul>
         </Section>
 
-        <Section id="tips" icon={Smartphone} color="bg-teal" title="10. Tips">
+        <Section id="xp" icon={Star} color="bg-yellow" title="10. Levels & XP">
+          <p>Naast de ranglijst spaar je <b>XP</b>. Daarvoor hoef je niet te winnen, meedoen telt ook:</p>
+          <ul>
+            <li>
+              <b>+{XP_RULES.played} XP</b> per potje dat je speelt
+            </li>
+            <li>
+              <b>+{XP_RULES.win} XP</b> extra als je wint, <b>+{XP_RULES.second}</b> voor een 2e plek en{" "}
+              <b>+{XP_RULES.third}</b> voor een 3e plek
+            </li>
+            <li>
+              <b>+{XP_RULES.night} XP</b> per gamenight waar je bij was (zodra de host hem afsluit)
+            </li>
+            <li>
+              <b>+{XP_RULES.hosted} XP</b> extra als jij de host was
+            </li>
+          </ul>
+          <p className="pt-1">
+            Met genoeg XP ga je een <b>level</b> omhoog. Elk level vraagt wat meer XP dan het vorige. Je titel groeit
+            mee: Rookie → Speler (LV 3) → Pro (LV 5) → Veteraan (LV 7) → Legende (LV 10) → Grootmeester (LV 15). Je
+            level en XP-balk zie je op je profiel, op Home en bij Players.
+          </p>
+        </Section>
+
+        <Section id="tips" icon={Smartphone} color="bg-teal" title="11. Tips">
           <ul>
             <li>
               <b>Zet de app op je beginscherm.</b> Open de site in Safari, tik op de deelknop (vierkantje met
@@ -355,6 +382,16 @@ export default async function UitlegPage() {
             <li>
               Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>. Daar kies je ook je{" "}
               <b>avatar</b>: een emoji, of gewoon je letter.
+            </li>
+            <li>
+              <b>🔔 Meldingen:</b> zet ze aan op je account (of via het kaartje op Home). Je krijgt dan een melding bij
+              een nieuwe gamenight, als de host je bevestigt, als de datum vaststaat, als de avond begint, als de recap
+              klaarstaat, en <b>een uur van tevoren</b>. De host krijgt een melding als iemand wil meedoen. Op de iPhone
+              werkt dit alleen als de app op je beginscherm staat.
+            </li>
+            <li>
+              <b>🌙 Nachtmodus:</b> staat je iPhone op donker, dan wordt de app dat ook, met sterren in plaats van
+              wolkjes. Op je account kun je ook zelf kiezen: Auto, Licht of Nacht.
             </li>
             <li>
               Geen zin in geluidjes? Zet <b>🔊 Geluidjes bij winst</b> uit op je account. Dat geldt alleen voor

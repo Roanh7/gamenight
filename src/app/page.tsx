@@ -7,6 +7,7 @@ import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
 import { computeXp, getAttendance } from "@/lib/xp";
+import { PushPrompt } from "@/components/PushPrompt";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
@@ -183,6 +184,7 @@ async function Dashboard({
       <InstallHint />
 
       {/* Begroeting */}
+      <PushPrompt />
       <section className="card relative overflow-hidden bg-red p-5 text-white">
         <div
           className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full border-2 border-line bg-yellow opacity-90"

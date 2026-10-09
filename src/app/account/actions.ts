@@ -46,3 +46,19 @@ export async function changePassword(formData: FormData) {
   if (error) redirect(`/account?fout=${encodeURIComponent("Wachtwoord wijzigen lukte niet.")}`);
   redirect(`/account?ok=${encodeURIComponent("Wachtwoord gewijzigd")}`);
 }
+
+/** Testmelding naar je eigen toestellen. */
+export async function sendTestPush() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+  const { sendPush } = await import("@/lib/push");
+  return sendPush([user.id], {
+    title: "🎮 Game Night",
+    body: "Het werkt! Zo krijg je straks meldingen over gamenights.",
+    url: "/account",
+    tag: "test",
+  });
+}

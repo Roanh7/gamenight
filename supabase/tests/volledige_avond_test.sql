@@ -432,6 +432,49 @@ begin
   end;
   reset role;
 
+  -- 30. Pushmeldingen
+  declare
+    sec text;
+    zz_night uuid;
+    hit boolean;
+  begin
+    insert into private.secrets (key, value) values ('push', 'zz-test-geheim') on conflict (key) do nothing;
+    select value into sec from private.secrets where key = 'push';
+    perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+    perform set_config('request.jwt.claim.sub', ua::text, true);
+    set local role authenticated;
+    perform public.save_push_subscription('https://push.zz.test/1', 'p256', 'authkey');
+    reset role;
+    perform set_config('request.jwt.claims', json_build_object('sub', uc, 'role', 'authenticated')::text, true);
+    perform set_config('request.jwt.claim.sub', uc::text, true);
+    set local role authenticated;
+    select count(*) into cnt from public.push_subscriptions where endpoint = 'https://push.zz.test/1';
+    rep := rep || case when cnt = 0 then 'OK' else 'FAIL' end || E' 30 toestellen van anderen niet zichtbaar\n';
+    begin
+      perform * from public.push_targets('fout-geheim', array[ua]);
+      rep := rep || E'FAIL 30b push_targets zonder juist geheim\n';
+    exception when others then rep := rep || E'OK 30b zonder geheim geen toestellen\n';
+    end;
+    reset role;
+    set local role anon;
+    select count(*) into cnt from public.push_targets(sec, array[ua]);
+    reset role;
+    rep := rep || case when cnt = 1 then 'OK' else 'FAIL' end || E' 30c server vindt toestel met geheim\n';
+
+    insert into public.game_nights (title, starts_at, host_id, created_by)
+    values ('ZzHerinnering', now() + interval '60 minutes', ua, ua) returning id into zz_night;
+    insert into public.participants (night_id, user_id, status) values (zz_night, ub, 'pending');
+    set local role anon;
+    select exists (select 1 from public.due_reminders(sec) d where d.night_id = zz_night and array_length(d.user_ids, 1) = 2) into hit;
+    rep := rep || case when hit then 'OK' else 'FAIL' end || E' 30d herinnering 1 uur van tevoren met 2 spelers\n';
+    select exists (select 1 from public.due_reminders(sec) d where d.night_id = zz_night) into hit;
+    reset role;
+    rep := rep || case when not hit then 'OK' else 'FAIL' end || E' 30e herinnering maar één keer\n';
+    update public.game_nights set starts_at = now() + interval '2 hours' where id = zz_night;
+    select not reminder_sent into hit from public.game_nights where id = zz_night;
+    rep := rep || case when hit then 'OK' else 'FAIL' end || E' 30f nieuwe tijd = nieuwe herinnering\n';
+  end;
+
   -- 22. Niet ingelogd
   set local role anon;
   begin

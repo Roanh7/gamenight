@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { appendToProgram } from "@/lib/program";
+import { dateNl, pushLater } from "@/lib/push";
 
 function str(fd: FormData, key: string) {
   return String(fd.get(key) ?? "").trim();
@@ -11,6 +12,24 @@ function str(fd: FormData, key: string) {
 
 function fail(path: string, message: string): never {
   redirect(`${path}?fout=${encodeURIComponent(message)}`);
+}
+
+type DBClient = Awaited<ReturnType<typeof createClient>>;
+
+/** Gegevens voor een melding: titel, datum, host(s), wie er komen en hoe ik heet. */
+async function pushInfo(supabase: DBClient, nightId: string, me: string) {
+  const [{ data: night }, { data: people }, { data: profile }] = await Promise.all([
+    supabase.from("game_nights").select("title, starts_at, host_id, cohost_id").eq("id", nightId).maybeSingle(),
+    supabase.from("participants").select("user_id, status").eq("night_id", nightId),
+    supabase.from("profiles").select("username").eq("id", me).maybeSingle(),
+  ]);
+  return {
+    title: night?.title ?? "Gamenight",
+    startsAt: night?.starts_at as string | undefined,
+    hosts: [night?.host_id, night?.cohost_id].filter(Boolean) as string[],
+    people: (people ?? []).map((p) => p.user_id as string),
+    name: profile?.username ?? "Iemand",
+  };
 }
 
 async function requireUser() {
@@ -75,6 +94,19 @@ export async function createNight(formData: FormData) {
   if (hostId !== user.id) {
     await supabase.from("participants").insert({ night_id: data.id, user_id: user.id, status: "pending" });
   }
+  const info = await pushInfo(supabase, data.id, user.id);
+  pushLater(
+    null,
+    {
+      title: `🎮 Nieuwe gamenight: ${title}`,
+      body: poll
+        ? `${info.name} plant een avond. Geef aan wanneer je kunt!`
+        : `${info.name} plant ${dateNl(startsAt)}. Doe je mee?`,
+      url: `/agenda/${data.id}`,
+      tag: `avond-${data.id}`,
+    },
+    user.id,
+  );
   revalidatePath("/", "layout");
   redirect(`/agenda/${data.id}`);
 }
@@ -108,7 +140,7 @@ export async function updateNight(formData: FormData) {
 }
 
 export async function setNightStatus(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
   const status = str(formData, "status");
   if (!["planned", "live", "finished", "cancelled"].includes(status)) return;
@@ -118,6 +150,16 @@ export async function setNightStatus(formData: FormData) {
       ? await supabase.rpc("finish_night", { p_night: id })
       : await supabase.from("game_nights").update({ status }).eq("id", id);
   if (error) fail(`/agenda/${id}/host`, "Status wijzigen lukte niet.");
+  if (status !== "planned") {
+    const info = await pushInfo(supabase, id, user.id);
+    const msg =
+      status === "live"
+        ? { title: `🎮 ${info.title} is begonnen!`, body: "Kijk live mee met de scores.", url: `/agenda/${id}` }
+        : status === "finished"
+          ? { title: `🏁 Recap: ${info.title}`, body: "De avond zit erop. Wie was de MVP?", url: `/agenda/${id}#recap` }
+          : { title: `❌ ${info.title} gaat niet door`, body: `${info.name} heeft de avond afgelast.`, url: `/agenda/${id}` };
+    pushLater(info.people, { ...msg, tag: `avond-${id}` }, user.id);
+  }
   revalidatePath("/", "layout");
   if (status === "finished") redirect(`/agenda/${id}?klaar=1#recap`);
 }
@@ -140,6 +182,14 @@ export async function joinNight(formData: FormData) {
     .from("participants")
     .insert({ night_id: id, user_id: user.id, status: "pending" });
   if (error && !error.message.includes("duplicate")) fail(`/agenda/${id}`, "Aanmelden lukte niet.");
+  if (!error) {
+    const info = await pushInfo(supabase, id, user.id);
+    pushLater(
+      info.hosts,
+      { title: `✋ ${info.name} wil meedoen`, body: `Aan ${info.title}. Bevestig je hem?`, url: `/agenda/${id}/host` },
+      user.id,
+    );
+  }
   revalidatePath(`/agenda/${id}`);
   revalidatePath("/");
 }
@@ -179,10 +229,16 @@ export async function setCohost(formData: FormData) {
 }
 
 export async function takeOverHost(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
+  const before = await pushInfo(supabase, id, user.id);
   const { error } = await supabase.rpc("take_over_host", { p_night: id });
   if (error) fail(`/agenda/${id}`, error.message);
+  pushLater(
+    before.hosts,
+    { title: `🎮 ${before.name} is nu host`, body: `Van ${before.title}. Jij bent co-host.`, url: `/agenda/${id}` },
+    user.id,
+  );
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}/host?ok=${encodeURIComponent("Jij bent nu de host")}`);
 }
@@ -190,17 +246,40 @@ export async function takeOverHost(formData: FormData) {
 /* ---------- Host: deelnemers ---------- */
 
 export async function confirmParticipant(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
   const userId = str(formData, "user_id");
-  await supabase.from("participants").update({ status: "confirmed" }).eq("night_id", id).eq("user_id", userId);
+  const { data: done } = await supabase
+    .from("participants")
+    .update({ status: "confirmed" })
+    .eq("night_id", id)
+    .eq("user_id", userId)
+    .eq("status", "pending")
+    .select("user_id");
+  if (done?.length) {
+    const info = await pushInfo(supabase, id, user.id);
+    pushLater([userId], { title: "✅ Je bent erbij!", body: `${info.name} heeft je bevestigd voor ${info.title}.`, url: `/agenda/${id}` }, user.id);
+  }
   revalidatePath(`/agenda/${id}`, "layout");
 }
 
 export async function confirmAll(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
-  await supabase.from("participants").update({ status: "confirmed" }).eq("night_id", id).eq("status", "pending");
+  const { data: done } = await supabase
+    .from("participants")
+    .update({ status: "confirmed" })
+    .eq("night_id", id)
+    .eq("status", "pending")
+    .select("user_id");
+  if (done?.length) {
+    const info = await pushInfo(supabase, id, user.id);
+    pushLater(
+      done.map((d) => d.user_id as string),
+      { title: "✅ Je bent erbij!", body: `${info.name} heeft je bevestigd voor ${info.title}.`, url: `/agenda/${id}` },
+      user.id,
+    );
+  }
   revalidatePath(`/agenda/${id}`, "layout");
 }
 
@@ -213,20 +292,22 @@ export async function removeParticipant(formData: FormData) {
 }
 
 export async function addParticipant(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
   const userId = str(formData, "user_id");
   if (!userId) return;
   await supabase
     .from("participants")
     .upsert({ night_id: id, user_id: userId, status: "confirmed" }, { onConflict: "night_id,user_id" });
+  const info = await pushInfo(supabase, id, user.id);
+  pushLater([userId], { title: "✅ Je bent erbij!", body: `${info.name} heeft je toegevoegd aan ${info.title}.`, url: `/agenda/${id}` }, user.id);
   revalidatePath(`/agenda/${id}`, "layout");
 }
 
 /* ---------- Host: potjes ---------- */
 
 export async function startMatch(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
   const gameId = str(formData, "game_id");
   const players = formData.getAll("players").map(String).filter(Boolean);
@@ -250,8 +331,17 @@ export async function startMatch(formData: FormData) {
   }
 
   // Avond automatisch op 'live' zetten, en een game die nog niet bij de avond hoorde komt erbij
-  await supabase.from("game_nights").update({ status: "live" }).eq("id", id).eq("status", "planned");
+  const { data: wentLive } = await supabase
+    .from("game_nights")
+    .update({ status: "live" })
+    .eq("id", id)
+    .eq("status", "planned")
+    .select("id");
   await appendToProgram(supabase, id, gameId);
+  if (wentLive?.length) {
+    const info = await pushInfo(supabase, id, user.id);
+    pushLater(info.people, { title: `🎮 ${info.title} is begonnen!`, body: "Kijk live mee met de scores.", url: `/agenda/${id}`, tag: `avond-${id}` }, user.id);
+  }
 
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}/host/potje/${match.id}`);
@@ -290,7 +380,7 @@ export async function toggleDateVote(formData: FormData) {
 }
 
 export async function pickDate(formData: FormData) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
   const option = str(formData, "option_id");
   const { data: opt } = await supabase
@@ -306,6 +396,12 @@ export async function pickDate(formData: FormData) {
     .eq("id", id)
     .select("id");
   if (error || !data?.length) fail(`/agenda/${id}`, "Alleen de host of co-host kan de datum kiezen.");
+  const info = await pushInfo(supabase, id, user.id);
+  pushLater(
+    null,
+    { title: `📅 Datum geprikt: ${info.title}`, body: `Het wordt ${dateNl(opt.starts_at)}.`, url: `/agenda/${id}`, tag: `avond-${id}` },
+    user.id,
+  );
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}?ok=${encodeURIComponent("Datum gekozen! 📅")}`);
 }

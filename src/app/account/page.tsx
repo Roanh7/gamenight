@@ -10,6 +10,7 @@ import { ColorPicker } from "@/components/ColorPicker";
 import { AvatarPicker } from "@/components/AvatarPicker";
 import { SoundToggle } from "@/components/Celebrate";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PushToggle } from "@/components/PushToggle";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
 import { SectionTitle } from "@/components/ui";
@@ -81,6 +82,15 @@ export default async function AccountPage(props: PageProps<"/account">) {
           <SubmitButton pendingText="Wijzigen…">Wijzig wachtwoord</SubmitButton>
         </form>
       </details>
+
+      <div className="card mt-3 px-4 py-3">
+        <p className="mb-2 font-black">🔔 Meldingen op dit toestel</p>
+        <PushToggle />
+        <p className="mt-2 text-xs text-muted">
+          Bij een nieuwe gamenight, als je bevestigd bent, als de datum vaststaat, als de avond begint, de recap, en
+          een uur van tevoren.
+        </p>
+      </div>
 
       <div className="card mt-3 px-4 py-3">
         <p className="mb-2 font-black">🌙 Weergave</p>
