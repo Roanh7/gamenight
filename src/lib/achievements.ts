@@ -4,7 +4,7 @@ export type Achievement = {
   id: string;
   title: string;
   description: string;
-  icon: "trophy" | "flame" | "crown" | "star" | "sparkles" | "home" | "swords" | "medal";
+  icon: "trophy" | "flame" | "crown" | "star" | "sparkles" | "home" | "swords" | "medal" | "target";
   earned: boolean;
   progress?: string;
 };
@@ -16,9 +16,10 @@ type Input = {
   games: Game[];
   hostedNights: number; // afgeronde avonden als host
   seasonTitles?: number; // aantal gewonnen seizoenen
+  bounties?: number; // hoe vaak je de koploper versloeg
 };
 
-export function computeAchievements({ userId, results, leaderboard, games, hostedNights, seasonTitles = 0 }: Input) {
+export function computeAchievements({ userId, results, leaderboard, games, hostedNights, seasonTitles = 0, bounties = 0 }: Input) {
   const wins = results.filter((r) => r.is_winner).length;
   const played = results.length;
   const distinctGames = new Set(results.map((r) => r.game_id)).size;
@@ -87,6 +88,13 @@ export function computeAchievements({ userId, results, leaderboard, games, hoste
       description: "Eindig gelijk op de eerste plek",
       icon: "medal",
       earned: sharedFirst >= 1,
+    },
+    {
+      id: "giant-slayer",
+      title: "Reuzendoder",
+      description: "Versla de nummer 1 van het seizoen in een potje",
+      icon: "target",
+      earned: bounties >= 1,
     },
     {
       id: "season",

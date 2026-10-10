@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getActivity, getGames, getProfiles, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
-import { currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
+import { currentBountyTarget, currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
@@ -143,6 +143,8 @@ async function Dashboard({
     getAttendance(supabase),
   ]);
   const myXp = computeXp(results, attendance)(userId);
+  const target = currentBountyTarget(results);
+  const targetName = target ? profiles.byId.get(target)?.username : undefined;
 
   const upcoming = (nightsRes.data ?? []) as GameNight[];
   const next = upcoming.find((n) => n.status === "live") ?? upcoming[0];
@@ -198,6 +200,11 @@ async function Dashboard({
           <Link href="/uitleg#xp" className="chip pixel bg-yellow text-[9px] text-night">
             LV {myXp.level} · {myXp.xp} XP
           </Link>
+          {targetName && (
+            <Link href="/ranking" className="chip bg-paper text-ink">
+              🎯 {target === userId ? "Premie op jou!" : `Versla ${targetName}: +10 XP`}
+            </Link>
+          )}
           <span className="chip bg-paper text-ink">
             🏆 {myOverall ? `#${myOverall.rank} in ${seasonLabel(season)}` : `Nog geen ranking in ${seasonLabel(season)}`}
           </span>

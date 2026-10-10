@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Crown, Flame, Home, Lock, Medal, Sparkles, Star, Swords, Trophy } from "lucide-react";
+import { Crown, Flame, Home, Lock, Medal, Sparkles, Star, Swords, Target, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getGames, getLeaderboards, getOverall, getProfiles, getResults } from "@/lib/data";
-import { allHeadToHeads, headToHead, seasonChampions, seasonLabel, type HeadToHead } from "@/lib/stats";
+import { allHeadToHeads, bountyHits, headToHead, seasonChampions, seasonLabel, type HeadToHead } from "@/lib/stats";
 import { computeAchievements } from "@/lib/achievements";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { XpBar } from "./XpBar";
@@ -11,7 +11,7 @@ import { Avatar } from "./Avatar";
 import { GameIcon } from "./GameIcon";
 import { EmptyState, RankBadge, SectionTitle } from "./ui";
 
-const ICONS = { trophy: Trophy, flame: Flame, crown: Crown, star: Star, sparkles: Sparkles, home: Home, swords: Swords, medal: Medal };
+const ICONS = { trophy: Trophy, flame: Flame, crown: Crown, star: Star, sparkles: Sparkles, home: Home, swords: Swords, medal: Medal, target: Target };
 
 export async function PlayerProfile({
   profile,
@@ -48,6 +48,7 @@ export async function PlayerProfile({
     games: games.list,
     hostedNights: hosted ?? 0,
     seasonTitles: seasonTitles.length,
+    bounties: bountyHits(allResults).get(profile.id) ?? 0,
   });
   const titles = [...seasonTitles.map((t) => `🏆 ${t}`), ...ach.titles.map((t) => `👑 ${t}`)];
   const versus = !isMe && viewerId ? headToHead(allResults, viewerId, profile.id) : null;

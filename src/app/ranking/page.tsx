@@ -4,6 +4,7 @@ import { ChevronRight, Gamepad2, Plus } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getGames, getProfiles, getResults } from "@/lib/data";
 import {
+  currentBountyTarget,
   currentSeason,
   daysLeftInSeason,
   filterSeason,
@@ -19,6 +20,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { Avatar } from "@/components/Avatar";
 import { SeasonTabs, parseSeason } from "@/components/SeasonTabs";
 import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { XP_RULES } from "@/lib/xp";
 
 export const metadata: Metadata = { title: "Ranking" };
 
@@ -41,6 +43,8 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const isCurrent = season === currentSeason();
   const champ = season !== "all" ? champions.get(season) : undefined;
   const champProfile = champ ? profiles.byId.get(champ) : undefined;
+  const target = isCurrent ? currentBountyTarget(results) : null;
+  const targetProfile = target ? profiles.byId.get(target) : undefined;
 
   // Meest gespeelde games eerst
   const playedCount = new Map<string, number>();
@@ -55,8 +59,8 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
         kicker="RANKING"
         title="Hall of Fame"
         action={
-          <Link href="/games/nieuw" className="btn btn-primary btn-sm">
-            <Plus size={16} strokeWidth={3} /> Game
+          <Link href="/records" className="btn btn-yellow btn-sm">
+            📜 Recordboek
           </Link>
         }
       />
@@ -85,6 +89,25 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
           ) : (
             <p className="mt-1 font-black">Gedeelde eerste plek: geen kampioen dit seizoen 🤝</p>
           )}
+        </section>
+      )}
+
+      {targetProfile && (
+        <section className="card mt-3 flex items-center gap-3 bg-red-soft p-3">
+          <Avatar
+            name={targetProfile.username}
+            color={targetProfile.avatar_color}
+            url={targetProfile.avatar_url}
+            emoji={targetProfile.avatar_emoji}
+            size="md"
+          />
+          <div className="min-w-0">
+            <p className="pixel text-[9px] text-red">🎯 PREMIE</p>
+            <p className="text-sm font-black">
+              {target === me?.user.id ? "Er staat een premie op jouw hoofd!" : `Versla ${targetProfile.username}`}
+            </p>
+            <p className="text-xs">Wie de koploper in een potje verslaat, krijgt +{XP_RULES.bounty} XP.</p>
+          </div>
         </section>
       )}
 

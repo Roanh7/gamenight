@@ -9,7 +9,7 @@ const ITEMS = [
   { href: "/agenda", label: "Agenda", icon: CalendarDays, match: (p: string) => p.startsWith("/agenda") },
   { href: "/games", label: "Games", icon: Gamepad2, match: (p: string) => p.startsWith("/games") },
   { href: "/spelers", label: "Players", icon: Users, match: (p: string) => p.startsWith("/spelers") || p.startsWith("/account") },
-  { href: "/ranking", label: "Ranking", icon: Trophy, match: (p: string) => p.startsWith("/ranking") },
+  { href: "/ranking", label: "Ranking", icon: Trophy, match: (p: string) => p.startsWith("/ranking") || p.startsWith("/records") },
 ];
 
 export function BottomNav() {

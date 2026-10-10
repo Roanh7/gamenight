@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Users } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getProfiles, getResults } from "@/lib/data";
-import { currentSeason, filterSeason, seasonChampions, seasonLabel, standings } from "@/lib/stats";
+import { currentBountyTarget, currentSeason, filterSeason, seasonChampions, seasonLabel, standings } from "@/lib/stats";
 import { Avatar } from "@/components/Avatar";
 import { EmptyState, PageHeader } from "@/components/ui";
 import { SOFT_BG, safeColor } from "@/lib/colors";
@@ -20,6 +20,7 @@ export default async function PlayersPage() {
     getAttendance(supabase),
   ]);
   const xpOf = computeXp(results, attendance);
+  const target = currentBountyTarget(results);
 
   const season = currentSeason();
   const seasonRows = standings(filterSeason(results, season));
@@ -87,6 +88,9 @@ export default async function PlayersPage() {
                       </span>
                     </span>
                     {titles > 0 && <span className="mt-1 text-xs">{"🏆".repeat(Math.min(titles, 3))}</span>}
+                    {p.id === target && (
+                      <span className="pixel mt-1.5 bg-red px-1.5 py-0.5 text-[8px] text-white">🎯 PREMIE +10 XP</span>
+                    )}
                   </Link>
                 </li>
               );

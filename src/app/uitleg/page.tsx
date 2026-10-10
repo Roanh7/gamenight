@@ -287,6 +287,16 @@ export default async function UitlegPage() {
             <b>🏆 Seizoenskampioen</b>. Onder <b>Ranking</b> kun je wisselen tussen het huidige seizoen, eerdere
             seizoenen en <b>All-time</b>.
           </p>
+          <p className="pt-1">
+            <b>🎯 Premie op de koploper:</b> wie dit seizoen alleen bovenaan staat, heeft een premie op zijn hoofd.
+            Eindig je in een potje hoger dan de koploper, dan krijg je <b>+{XP_RULES.bounty} XP</b> extra. Je ziet
+            op Home, bij Ranking en bij Players op wie de premie staat.
+          </p>
+          <p className="pt-1">
+            <b>📜 Recordboek:</b> via de knop bij <b>Ranking</b> zie je de records aller tijden: meeste zeges,
+            langste winstreeks, beste avond, vaakst MVP, trouwste speler, meeste avonden gehost, de grootste
+            reuzendoder, de pechvogel aller tijden, en de hoogste score per game.
+          </p>
         </Section>
 
         <Section id="games" icon={Gamepad2} color="bg-orange" title="8. Games">
@@ -333,8 +343,8 @@ export default async function UitlegPage() {
             </li>
             <li>
               Op je <b>account</b> (je rondje rechtsboven) zie je je rankings per game en je{" "}
-              <b>achievements</b>: Eerste zege,
-              Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish, Seizoenskampioen en Kampioen.
+              <b>10 achievements</b>: Eerste zege, Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish,
+              Reuzendoder (versla de koploper van het seizoen), Seizoenskampioen en Kampioen.
             </li>
             <li>
               Op het profiel van een ander zie je jullie <b>onderlinge stand</b>: hoe vaak jij hoger eindigde dan
@@ -363,6 +373,9 @@ export default async function UitlegPage() {
             </li>
             <li>
               <b>+{XP_RULES.hosted} XP</b> extra als jij de host was
+            </li>
+            <li>
+              <b>+{XP_RULES.bounty} XP</b> premie als je in een potje hoger eindigt dan de koploper van het seizoen
             </li>
           </ul>
           <p className="pt-1">

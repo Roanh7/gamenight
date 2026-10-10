@@ -1,7 +1,7 @@
 import type { MatchResult } from "./types";
 
 /** Resultaat van één speler in één afgerond potje, met het moment van afronden. */
-export type ResultRow = MatchResult & { finished_at: string };
+export type ResultRow = MatchResult & { finished_at: string; night_id?: string };
 
 export type Standing = {
   user_id: string;
@@ -149,4 +149,58 @@ export function allHeadToHeads(rows: ResultRow[], me: string) {
     .map((o) => headToHead(rows, me, o))
     .filter((h) => h.wins + h.losses + h.draws > 0)
     .sort((a, b) => b.wins + b.losses + b.draws - (a.wins + a.losses + a.draws));
+}
+
+/* ---------------- Premie op de koploper ---------------- */
+
+/** De unieke nummer 1 van een lijst standen (of null bij een gedeelde eerste plek). */
+function uniqueLeader(table: Map<string, { points: number; wins: number }>) {
+  let best: string | null = null;
+  let tie = false;
+  let bp = -Infinity;
+  let bw = -Infinity;
+  for (const [u, s] of table) {
+    if (s.points > bp || (s.points === bp && s.wins > bw)) {
+      best = u;
+      bp = s.points;
+      bw = s.wins;
+      tie = false;
+    } else if (s.points === bp && s.wins === bw) tie = true;
+  }
+  return tie || bp <= 0 ? null : best;
+}
+
+/**
+ * Hoe vaak iemand de koploper van het seizoen versloeg: in een potje hoger eindigen
+ * dan degene die op dat moment (vóór het potje) alleen bovenaan stond.
+ */
+export function bountyHits(rows: ResultRow[]) {
+  const byMatch = new Map<string, ResultRow[]>();
+  for (const r of rows) byMatch.set(r.match_id, [...(byMatch.get(r.match_id) ?? []), r]);
+  const matches = [...byMatch.values()].sort((a, b) => a[0].finished_at.localeCompare(b[0].finished_at));
+  const seasons = new Map<string, Map<string, { points: number; wins: number }>>();
+  const hits = new Map<string, number>();
+  for (const rs of matches) {
+    const season = seasonOf(rs[0].finished_at);
+    const table = seasons.get(season) ?? new Map<string, { points: number; wins: number }>();
+    seasons.set(season, table);
+    const leader = uniqueLeader(table);
+    const lr = leader ? rs.find((r) => r.user_id === leader) : undefined;
+    if (lr) {
+      for (const r of rs) if (r.user_id !== leader && r.placement < lr.placement) hits.set(r.user_id, (hits.get(r.user_id) ?? 0) + 1);
+    }
+    for (const r of rs) {
+      const s = table.get(r.user_id) ?? { points: 0, wins: 0 };
+      s.points += Number(r.league_points);
+      s.wins += r.is_winner ? 1 : 0;
+      table.set(r.user_id, s);
+    }
+  }
+  return hits;
+}
+
+/** Wie er nu alleen bovenaan staat dit seizoen (daar staat de premie op). */
+export function currentBountyTarget(rows: ResultRow[]) {
+  const top = standings(filterSeason(rows, currentSeason())).filter((s) => s.rank === 1);
+  return top.length === 1 && top[0].points > 0 ? top[0].user_id : null;
 }
