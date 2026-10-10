@@ -6,7 +6,7 @@ import { computeXp, getAttendance } from "@/lib/xp";
 import { computeRecords, gameRecords } from "@/lib/records";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
-import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { PageHeader, SectionTitle } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Recordboek" };
 
@@ -51,13 +51,13 @@ export default async function RecordsPage() {
         Wie heeft het hoogst gescoord, de langste reeks, de meeste avonden? Alle seizoenen bij elkaar.
       </p>
 
-      {results.length === 0 ? (
-        <EmptyState
-          icon={<span className="text-3xl">📜</span>}
-          title="Nog geen records"
-          text="Na de eerste gespeelde potjes vult het recordboek zich vanzelf."
-        />
-      ) : (
+      {results.length === 0 && (
+        <p className="card mb-3 bg-yellow-soft px-4 py-3 text-sm font-bold">
+          📜 Nog geen potjes gespeeld. Na de eerste gamenight vult het recordboek zich vanzelf. Wie pakt het eerste
+          record?
+        </p>
+      )}
+      {(
         <>
           <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 [&>li]:min-w-0">
             {records.map((r) => (
