@@ -83,13 +83,13 @@ export function PlayerCard({
 
         <div className="my-1.5 h-[2px] w-full" style={{ background: st.accent, opacity: 0.5 }} />
 
-        <dl className="grid grid-cols-4 gap-0.5 text-center">
+        <dl className={`grid gap-x-1 gap-y-1 text-center ${size === "lg" ? "grid-cols-4" : "grid-cols-2"}`}>
           {(
             [
               [`${stats.winPct}%`, "WIN"],
               [stats.games, "GAMES"],
               [stats.streak, "STREAK"],
-              [stats.trophies, "TROPH."],
+              [stats.trophies, size === "lg" ? "TROPH." : "TROPHIES"],
             ] as const
           ).map(([v, l]) => (
             <div key={l}>

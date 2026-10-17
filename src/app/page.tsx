@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getActivity, getGames, getProfiles, getComments, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
-import { currentBountyTarget, currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
+import { getActivity, getGames, getNight, getProfiles, getComments, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
+import { currentBountyTarget, currentSeason, filterSeason, seasonChampions, seasonLabel, standings } from "@/lib/stats";
+import { computeOvr, findRival, matchSizes, recentForm, streaks } from "@/lib/player";
+import { PlayerHub } from "@/components/PlayerHub";
+import { LiveHub } from "@/components/LiveHub";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
@@ -127,7 +130,7 @@ async function Dashboard({
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
-    getActivity(supabase, 4),
+    getActivity(supabase, 30),
     supabase
       .from("game_nights")
       .select("*")
@@ -144,10 +147,38 @@ async function Dashboard({
   ]);
   const myXp = computeXp(results, attendance)(userId);
   const target = currentBountyTarget(results);
-  const targetName = target ? profiles.byId.get(target)?.username : undefined;
+  const meProfile = profiles.byId.get(userId);
+  const myOvr = computeOvr(results, userId, matchSizes(results), games.byId);
+  const rivalRaw = findRival(results, userId);
+  const rivalProfile = rivalRaw ? profiles.byId.get(rivalRaw.opponent) : undefined;
+  const leaderProfile = target ? profiles.byId.get(target) : undefined;
+  const isChampion = [...seasonChampions(results).values()].includes(userId);
+  const myAllWins = results.filter((r) => r.user_id === userId && r.is_winner).length;
+
+  // Nieuws over jou (zelf genoemd, winnaar of MVP), daaronder het nieuws van iedereen
+  const aboutMe = activity
+    .filter((a) => {
+      const p = (a.payload ?? {}) as Record<string, unknown>;
+      return (
+        a.actor_id === userId ||
+        ((p.winners as string[] | undefined) ?? []).includes(userId) ||
+        p.mvp === userId ||
+        p.old_host === userId
+      );
+    })
+    .slice(0, 3);
+  const groupNews = activity.slice(0, 4);
+  const feedItems = [...new Map([...aboutMe, ...groupNews].map((a) => [a.id, a])).values()];
 
   const upcoming = (nightsRes.data ?? []) as GameNight[];
   const next = upcoming.find((n) => n.status === "live") ?? upcoming[0];
+  // Live-modus: er is nu een avond bezig waar jij bij bent (of die jij host)
+  const liveData = next?.status === "live" ? await getNight(supabase, next.id) : null;
+  const inLive =
+    liveData &&
+    (liveData.participants.some((p) => p.user_id === userId) ||
+      liveData.night.host_id === userId ||
+      liveData.night.cohost_id === userId);
   const lastMatches = (lastMatchesRes.data ?? []) as Match[];
 
   let nextParticipants: Participant[] = [];
@@ -162,14 +193,14 @@ async function Dashboard({
   }
 
   // Titels van avonden in de feed
-  const nightIds = [...new Set(activity.map((a) => a.night_id).filter(Boolean))] as string[];
+  const nightIds = [...new Set(feedItems.map((a) => a.night_id).filter(Boolean))] as string[];
   const { data: feedNights } = nightIds.length
     ? await supabase.from("game_nights").select("id, title").in("id", nightIds)
     : { data: [] };
   const nightsById = new Map((feedNights ?? []).map((n) => [n.id, n]));
   const [reactions, comments] = await Promise.all([
-    getReactions(supabase, activity.map((a) => a.id), userId, profiles.byId),
-    getComments(supabase, activity.map((a) => a.id)),
+    getReactions(supabase, feedItems.map((a) => a.id), userId, profiles.byId),
+    getComments(supabase, feedItems.map((a) => a.id)),
   ]);
 
   const season = currentSeason();
@@ -188,36 +219,37 @@ async function Dashboard({
     <div>
       <InstallHint />
 
-      {/* Begroeting */}
       <PushPrompt />
-      <section className="card relative overflow-hidden bg-red p-5 text-white">
-        <div
-          className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full border-2 border-line bg-yellow opacity-90"
-          aria-hidden
+      {inLive && liveData && (
+        <LiveHub
+          night={liveData.night}
+          matches={liveData.matches}
+          results={liveData.results}
+          live={liveData.live}
+          liveTeams={liveData.liveTeams}
+          teams={liveData.teams}
+          profiles={profiles.byId}
+          games={games.byId}
+          meId={userId}
+          isHost={liveData.night.host_id === userId || liveData.night.cohost_id === userId}
         />
-        <p className="pixel relative text-[10px] opacity-90">{welcome ? "NEW PLAYER JOINED!" : "PLAYER 1"}</p>
-        <h1 className="relative mt-1 text-2xl font-black">
-          {welcome ? `Welkom, ${username}!` : `Hoi ${username}!`}
-        </h1>
-        <div className="relative mt-3 flex flex-wrap gap-2">
-          <Link href="/uitleg#xp" className="chip pixel bg-yellow text-[9px] text-night">
-            LV {myXp.level} · {myXp.xp} XP
-          </Link>
-          {targetName && (
-            <Link href="/ranking" className="chip bg-paper text-ink">
-              🎯 {target === userId ? "Premie op jou!" : `Versla ${targetName}: +10 XP`}
-            </Link>
-          )}
-          <span className="chip bg-paper text-ink">
-            🏆 {myOverall ? `#${myOverall.rank} in ${seasonLabel(season)}` : `Nog geen ranking in ${seasonLabel(season)}`}
-          </span>
-          {myOverall && (
-            <span className="chip bg-paper text-ink">
-              {myOverall.wins} {myOverall.wins === 1 ? "zege" : "zeges"}
-            </span>
-          )}
-        </div>
-      </section>
+      )}
+      {meProfile && (
+        <PlayerHub
+          me={meProfile}
+          welcome={welcome}
+          xp={myXp}
+          ovr={myOvr?.ovr ?? null}
+          provisional={myOvr?.provisional ?? true}
+          rank={myOverall?.rank ?? null}
+          wins={myAllWins}
+          streak={streaks(results, userId).current}
+          form={recentForm(results, userId, 5)}
+          rival={rivalProfile && rivalRaw ? { profile: rivalProfile, wins: rivalRaw.wins, losses: rivalRaw.losses } : null}
+          leader={leaderProfile ? { profile: leaderProfile, isMe: target === userId } : null}
+          isChampion={isChampion}
+        />
+      )}
 
       {/* Volgende avond */}
       <SectionTitle
@@ -343,9 +375,26 @@ async function Dashboard({
       >
         Latest news
       </SectionTitle>
-      {activity.length > 0 ? (
+      {aboutMe.length > 0 && (
+        <>
+          <p className="pixel mb-1.5 text-[9px] text-muted">OVER JOU</p>
+          <div className="mb-3">
+            <ActivityFeed
+              items={aboutMe}
+              profiles={profiles.byId}
+              games={games.byId}
+              nights={nightsById}
+              me={{ id: userId, name: username }}
+              reactions={reactions}
+              comments={comments}
+            />
+          </div>
+          <p className="pixel mb-1.5 text-[9px] text-muted">IEDEREEN</p>
+        </>
+      )}
+      {groupNews.length > 0 ? (
         <ActivityFeed
-          items={activity}
+          items={groupNews}
           profiles={profiles.byId}
           games={games.byId}
           nights={nightsById}

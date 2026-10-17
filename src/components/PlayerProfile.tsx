@@ -75,6 +75,12 @@ export async function PlayerProfile({
           <div className="mt-3">
             <XpBar info={xp} />
           </div>
+          <Link
+            href={isMe ? "/kaarten" : `/kaarten/${profile.username}`}
+            className="btn btn-yellow btn-sm mt-3 w-full"
+          >
+            🃏 {isMe ? "Mijn Player Cards" : `Player Card van ${profile.username}`}
+          </Link>
           {titles.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {titles.map((t) => (

@@ -62,6 +62,7 @@ const TOC = [
   ["games", "Games"],
   ["extra", "Players & nieuws"],
   ["xp", "Levels & XP"],
+  ["kaarten", "Player Cards"],
   ["tips", "Tips"],
 ];
 
@@ -389,7 +390,41 @@ export default async function UitlegPage() {
           </p>
         </Section>
 
-        <Section id="tips" icon={Smartphone} color="bg-teal" title="11. Tips">
+        <Section id="kaarten" icon={Gamepad2} color="bg-orange" title="11. Player Hub & Player Cards">
+          <ul>
+            <li>
+              <b>Home is je Player Hub:</b> je avatar, level en XP (met hoeveel je nog nodig hebt en je volgende
+              beloning), je ranking, zeges, winstreeks, je vorm in de laatste 5 potjes (W = gewonnen, L = verloren, D
+              = gedeelde eerste plek), je grootste rivaal en de koploper. Daaronder eerst het nieuws over jou.
+            </li>
+            <li>
+              Je avatar groeit mee: vanaf level 5 een gekleurde rand, vanaf level 10 een bewegend effect en als
+              seizoenskampioen een gouden rand. Vanaf level 3 krijg je een pixel-banner, vanaf level 7 een neon-banner.
+            </li>
+            <li>
+              <b>Live-modus:</b> tijdens een gamenight waar je bij bent, staat bovenaan Home de lopende stand, jouw
+              punten van die avond en (voor de host) grote knoppen om scores bij te werken of een nieuw potje te starten.
+            </li>
+            <li>
+              <b>Player Cards:</b> iedereen heeft een verzamelkaart met een <b>OVR</b> (40–99): winpercentage 35%,
+              gemiddelde eindpositie 25%, prestaties over verschillende games 20% en recente vorm 20%. Met minder dan 10
+              potjes is je OVR nog voorlopig.
+            </li>
+            <li>
+              Speciale edities speel je vrij: <b>Gold</b> (seizoen gewonnen), <b>Rivalry</b> (10 keer dezelfde
+              tegenstander verslagen), <b>Legend</b> (2 seizoenen, level 15 of 100 zeges), <b>Underdog</b> (de koploper
+              verslagen) en <b>Undefeated</b> (op één avond al je potjes gewonnen, minstens 3). Wat je verdient, blijf je
+              houden.
+            </li>
+            <li>
+              Na elk seizoen krijg je een <b>seizoenskaart</b> met je cijfers van toen. Kies zelf welke kaart je laat zien
+              met <b>⭐ Toon deze</b>, bekijk iedereens kaart in het <b>album</b>, vergelijk twee spelers en deel je
+              kaart als plaatje in de groepsapp.
+            </li>
+          </ul>
+        </Section>
+
+        <Section id="tips" icon={Smartphone} color="bg-teal" title="12. Tips">
           <ul>
             <li>
               <b>Zet de app op je beginscherm.</b> Open de site in Safari, tik op de deelknop (vierkantje met

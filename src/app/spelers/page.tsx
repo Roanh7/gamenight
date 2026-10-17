@@ -36,7 +36,15 @@ export default async function PlayersPage() {
 
   return (
     <div>
-      <PageHeader kicker="PLAYERS" title={`${players.length} spelers`} />
+      <PageHeader
+        kicker="PLAYERS"
+        title={`${players.length} spelers`}
+        action={
+          <Link href="/kaarten?tab=album" className="btn btn-yellow btn-sm">
+            🃏 Kaarten
+          </Link>
+        }
+      />
       <p className="-mt-3 mb-4 text-sm font-bold text-muted">Tik op een speler voor zijn profiel. Volgorde: stand van seizoen {seasonLabel(season)}.</p>
 
       {players.length ? (
