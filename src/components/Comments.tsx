@@ -128,7 +128,7 @@ export function Comments({
             maxLength={500}
             placeholder="Schrijf een comment…"
             aria-label="Comment"
-            className="input min-h-[38px] flex-1 py-1.5 text-sm"
+            className="input min-h-[38px] flex-1 py-1.5 text-base"
             autoFocus
           />
           <button type="submit" disabled={pending || !text.trim()} className="btn btn-primary btn-sm px-3" aria-label="Versturen">

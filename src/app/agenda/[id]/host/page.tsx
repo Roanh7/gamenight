@@ -296,7 +296,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
         {notJoined.length > 0 && (
           <form action={addParticipant} className="flex gap-2 bg-cream p-3">
             <input type="hidden" name="night_id" value={id} />
-            <select name="user_id" className="input min-h-[40px] flex-1 py-1.5 text-sm" defaultValue="">
+            <select name="user_id" className="input min-h-[40px] flex-1 py-1.5 text-base" defaultValue="">
               <option value="" disabled>
                 Iemand toevoegen…
               </option>

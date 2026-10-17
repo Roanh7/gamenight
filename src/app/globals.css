@@ -334,3 +334,12 @@ body {
     }
   }
 }
+
+/* iPhone zoomt in op invulvelden met tekst kleiner dan 16px: op telefoons altijd minimaal 16px */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
