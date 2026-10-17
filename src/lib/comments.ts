@@ -24,4 +24,4 @@ export function countReactions(rows: CommentRow["comment_reactions"], meId: stri
   return out;
 }
 
-export const COMMENT_SELECT = "id, activity_id, user_id, body, created_at, profiles(username, avatar_color, avatar_emoji), comment_reactions(user_id, emoji, profiles(username))";
+export const COMMENT_SELECT = "id, activity_id, user_id, body, created_at, profiles!comments_user_id_fkey(username, avatar_color, avatar_emoji), comment_reactions(user_id, emoji, profiles!comment_reactions_user_id_fkey(username))";
