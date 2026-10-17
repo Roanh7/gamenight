@@ -1,41 +1,28 @@
 import type { CardStats, EditionId } from "@/lib/player";
 import { EDITIONS } from "@/lib/player";
-import { HEX, safeColor } from "@/lib/colors";
+import { BG, TEXT_ON, safeColor } from "@/lib/colors";
 import { seasonLabel } from "@/lib/stats";
-import { parseAvatar } from "@/lib/avatar";
-import { CARD_LAYOUT as L, EDITION_ART, cardArtSvg } from "@/lib/cardArt";
 
-/** Kleuren per editie (ook gebruikt door de PNG en andere plekken). */
-export const EDITION_STYLE: Record<EditionId, { text: string; accent: string; shine?: boolean }> = EDITION_ART;
+/** Kleuren per editie (eigen Game Night-stijl). */
+export const EDITION_STYLE: Record<EditionId, { bg: string; text: string; accent: string; shine?: boolean }> = {
+  standard: { bg: "linear-gradient(160deg,#f4efe3 0%,#d9d1bf 55%,#bdb4a0 100%)", text: "#1e1b2b", accent: "#6e6879" },
+  gold: { bg: "linear-gradient(160deg,#fff1b8 0%,#ffc527 45%,#c98a00 100%)", text: "#1e1b2b", accent: "#7a4e00", shine: true },
+  rivalry: { bg: "linear-gradient(160deg,#ff5a6e 0%,#e4002b 45%,#3a0010 100%)", text: "#ffffff", accent: "#ffd0d7" },
+  legend: { bg: "linear-gradient(160deg,#c9a7ff 0%,#7b4fd6 40%,#12a3a0 100%)", text: "#ffffff", accent: "#e8dcff", shine: true },
+  underdog: { bg: "linear-gradient(160deg,#7fe09c 0%,#22a04b 45%,#0b4d22 100%)", text: "#ffffff", accent: "#d3f7de" },
+  undefeated: { bg: "linear-gradient(160deg,#8fb0ff 0%,#2f5de0 45%,#0f1f6b 100%)", text: "#ffffff", accent: "#dbe5ff" },
+};
 
-// 1em = 1/16 van de kaartbreedte
-const SIZES = { sm: 10, md: 12, lg: 16.5 } as const;
-
-export const CARD_CLIP =
-  "polygon(10% 1.1%, 33.75% 1.1%, 37.5% 3.6%, 62.5% 3.6%, 66.25% 1.1%, 90% 1.1%, 98.4% 6.7%, 98.4% 89.3%, 50% 98.9%, 1.6% 89.3%, 1.6% 6.7%)";
-
-export function cardStatList(stats: CardStats) {
-  const a = stats.attrs;
-  return [
-    [a?.win ?? "--", "WIN"],
-    [a?.pos ?? "--", "POS"],
-    [a?.all ?? "--", "ALL"],
-    [a?.vrm ?? "--", "FRM"],
-    [stats.games, "GMS"],
-    [stats.streak, "STK"],
-  ] as const;
-}
-
-export function nameSize(name: string) {
-  return name.length > 14 ? 0.6 : name.length > 10 ? 0.76 : L.name.size;
-}
+const SIZES = {
+  sm: { w: "w-[132px]", ovr: "text-[18px]", name: "text-[9px]", avatar: "h-14 w-14 text-[30px]", stat: "text-[10px]", label: "text-[7px]", pad: "p-2" },
+  md: { w: "w-[176px]", ovr: "text-[24px]", name: "text-[11px]", avatar: "h-[72px] w-[72px] text-[40px]", stat: "text-[12px]", label: "text-[8px]", pad: "p-2.5" },
+  lg: { w: "w-[230px]", ovr: "text-[32px]", name: "text-[13px]", avatar: "h-24 w-24 text-[54px]", stat: "text-[15px]", label: "text-[9px]", pad: "p-3.5" },
+};
 
 export function PlayerCard({
   name,
   color,
   emoji,
-  config,
-  mainIcon,
   nickname,
   edition,
   stats,
@@ -46,8 +33,6 @@ export function PlayerCard({
   name: string;
   color?: string | null;
   emoji?: string | null;
-  config?: unknown;
-  mainIcon?: string | null;
   nickname: string;
   edition: EditionId;
   stats: CardStats;
@@ -55,119 +40,73 @@ export function PlayerCard({
   size?: keyof typeof SIZES;
   locked?: boolean;
 }) {
-  const art = EDITION_ART[edition];
-  const pix = parseAvatar(config);
-  const em = (n: number) => `${n}em`;
-  const list = cardStatList(stats);
+  const st = EDITION_STYLE[edition];
+  const s = SIZES[size];
   const c = safeColor(color);
-
   return (
     <div
-      className={`pcard relative select-none ${locked ? "pcard-locked" : ""}`}
-      style={{ fontSize: SIZES[size], width: em(16), height: em(22.4), color: art.text }}
-      role="img"
-      aria-label={`Player Card van ${name}: ${stats.ovr ?? "geen"} OVR, ${EDITIONS[edition].name}`}
+      className={`player-card relative ${s.w} ${locked ? "opacity-40 grayscale" : ""}`}
+      style={{ background: st.bg, color: st.text }}
     >
-      <div className="pcard-art absolute inset-0" dangerouslySetInnerHTML={{ __html: cardArtSvg(edition, pix) }} />
+      {st.shine && !locked && <span className="player-card-shine" aria-hidden />}
+      <div className={`relative flex flex-col ${s.pad}`}>
+        <div className="flex items-start justify-between">
+          <div className="leading-none">
+            <p className={`pixel ${s.ovr} leading-none`}>{stats.ovr ?? "--"}</p>
+            <p className={`pixel mt-1 ${s.label}`} style={{ color: st.accent }}>
+              OVR
+            </p>
+            {stats.provisional && stats.ovr !== null && (
+              <p className={`mt-1 font-black uppercase ${s.label}`} style={{ color: st.accent }}>
+                voorlopig
+              </p>
+            )}
+          </div>
+          <p className={`pixel max-w-[60%] text-right uppercase leading-tight ${s.label}`} style={{ color: st.accent }}>
+            {season ? seasonLabel(season) : EDITIONS[edition].name}
+          </p>
+        </div>
 
-      {!pix && (
-        <div
-          className="absolute flex items-center justify-center"
-          style={{ left: em(L.avatar.x + 1), top: em(L.avatar.y + 1.2), width: em(L.avatar.size - 2), height: em(L.avatar.size - 2) }}
-          aria-hidden
-        >
+        <div className="mt-1 flex justify-center">
           <span
-            className="flex h-full w-full items-center justify-center leading-none"
-            style={{
-              fontSize: em(5.4),
-              background: emoji ? "transparent" : HEX[c],
-              borderRadius: "0.18em",
-              border: emoji ? "none" : "0.05em solid #1e1b2b",
-              color: "#fff",
-            }}
+            className={`${s.avatar} ${BG[c]} ${TEXT_ON[c]} pixel-avatar flex items-center justify-center leading-none`}
+            aria-hidden
           >
-            {emoji ?? <span className="pixel" style={{ fontSize: "0.5em" }}>{name.slice(0, 1).toUpperCase()}</span>}
+            {emoji ?? <span className="pixel text-[0.55em] uppercase">{name.slice(0, 1)}</span>}
           </span>
         </div>
-      )}
 
-      {/* Holo / glans */}
-      {(art.holo || art.shine) && !locked && (
-        <div className="pointer-events-none absolute inset-0" style={{ clipPath: CARD_CLIP }} aria-hidden>
-          {art.holo && <span className="pcard-holo" />}
-          {art.shine && <span className="player-card-shine" />}
-        </div>
-      )}
-
-      {/* Linkerkolom: OVR, hoofdgame, editie */}
-      <div className="absolute flex flex-col items-center" style={{ left: em(L.ovr.x), top: em(L.ovr.y), width: em(3.3) }}>
-        <span className="pixel leading-none" style={{ fontSize: em(L.ovr.size), textShadow: "0.06em 0.06em 0 rgba(0,0,0,.18)" }}>
-          {stats.ovr ?? "--"}
-        </span>
-        <span className="pixel leading-none" style={{ fontSize: em(L.ovrLabel.size), marginTop: em(0.35), color: art.accent }}>
-          OVR{stats.provisional && stats.ovr !== null ? "*" : ""}
-        </span>
-        <span className="leading-none" style={{ fontSize: em(L.game.size), marginTop: em(0.5) }} title="Meest gespeelde game">
-          {mainIcon ?? "🎲"}
-        </span>
-        <span
-          className="flex items-center justify-center leading-none"
-          style={{
-            fontSize: em(L.edition.size * 0.62),
-            marginTop: em(0.45),
-            width: em(1.55),
-            height: em(1.55),
-            borderRadius: "999px",
-            background: "rgba(30,27,43,.85)",
-            boxShadow: `0 0 0 0.12em ${art.ribbon}`,
-          }}
-          title={EDITIONS[edition].name}
-        >
-          {art.icon}
-        </span>
-      </div>
-
-      {/* Naam-lint */}
-      <div className="absolute inset-x-0 text-center text-white" style={{ top: em(L.ribbon.y), height: em(L.ribbon.h) }}>
-        <p className="pixel truncate px-[1.2em] uppercase leading-none" style={{ fontSize: em(nameSize(name)), marginTop: em(nameSize(name) === 1 ? 0.42 : 0.55) }}>
-          {name}
-        </p>
-        <p
-          className="absolute inset-x-0 truncate px-[1em] font-black uppercase leading-none tracking-wider"
-          style={{ fontSize: em(L.nick.size), top: em((L.nick.y - L.ribbon.y) / L.nick.size), color: art.ribbon }}
-        >
+        <p className={`pixel mt-2 truncate text-center uppercase ${s.name}`}>{name}</p>
+        <p className={`truncate text-center font-black uppercase tracking-wide ${s.label}`} style={{ color: st.accent }}>
           {nickname}
         </p>
-      </div>
 
-      {/* Attributen */}
-      {[0, 1].map((col) => (
-        <dl key={col} className="absolute" style={{ left: em(L.stats.cols[col]), top: em(L.stats.y), width: em(5.2) }}>
-          {list.slice(col * 3, col * 3 + 3).map(([v, l]) => (
-            <div key={l} className="flex items-baseline" style={{ height: em(L.stats.row) }}>
-              <dd className="pixel leading-none" style={{ fontSize: em(L.stats.valueSize), width: "2.4em" }}>
-                {v}
-              </dd>
-              <dt className="font-black leading-none" style={{ fontSize: em(L.stats.labelSize), color: art.accent }}>
+        <div className="my-1.5 h-[2px] w-full" style={{ background: st.accent, opacity: 0.5 }} />
+
+        <dl className={`grid gap-x-1 gap-y-1 text-center ${size === "lg" ? "grid-cols-4" : "grid-cols-2"}`}>
+          {(
+            [
+              [`${stats.winPct}%`, "WIN"],
+              [stats.games, "GAMES"],
+              [stats.streak, "STREAK"],
+              [stats.trophies, size === "lg" ? "TROPH." : "TROPHIES"],
+            ] as const
+          ).map(([v, l]) => (
+            <div key={l}>
+              <dd className={`pixel ${s.stat} leading-tight`}>{v}</dd>
+              <dt className={`font-black ${s.label}`} style={{ color: st.accent }}>
                 {l}
               </dt>
             </div>
           ))}
         </dl>
-      ))}
 
-      {/* Prijzen en voet */}
-      <p className="absolute inset-x-0 text-center font-black leading-none" style={{ top: em(L.trophies.y) }}>
-        <span style={{ fontSize: em(L.trophies.size), color: stats.trophies > 0 ? art.text : art.accent }}>
-          {stats.trophies > 0 ? `🏆 ×${stats.trophies}` : `${stats.winPct}% WINST`}
-        </span>
-      </p>
-      <p className="pixel absolute inset-x-0 text-center uppercase leading-none" style={{ top: em(L.footer.y) }}>
-        <span style={{ fontSize: em(L.footer.size), color: art.accent }}>{season ? seasonLabel(season) : EDITIONS[edition].name}</span>
-      </p>
-
+        <p className={`mt-1.5 text-center font-black uppercase tracking-wider ${s.label}`} style={{ color: st.accent }}>
+          Game Night · {EDITIONS[edition].name}
+        </p>
+      </div>
       {locked && (
-        <span className="absolute inset-0 flex items-center justify-center" style={{ fontSize: em(3) }} aria-label="nog niet vrijgespeeld">
+        <span className="absolute inset-0 flex items-center justify-center text-3xl" aria-label="nog niet vrijgespeeld">
           🔒
         </span>
       )}

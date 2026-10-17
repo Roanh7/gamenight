@@ -75,7 +75,7 @@ body {
     box-shadow: 0 1px 0 var(--color-line);
   }
   .btn:disabled {
-    opacity: 0.4;
+    opacity: 0.55;
     cursor: not-allowed;
   }
   .btn-primary {
@@ -409,32 +409,4 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .player-card-shine, .hub-avatar.glow, .hub-banner-neon { animation: none; }
-}
-
-/* Player Card (nieuw ontwerp) */
-.pcard {
-  filter: drop-shadow(0 0.32em 0 rgba(30, 27, 43, 0.9));
-  -webkit-user-select: none;
-}
-.pcard-art > svg { display: block; width: 100%; height: 100%; }
-.pcard-locked { filter: grayscale(1) opacity(0.45); }
-.pcard-holo {
-  position: absolute;
-  inset: -20%;
-  background: conic-gradient(from 0deg, #ff6bd6, #ffd36b, #6bffb0, #6bc8ff, #b06bff, #ff6bd6);
-  mix-blend-mode: soft-light;
-  opacity: 0.4;
-  animation: pcard-holo 6s linear infinite;
-}
-@keyframes pcard-holo {
-  to { transform: rotate(360deg); }
-}
-.avatar-pop { animation: avatar-pop 0.22s ease-out; }
-@keyframes avatar-pop {
-  0% { transform: scale(0.94); }
-  60% { transform: scale(1.04); }
-  100% { transform: scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pcard-holo, .avatar-pop { animation: none; }
 }

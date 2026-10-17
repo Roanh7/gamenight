@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -45,17 +44,14 @@ export function AvatarPicker({
   name,
   color,
   emoji,
-  config,
 }: {
   userId: string;
   name: string;
   color: string;
   emoji: string | null;
-  config?: unknown;
 }) {
   const router = useRouter();
   const [current, setCurrent] = useState(emoji);
-  const [pixel, setPixel] = useState(config ?? null);
   const [tab, setTab] = useState(() => Math.max(0, GROUPS.findIndex((g) => emoji && g.emojis.includes(emoji))));
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -66,14 +62,13 @@ export function AvatarPicker({
       const supabase = createClient();
       const { error } = await supabase
         .from("profiles")
-        .update({ avatar_emoji: next, avatar_url: null, avatar_config: null })
+        .update({ avatar_emoji: next, avatar_url: null })
         .eq("id", userId);
       if (error) {
         setError("Opslaan lukte niet.");
         return;
       }
       setCurrent(next);
-      setPixel(null);
       router.refresh();
     });
   }
@@ -81,21 +76,16 @@ export function AvatarPicker({
   return (
     <div>
       <span className="label">Avatar</span>
-      <div className="flex flex-wrap items-center gap-3">
-        <Avatar name={name} color={color} emoji={current} config={pixel} size="lg" />
-        <Link href="/account/avatar" className="btn btn-yellow btn-sm">
-          🎨 {pixel ? "Avatar aanpassen" : "Maak je eigen avatar"}
-        </Link>
-        {current && !pixel && (
+      <div className="flex items-center gap-3">
+        <Avatar name={name} color={color} emoji={current} size="lg" />
+        {current && (
           <button type="button" onClick={() => save(null)} disabled={pending} className="btn btn-secondary btn-sm">
             <RotateCcw size={14} strokeWidth={2.5} /> Terug naar letter
           </button>
         )}
       </div>
 
-      <p className="mb-1.5 mt-3 text-xs font-bold text-muted">
-        {pixel ? "Of kies toch een emoji (dan verdwijnt je gemaakte avatar):" : "Of kies een emoji:"}
-      </p>
+      <p className="mb-1.5 mt-3 text-xs font-bold text-muted">Kies een emoji:</p>
       <div className="-mx-1 mb-2 flex gap-1.5 overflow-x-auto px-1 pb-1" role="tablist">
         {GROUPS.map((g, i) => (
           <button

@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatScore } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
 
-type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; avatar_config?: unknown };
+type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null };
 type Entry = { user_id: string; round: number; points: number };
 
 export function ScoreBoard({
@@ -155,7 +155,7 @@ export function ScoreBoard({
               return (
                 <li key={p.id} className={`flex items-center gap-3 px-4 py-2.5 ${crown ? "bg-yellow-soft" : ""}`}>
                   <span className="pixel w-5 text-[11px] text-muted">{anyScore ? place : "–"}</span>
-                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} config={p.avatar_config} size="sm" crown={crown} />
+                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown={crown} />
                   <span className="min-w-0 flex-1 truncate font-black">{p.username}</span>
                   <span className="pixel text-base">{formatScore(t)}</span>
                 </li>
@@ -196,7 +196,7 @@ export function ScoreBoard({
             const key = `${p.id}:${round}`;
             return (
               <li key={key} className="flex items-center gap-2">
-                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} config={p.avatar_config} size="sm" />
+                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
                 <span className="min-w-0 flex-1 truncate text-sm font-bold">{p.username}</span>
                 <button
                   type="button"

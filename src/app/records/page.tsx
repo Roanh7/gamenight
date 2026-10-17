@@ -35,7 +35,7 @@ export default async function RecordsPage() {
       <div className="flex shrink-0 -space-x-1.5">
         {ids.slice(0, 3).map((id) => {
           const p = profiles.byId.get(id);
-          return p ? <Avatar key={id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} config={p.avatar_config} size="sm" /> : null;
+          return p ? <Avatar key={id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" /> : null;
         })}
       </div>
       <span className="truncate text-sm font-black">

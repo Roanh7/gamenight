@@ -16,7 +16,6 @@ export type Profile = {
   avatar_color: Color;
   avatar_url: string | null;
   avatar_emoji: string | null;
-  avatar_config?: unknown;
   favorite_card?: string | null;
   bio: string | null;
   created_at: string;

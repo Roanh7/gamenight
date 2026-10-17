@@ -76,7 +76,7 @@ export default async function PlayersPage() {
                         name={p.username}
                         color={p.avatar_color}
                         url={p.avatar_url}
-                        emoji={p.avatar_emoji} config={p.avatar_config}
+                        emoji={p.avatar_emoji}
                         size="xl"
                         crown={s?.rank === 1}
                       />

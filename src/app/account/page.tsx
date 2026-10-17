@@ -34,7 +34,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
           userId={me.user.id}
           name={profile.username}
           color={profile.avatar_color}
-          emoji={profile.avatar_emoji} config={profile.avatar_config}
+          emoji={profile.avatar_emoji}
         />
       </section>
       <details className="card overflow-hidden">

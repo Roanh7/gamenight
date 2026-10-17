@@ -280,7 +280,7 @@ async function Dashboard({
             <div className="flex -space-x-1.5">
               {nextParticipants.slice(0, 7).map((p) => {
                 const pr = profiles.byId.get(p.user_id);
-                return pr ? <Avatar key={p.user_id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} config={pr.avatar_config} size="sm" /> : null;
+                return pr ? <Avatar key={p.user_id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="sm" /> : null;
               })}
             </div>
             <span className="text-xs font-bold text-muted">{nextParticipants.length} aangemeld</span>

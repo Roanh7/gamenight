@@ -156,25 +156,7 @@ export const NICKNAMES: Record<string, string> = {
   Grootmeester: "THE GRANDMASTER",
 };
 
-/** Kaart-attributen (40–99), net als bij een voetbalkaart. */
-export type CardAttrs = { win: number; pos: number; all: number; vrm: number };
-
-export type CardStats = {
-  ovr: number | null;
-  provisional: boolean;
-  winPct: number;
-  games: number;
-  streak: number;
-  trophies: number;
-  attrs?: CardAttrs | null;
-  /** Meest gespeelde game */
-  mainGame?: string | null;
-};
-
-function attr(x: number, n: number) {
-  const adj = (x * n + PRIOR_VALUE * PRIOR_MATCHES) / (n + PRIOR_MATCHES);
-  return Math.max(40, Math.min(99, Math.round(45 + adj * 54)));
-}
+export type CardStats = { ovr: number | null; provisional: boolean; winPct: number; games: number; streak: number; trophies: number };
 
 export type SeasonCard = CardStats & { season: string; rank: number | null; edition: "standard" | "gold" };
 
@@ -189,19 +171,7 @@ function statsFor(rows: ResultRow[], userId: string, sizes: Map<string, number>,
   const rs = rows.filter((r) => r.user_id === userId);
   const wins = rs.filter((r) => r.is_winner).length;
   const o = computeOvr(rows, userId, sizes, games);
-  const count = new Map<string, number>();
-  for (const r of rs) count.set(r.game_id, (count.get(r.game_id) ?? 0) + 1);
-  const mainGame = [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
   return {
-    attrs: o
-      ? {
-          win: attr(o.parts.win, o.played),
-          pos: attr(o.parts.position, o.played),
-          all: attr(o.parts.versatility, o.played),
-          vrm: attr(o.parts.form, Math.min(o.played, 10)),
-        }
-      : null,
-    mainGame,
     ovr: o?.ovr ?? null,
     provisional: o?.provisional ?? true,
     winPct: rs.length ? Math.round((wins / rs.length) * 100) : 0,
