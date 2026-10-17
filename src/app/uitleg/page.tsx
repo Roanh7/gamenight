@@ -357,7 +357,7 @@ export default async function UitlegPage() {
             </li>
             <li>
               Je kunt er ook een <b>💬 comment</b> onder zetten. De laatste twee comments zie je meteen; tik op{" "}
-              <b>Laad alle comments</b> om de rest te zien. Je eigen comment haal je weg met het kruisje.
+              <b>Laad alle comments</b> om de rest te zien. Ook onder een comment kun je met een emoji reageren. Je eigen comment haal je weg met het kruisje.
             </li>
           </ul>
         </Section>

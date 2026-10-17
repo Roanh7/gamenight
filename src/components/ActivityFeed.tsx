@@ -201,6 +201,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                   <Comments
                     activityId={a.id}
                     userId={me.id}
+                    myName={me.name}
                     initial={comments?.get(a.id) ?? { count: 0, latest: [] }}
                   />
                 </>

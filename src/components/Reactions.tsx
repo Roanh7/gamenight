@@ -2,22 +2,26 @@
 
 import { useState } from "react";
 import { SmilePlus } from "lucide-react";
-import { toggleReaction } from "@/app/social-actions";
+import { toggleCommentReaction, toggleReaction } from "@/app/social-actions";
 
 export const REACTION_EMOJIS = ["🔥", "😂", "👏", "🧂", "💀", "👑"] as const;
 
 type Counts = Record<string, { n: number; mine: boolean; names: string[] }>;
 
-/** Emoji-reacties onder een nieuwsbericht; werkt direct (optimistisch). */
+/** Emoji-reacties onder een nieuwsbericht of een comment; werkt direct (optimistisch). */
 export function Reactions({
   activityId,
+  commentId,
   myName,
   initial,
+  small,
 }: {
-  activityId: number;
-  userId: string;
+  activityId?: number;
+  commentId?: number;
+  userId?: string;
   myName: string;
   initial: Counts;
+  small?: boolean;
 }) {
   const [counts, setCounts] = useState<Counts>(initial);
   const [open, setOpen] = useState(false);
@@ -32,14 +36,17 @@ export function Reactions({
     };
     setCounts(next);
     setOpen(false);
-    const res = await toggleReaction(activityId, emoji, !cur.mine).catch(() => ({ ok: false }));
+    const res = await (commentId
+      ? toggleCommentReaction(commentId, emoji, !cur.mine)
+      : toggleReaction(activityId!, emoji, !cur.mine)
+    ).catch(() => ({ ok: false }));
     if (!res.ok) setCounts(counts); // terugdraaien bij fout
   }
 
   const shown = REACTION_EMOJIS.filter((e) => (counts[e]?.n ?? 0) > 0);
 
   return (
-    <div className="mt-1.5 flex flex-wrap items-center gap-1">
+    <div className={`flex flex-wrap items-center gap-1 ${small ? "mt-0.5" : "mt-1.5"}`}>
       {shown.map((e) => (
         <button
           key={e}
@@ -47,11 +54,11 @@ export function Reactions({
           onClick={() => toggle(e)}
           title={counts[e].names.join(", ")}
           aria-pressed={counts[e].mine}
-          className={`inline-flex h-7 items-center gap-1 rounded-full border-2 px-2 text-xs font-black ${
+          className={`inline-flex items-center gap-1 rounded-full border-2 font-black ${small ? "h-6 px-1.5 text-[11px]" : "h-7 px-2 text-xs"} ${
             counts[e].mine ? "border-line bg-yellow-soft" : "border-soft bg-paper"
           }`}
         >
-          <span className="text-sm leading-none">{e}</span>
+          <span className={`leading-none ${small ? "text-xs" : "text-sm"}`}>{e}</span>
           {counts[e].n}
         </button>
       ))}
@@ -62,7 +69,7 @@ export function Reactions({
               key={e}
               type="button"
               onClick={() => toggle(e)}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-base hover:bg-cream"
+              className={`flex items-center justify-center rounded-full hover:bg-cream ${small ? "h-6 w-6 text-sm" : "h-7 w-7 text-base"}`}
               aria-label={`Reageer met ${e}`}
             >
               {e}
@@ -73,10 +80,10 @@ export function Reactions({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-cream hover:text-ink"
+          className={`inline-flex items-center justify-center rounded-full text-muted hover:bg-cream hover:text-ink ${small ? "h-6 w-6" : "h-7 w-7"}`}
           aria-label="Reageren"
         >
-          <SmilePlus size={16} strokeWidth={2.5} />
+          <SmilePlus size={small ? 14 : 16} strokeWidth={2.5} />
         </button>
       )}
     </div>

@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { MessageCircle, Send, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { COMMENT_SELECT, type CommentRow } from "@/lib/comments";
+import { COMMENT_SELECT, countReactions, type CommentRow } from "@/lib/comments";
+import { Reactions } from "./Reactions";
 import { addComment, deleteComment } from "@/app/social-actions";
 import { timeAgo } from "@/lib/format";
 import { Avatar } from "./Avatar";
@@ -12,10 +13,12 @@ import { Avatar } from "./Avatar";
 export function Comments({
   activityId,
   userId,
+  myName,
   initial,
 }: {
   activityId: number;
   userId: string;
+  myName: string;
   initial: { count: number; latest: CommentRow[] };
 }) {
   const [list, setList] = useState<CommentRow[]>(initial.latest);
@@ -95,6 +98,12 @@ export function Comments({
                   <span className="whitespace-pre-line break-words">{c.body}</span>
                 </p>
                 <p className="text-[10px] text-muted">{timeAgo(c.created_at)}</p>
+                <Reactions
+                  commentId={c.id}
+                  myName={myName}
+                  initial={countReactions(c.comment_reactions, userId)}
+                  small
+                />
               </div>
               {c.user_id === userId && (
                 <button

@@ -78,6 +78,43 @@ export async function addComment(activityId: number, body: string) {
   return { ok: true as const, comment: data as unknown as CommentRow };
 }
 
+/** Emoji-reactie op een comment. De schrijver van de comment krijgt een melding. */
+export async function toggleCommentReaction(commentId: number, emoji: string, on: boolean) {
+  const ctx = await me();
+  if (!ctx || !EMOJIS.includes(emoji)) return { ok: false };
+  const { supabase, user, name } = ctx;
+  const { error } = on
+    ? await supabase.from("comment_reactions").insert({ comment_id: commentId, user_id: user.id, emoji })
+    : await supabase
+        .from("comment_reactions")
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("user_id", user.id)
+        .eq("emoji", emoji);
+  if (error && !error.message.includes("duplicate")) return { ok: false };
+  if (on && !error) {
+    const { data: c } = await supabase
+      .from("comments")
+      .select("user_id, activity_id, body")
+      .eq("id", commentId)
+      .maybeSingle();
+    if (c) {
+      const body = String(c.body);
+      pushLater(
+        [c.user_id as string],
+        {
+          title: `${emoji} ${name} reageerde op je comment`,
+          body: `"${body.length > 80 ? body.slice(0, 80) + "…" : body}"`,
+          url: `/nieuws#a-${c.activity_id}`,
+          tag: `comment-reactie-${commentId}`,
+        },
+        user.id,
+      );
+    }
+  }
+  return { ok: true };
+}
+
 export async function deleteComment(id: number) {
   const ctx = await me();
   if (!ctx) return { ok: false };
