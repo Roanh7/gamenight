@@ -11,7 +11,8 @@ function ready() {
   const priv = process.env.VAPID_PRIVATE_KEY;
   if (!pub || !priv || !process.env.PUSH_SECRET) return false;
   if (!configured) {
-    webpush.setVapidDetails("mailto:gamenight@example.invalid", pub, priv);
+    // Apple wil een echt adres als afzender, anders weigert hij de melding (BadJwtToken)
+    webpush.setVapidDetails("https://gamenight-theta.vercel.app", pub.trim(), priv.trim());
     configured = true;
   }
   return true;
@@ -24,43 +25,63 @@ function db() {
   });
 }
 
+export type PushReport = { sent: number; devices: number; problems: string[] };
+
 /**
  * Stuurt een melding naar de toestellen van deze spelers (of iedereen als `users` null is),
  * behalve naar `except`. Gooit nooit een fout: een melding mag de app niet laten haperen.
  */
-export async function sendPush(users: string[] | null, message: PushMessage, except?: string | null) {
-  if (!ready()) return 0;
+export async function sendPushReport(
+  users: string[] | null,
+  message: PushMessage,
+  except?: string | null,
+): Promise<PushReport> {
+  const report: PushReport = { sent: 0, devices: 0, problems: [] };
+  if (!ready()) {
+    report.problems.push("sleutels ontbreken op de server");
+    return report;
+  }
   const targets = users?.filter((u) => u && u !== except) ?? null;
-  if (targets && targets.length === 0) return 0;
+  if (targets && targets.length === 0) return report;
   const client = db();
   const { data, error } = await client.rpc("push_targets", {
-    p_secret: process.env.PUSH_SECRET!,
+    p_secret: process.env.PUSH_SECRET!.trim(),
     p_users: targets,
   });
-  if (error || !data) return 0;
+  if (error || !data) {
+    report.problems.push(`database: ${error?.message ?? "geen antwoord"}`);
+    console.error("[push] push_targets", error);
+    return report;
+  }
   const subs = (data as { user_id: string; endpoint: string; p256dh: string; auth: string }[]).filter(
     (s) => s.user_id !== except,
   );
+  report.devices = subs.length;
   const payload = JSON.stringify(message);
-  let sent = 0;
   await Promise.all(
     subs.map(async (s) => {
       try {
         await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, {
           TTL: 60 * 60 * 6,
-          urgency: "normal",
+          urgency: "high",
         });
-        sent++;
+        report.sent++;
       } catch (e) {
-        const code = (e as { statusCode?: number }).statusCode;
+        const err = e as { statusCode?: number; body?: string; message?: string };
+        report.problems.push(`${new URL(s.endpoint).host}: ${err.statusCode ?? ""} ${err.body || err.message || ""}`.trim());
+        console.error("[push] versturen mislukt", err.statusCode, err.body || err.message);
         // 404/410: het toestel heeft de meldingen uitgezet of de app verwijderd
-        if (code === 404 || code === 410) {
-          await client.rpc("push_forget", { p_secret: process.env.PUSH_SECRET!, p_endpoint: s.endpoint });
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          await client.rpc("push_forget", { p_secret: process.env.PUSH_SECRET!.trim(), p_endpoint: s.endpoint });
         }
       }
     }),
   );
-  return sent;
+  return report;
+}
+
+export async function sendPush(users: string[] | null, message: PushMessage, except?: string | null) {
+  return (await sendPushReport(users, message, except)).sent;
 }
 
 /** Zelfde als sendPush, maar pas nadat de pagina al terug is (de gebruiker wacht er niet op). */

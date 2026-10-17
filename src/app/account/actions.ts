@@ -47,15 +47,15 @@ export async function changePassword(formData: FormData) {
   redirect(`/account?ok=${encodeURIComponent("Wachtwoord gewijzigd")}`);
 }
 
-/** Testmelding naar je eigen toestellen. */
+/** Testmelding naar je eigen toestellen; geeft terug wat er gebeurde. */
 export async function sendTestPush() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return 0;
-  const { sendPush } = await import("@/lib/push");
-  return sendPush([user.id], {
+  if (!user) return { sent: 0, devices: 0, problems: ["niet ingelogd"] };
+  const { sendPushReport } = await import("@/lib/push");
+  return sendPushReport([user.id], {
     title: "🎮 Game Night",
     body: "Het werkt! Zo krijg je straks meldingen over gamenights.",
     url: "/account",

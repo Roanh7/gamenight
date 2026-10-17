@@ -93,8 +93,12 @@ export function PushToggle() {
   async function test() {
     setBusy(true);
     setNote(null);
-    const n = await sendTestPush().catch(() => 0);
-    setNote(n ? "Testmelding verstuurd! 📬" : "Er ging geen melding uit. Zet ze uit en weer aan.");
+    const r = await sendTestPush().catch(() => null);
+    if (!r) setNote("De server reageerde niet. Probeer het zo nog eens.");
+    else if (r.sent) setNote("Testmelding verstuurd! 📬 Hij kan een paar seconden onderweg zijn.");
+    else if (!r.devices && !r.problems.length)
+      setNote("Dit toestel staat nog niet geregistreerd. Tik op Uitzetten en zet ze daarna weer aan.");
+    else setNote(`Er ging geen melding uit (${r.problems.join("; ").slice(0, 160)}).`);
     setBusy(false);
   }
 
