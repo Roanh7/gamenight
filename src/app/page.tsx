@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Gamepad2, Newspaper, Plus, Trophy, Vote } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getActivity, getGames, getProfiles, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
+import { getActivity, getGames, getProfiles, getComments, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
 import { currentBountyTarget, currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
@@ -167,7 +167,10 @@ async function Dashboard({
     ? await supabase.from("game_nights").select("id, title").in("id", nightIds)
     : { data: [] };
   const nightsById = new Map((feedNights ?? []).map((n) => [n.id, n]));
-  const reactions = await getReactions(supabase, activity.map((a) => a.id), userId, profiles.byId);
+  const [reactions, comments] = await Promise.all([
+    getReactions(supabase, activity.map((a) => a.id), userId, profiles.byId),
+    getComments(supabase, activity.map((a) => a.id)),
+  ]);
 
   const season = currentSeason();
   const overall = standings(filterSeason(results, season));
@@ -348,6 +351,7 @@ async function Dashboard({
           nights={nightsById}
           me={{ id: userId, name: username }}
           reactions={reactions}
+          comments={comments}
         />
       ) : (
         <EmptyState icon={<Newspaper size={32} />} title="Nog geen nieuws" text="Hier zie je straks wie er wint en stijgt." />

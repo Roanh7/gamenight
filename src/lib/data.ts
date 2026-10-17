@@ -187,3 +187,25 @@ export async function getResults(supabase: DB) {
     } as ResultRow;
   });
 }
+
+import { COMMENT_SELECT, type CommentRow } from "./comments";
+export type { CommentRow };
+
+/** Per nieuwsbericht: hoeveel comments, plus de laatste 2 om alvast te tonen. */
+export async function getComments(supabase: DB, activityIds: number[]) {
+  const out = new Map<number, { count: number; latest: CommentRow[] }>();
+  if (!activityIds.length) return out;
+  const { data } = await supabase
+    .from("comments")
+    .select(COMMENT_SELECT)
+    .in("activity_id", activityIds)
+    .order("created_at", { ascending: true })
+    .limit(2000);
+  for (const c of (data ?? []) as unknown as CommentRow[]) {
+    const e = out.get(c.activity_id) ?? { count: 0, latest: [] };
+    e.count += 1;
+    e.latest = [...e.latest, c].slice(-2);
+    out.set(c.activity_id, e);
+  }
+  return out;
+}

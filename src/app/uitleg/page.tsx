@@ -355,6 +355,10 @@ export default async function UitlegPage() {
               Onder elk nieuwsbericht kun je <b>reageren</b> met een emoji (🔥 😂 👏 🧂 💀 👑). Tik op het
               smiley-knopje; nog eens tikken op je emoji haalt hem weg.
             </li>
+            <li>
+              Je kunt er ook een <b>💬 comment</b> onder zetten. De laatste twee comments zie je meteen; tik op{" "}
+              <b>Laad alle comments</b> om de rest te zien. Je eigen comment haal je weg met het kruisje.
+            </li>
           </ul>
         </Section>
 
@@ -399,7 +403,7 @@ export default async function UitlegPage() {
             <li>
               <b>🔔 Meldingen:</b> zet ze aan op je account (of via het kaartje op Home). Je krijgt dan een melding bij
               een nieuwe gamenight, als de host je bevestigt, als de datum vaststaat, als de avond begint, als de recap
-              klaarstaat, en <b>een uur van tevoren</b>. De host krijgt een melding als iemand wil meedoen, en iedereen krijgt er een als er een nieuwe speler bij komt. Op de iPhone
+              klaarstaat, en <b>een uur van tevoren</b>. De host krijgt een melding als iemand wil meedoen, en iedereen krijgt er een als er een nieuwe speler bij komt. Reageert of commentet iemand op een bericht over jou (bijv. jouw zege), dan hoor je dat ook; net als wanneer iemand antwoordt in een gesprek waar jij al in commentte. Op de iPhone
               werkt dit alleen als de app op je beginscherm staat.
             </li>
             <li>

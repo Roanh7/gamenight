@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Newspaper } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getActivity, getGames, getProfiles, getReactions } from "@/lib/data";
+import { getActivity, getComments, getGames, getProfiles, getReactions } from "@/lib/data";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { EmptyState, PageHeader } from "@/components/ui";
 
@@ -21,7 +21,12 @@ export default async function NieuwsPage() {
     ? await supabase.from("game_nights").select("id, title").in("id", nightIds)
     : { data: [] };
   const nightsById = new Map((nights ?? []).map((n) => [n.id, n]));
-  const reactions = me ? await getReactions(supabase, activity.map((a) => a.id), me.user.id, profiles.byId) : undefined;
+  const [reactions, comments] = me
+    ? await Promise.all([
+        getReactions(supabase, activity.map((a) => a.id), me.user.id, profiles.byId),
+        getComments(supabase, activity.map((a) => a.id)),
+      ])
+    : [undefined, undefined];
 
   return (
     <div>
@@ -35,6 +40,7 @@ export default async function NieuwsPage() {
             nights={nightsById}
             me={me ? { id: me.user.id, name: me.profile.username } : undefined}
             reactions={reactions}
+            comments={comments}
           />
           {activity.length === 100 && (
             <p className="mt-3 text-center text-xs text-muted">Je ziet de laatste 100 berichten.</p>

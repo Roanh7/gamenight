@@ -475,6 +475,38 @@ begin
     rep := rep || case when hit then 'OK' else 'FAIL' end || E' 30f nieuwe tijd = nieuwe herinnering\n';
   end;
 
+  -- 31. Comments
+  declare
+    act bigint;
+    cid bigint;
+  begin
+    select id into act from public.activity order by id desc limit 1;
+    perform set_config('request.jwt.claims', json_build_object('sub', ua, 'role', 'authenticated')::text, true);
+    perform set_config('request.jwt.claim.sub', ua::text, true);
+    set local role authenticated;
+    insert into public.comments (activity_id, body) values (act, 'ZzMooi gespeeld!') returning id into cid;
+    begin
+      insert into public.comments (activity_id, user_id, body) values (act, ub, 'ZzNamens B');
+      rep := rep || E'FAIL 31 comment namens een ander\n';
+    exception when others then rep := rep || E'OK 31 geen comments namens anderen\n';
+    end;
+    begin
+      insert into public.comments (activity_id, body) values (act, '   ');
+      rep := rep || E'FAIL 31b lege comment toegestaan\n';
+    exception when others then rep := rep || E'OK 31b lege comment geweigerd\n';
+    end;
+    reset role;
+    perform set_config('request.jwt.claims', json_build_object('sub', ub, 'role', 'authenticated')::text, true);
+    perform set_config('request.jwt.claim.sub', ub::text, true);
+    set local role authenticated;
+    select count(*) into cnt from public.comments where id = cid;
+    rep := rep || case when cnt = 1 then 'OK' else 'FAIL' end || E' 31c iedereen ziet de comment\n';
+    delete from public.comments where id = cid;
+    reset role;
+    select count(*) into cnt from public.comments where id = cid;
+    rep := rep || case when cnt = 1 then 'OK' else 'FAIL' end || E' 31d andermans comment niet te verwijderen\n';
+  end;
+
   -- 22. Niet ingelogd
   set local role anon;
   begin

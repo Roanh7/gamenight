@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SmilePlus } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { toggleReaction } from "@/app/social-actions";
 
 export const REACTION_EMOJIS = ["🔥", "😂", "👏", "🧂", "💀", "👑"] as const;
 
@@ -11,7 +11,6 @@ type Counts = Record<string, { n: number; mine: boolean; names: string[] }>;
 /** Emoji-reacties onder een nieuwsbericht; werkt direct (optimistisch). */
 export function Reactions({
   activityId,
-  userId,
   myName,
   initial,
 }: {
@@ -33,11 +32,8 @@ export function Reactions({
     };
     setCounts(next);
     setOpen(false);
-    const supabase = createClient();
-    const { error } = cur.mine
-      ? await supabase.from("reactions").delete().eq("activity_id", activityId).eq("user_id", userId).eq("emoji", emoji)
-      : await supabase.from("reactions").insert({ activity_id: activityId, user_id: userId, emoji });
-    if (error && !error.message.includes("duplicate")) setCounts(counts); // terugdraaien bij fout
+    const res = await toggleReaction(activityId, emoji, !cur.mine).catch(() => ({ ok: false }));
+    if (!res.ok) setCounts(counts); // terugdraaien bij fout
   }
 
   const shown = REACTION_EMOJIS.filter((e) => (counts[e]?.n ?? 0) > 0);

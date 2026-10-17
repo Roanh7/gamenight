@@ -4,6 +4,8 @@ import type { Activity, Game, GameNight, Profile } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import { Avatar } from "./Avatar";
 import { Reactions } from "./Reactions";
+import { Comments } from "./Comments";
+import type { CommentRow } from "@/lib/comments";
 
 type Props = {
   items: Activity[];
@@ -12,11 +14,12 @@ type Props = {
   nights: Map<string, Pick<GameNight, "id" | "title">>;
   me?: { id: string; name: string };
   reactions?: Map<number, Record<string, { n: number; mine: boolean; names: string[] }>>;
+  comments?: Map<number, { count: number; latest: CommentRow[] }>;
 };
 
 type RecapStat = { user_id: string; points: number; wins: number; played: number; last: number };
 
-export function ActivityFeed({ items, profiles, games, nights, me, reactions }: Props) {
+export function ActivityFeed({ items, profiles, games, nights, me, reactions, comments }: Props) {
   return (
     <ul className="card divide-y-2 divide-soft overflow-hidden">
       {items.map((a) => {
@@ -172,7 +175,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions }: 
         }
 
         return (
-          <li key={a.id} className="flex items-start gap-3 px-4 py-3">
+          <li key={a.id} id={`a-${a.id}`} className="flex scroll-mt-20 items-start gap-3 px-4 py-3">
             <div className="relative">
               {actor ? (
                 <Avatar name={actor.username} color={actor.avatar_color} url={actor.avatar_url} emoji={actor.avatar_emoji} size="sm" />
@@ -193,7 +196,14 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions }: 
               <p className="text-sm leading-snug">{text}</p>
               <p className="mt-0.5 text-xs text-muted">{timeAgo(a.created_at)}</p>
               {me && (
-                <Reactions activityId={a.id} userId={me.id} myName={me.name} initial={reactions?.get(a.id) ?? {}} />
+                <>
+                  <Reactions activityId={a.id} userId={me.id} myName={me.name} initial={reactions?.get(a.id) ?? {}} />
+                  <Comments
+                    activityId={a.id}
+                    userId={me.id}
+                    initial={comments?.get(a.id) ?? { count: 0, latest: [] }}
+                  />
+                </>
               )}
             </div>
           </li>
