@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { COLORS } from "@/lib/types";
+import { pushLater } from "@/lib/push";
 
 export type AuthState = { error?: string; info?: string } | undefined;
 
@@ -61,6 +62,20 @@ export async function signup(_: AuthState, formData: FormData): Promise<AuthStat
       emailRedirectTo: `${origin}/auth/callback`,
     },
   });
+
+  if (!error && data.user) {
+    // Iedereen (behalve de nieuwe speler zelf) hoort dat er iemand bij is gekomen
+    pushLater(
+      null,
+      {
+        title: `👋 ${username} doet nu mee!`,
+        body: "Er is een nieuwe speler bij Game Night. Tijd voor een potje?",
+        url: `/spelers/${username}`,
+        tag: `nieuw-${data.user.id}`,
+      },
+      data.user.id,
+    );
+  }
 
   if (error) {
     const msg = error.message.toLowerCase();

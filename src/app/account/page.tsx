@@ -87,7 +87,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
         <p className="mb-2 font-black">🔔 Meldingen op dit toestel</p>
         <PushToggle />
         <p className="mt-2 text-xs text-muted">
-          Bij een nieuwe gamenight, als je bevestigd bent, als de datum vaststaat, als de avond begint, de recap, en
+          Bij een nieuwe gamenight, een nieuwe speler, als je bevestigd bent, als de datum vaststaat, als de avond begint, de recap, en
           een uur van tevoren.
         </p>
       </div>

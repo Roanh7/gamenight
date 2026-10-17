@@ -399,7 +399,7 @@ export default async function UitlegPage() {
             <li>
               <b>🔔 Meldingen:</b> zet ze aan op je account (of via het kaartje op Home). Je krijgt dan een melding bij
               een nieuwe gamenight, als de host je bevestigt, als de datum vaststaat, als de avond begint, als de recap
-              klaarstaat, en <b>een uur van tevoren</b>. De host krijgt een melding als iemand wil meedoen. Op de iPhone
+              klaarstaat, en <b>een uur van tevoren</b>. De host krijgt een melding als iemand wil meedoen, en iedereen krijgt er een als er een nieuwe speler bij komt. Op de iPhone
               werkt dit alleen als de app op je beginscherm staat.
             </li>
             <li>
