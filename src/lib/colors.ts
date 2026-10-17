@@ -52,3 +52,14 @@ export function safeColor(c: string | null | undefined): Color {
     ? (c as Color)
     : "red";
 }
+
+export const HEX: Record<Color, string> = {
+  red: "#e4002b",
+  blue: "#2f5de0",
+  green: "#22a04b",
+  yellow: "#ffc527",
+  purple: "#7b4fd6",
+  orange: "#f5761a",
+  pink: "#e6489b",
+  teal: "#12a3a0",
+};

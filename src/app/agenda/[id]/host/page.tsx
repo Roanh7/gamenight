@@ -151,7 +151,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                         className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-paper px-2 py-2 has-[:checked]:bg-green-soft"
                       >
                         <input type="checkbox" name="players" value={p.user_id} defaultChecked className="h-4 w-4 accent-[#22a04b]" />
-                        <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
+                        <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} config={pr.avatar_config} size="xs" />
                         <span className="truncate text-sm font-bold">{pr.username}</span>
                       </label>
                     );
@@ -246,7 +246,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
           if (!pr) return null;
           return (
             <div key={p.user_id} className="flex items-center gap-3 px-3 py-2.5">
-              <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="sm" />
+              <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} config={pr.avatar_config} size="sm" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-black">{pr.username}</p>
                 <p className="text-xs font-bold text-muted">

@@ -1,10 +1,13 @@
 import { BG, TEXT_ON, safeColor } from "@/lib/colors";
+import { parseAvatar } from "@/lib/avatar";
+import { PixelAvatar } from "./PixelAvatar";
 
 type Props = {
   name: string;
   color?: string | null;
   url?: string | null;
   emoji?: string | null;
+  config?: unknown;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   crown?: boolean;
 };
@@ -17,13 +20,18 @@ const SIZES = {
   xl: { box: "h-20 w-20 rounded-2xl", text: "text-xl", emoji: "text-[44px]" },
 };
 
-/** Profielfoto, emoji, of de eerste letter in je eigen kleur. */
-export function Avatar({ name, color, url, emoji, size = "md", crown }: Props) {
+/** Zelfgemaakte pixel-avatar, emoji, of de eerste letter in je eigen kleur. */
+export function Avatar({ name, color, url, emoji, config, size = "md", crown }: Props) {
   const c = safeColor(color);
   const s = SIZES[size];
+  const pix = parseAvatar(config);
   return (
     <span className="relative inline-flex shrink-0">
-      {url ? (
+      {pix ? (
+        <span className={`${s.box} inline-flex overflow-hidden border-2 border-line`} aria-hidden>
+          <PixelAvatar config={pix} className="h-full w-full" />
+        </span>
+      ) : url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={url}

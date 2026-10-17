@@ -31,10 +31,11 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
         <PlayerCard
           name={p.username}
           color={p.avatar_color}
-          emoji={p.avatar_emoji}
+          emoji={p.avatar_emoji} config={p.avatar_config}
           nickname={nickname}
           edition={shown.edition}
           stats={shown.stats}
+          mainIcon={data.iconOf(shown.stats)}
           season={shown.season}
           size="lg"
         />
@@ -68,10 +69,11 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
             <PlayerCard
               name={p.username}
               color={p.avatar_color}
-              emoji={p.avatar_emoji}
+              emoji={p.avatar_emoji} config={p.avatar_config}
               nickname={nickname}
               edition={e}
               stats={col.current}
+              mainIcon={data.iconOf(col.current)}
               size="sm"
               locked={!col.earned[e]}
             />
@@ -89,10 +91,11 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
                 <PlayerCard
                   name={p.username}
                   color={p.avatar_color}
-                  emoji={p.avatar_emoji}
+                  emoji={p.avatar_emoji} config={p.avatar_config}
                   nickname={s.rank ? `#${s.rank} IN ${seasonLabel(s.season).toUpperCase()}` : nickname}
                   edition={s.edition}
                   stats={s}
+                  mainIcon={data.iconOf(s)}
                   season={s.season}
                   size="sm"
                 />

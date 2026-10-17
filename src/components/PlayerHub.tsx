@@ -5,6 +5,8 @@ import type { FormLetter } from "@/lib/player";
 import { nextReward } from "@/lib/player";
 import { BG, TEXT_ON, safeColor } from "@/lib/colors";
 import { Avatar } from "./Avatar";
+import { PixelAvatar } from "./PixelAvatar";
+import { parseAvatar } from "@/lib/avatar";
 
 const HEX: Record<string, string> = {
   red: "#e4002b",
@@ -46,6 +48,7 @@ export function PlayerHub({
   isChampion: boolean;
 }) {
   const c = safeColor(me.avatar_color);
+  const pix = parseAvatar(me.avatar_config);
   const reward = nextReward(xp.level);
   const banner = xp.level >= 7 ? "hub-banner-neon" : xp.level >= 3 ? "bg-red hub-banner-pixel" : "bg-red";
   const avatarFx = [
@@ -69,13 +72,28 @@ export function PlayerHub({
           )}
         </div>
         <div className="mt-3 flex items-center gap-4">
-          <span
-            className={`hub-avatar ${avatarFx} ${BG[c]} ${TEXT_ON[c]} flex h-24 w-24 shrink-0 items-center justify-center text-[54px] leading-none`}
-            style={{ ["--hub-ring" as string]: HEX[c] }}
-            aria-hidden
-          >
-            {me.avatar_emoji ?? <span className="pixel text-3xl uppercase">{me.username.slice(0, 1)}</span>}
-          </span>
+          {pix ? (
+            <Link
+              href="/account/avatar"
+              className={`hub-avatar ${avatarFx} block h-24 w-24 shrink-0 overflow-hidden`}
+              style={{ ["--hub-ring" as string]: HEX[c] }}
+              aria-label="Avatar aanpassen"
+            >
+              <PixelAvatar config={pix} className="h-full w-full" />
+            </Link>
+          ) : (
+            <Link
+              href="/account/avatar"
+              className={`hub-avatar ${avatarFx} ${BG[c]} ${TEXT_ON[c]} relative flex h-24 w-24 shrink-0 items-center justify-center text-[54px] leading-none`}
+              style={{ ["--hub-ring" as string]: HEX[c] }}
+              aria-label="Maak je eigen avatar"
+            >
+              {me.avatar_emoji ?? <span className="pixel text-3xl uppercase">{me.username.slice(0, 1)}</span>}
+              <span className="pixel absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border-2 border-line bg-yellow px-1 py-0.5 text-[7px] text-night">
+                + MAAK
+              </span>
+            </Link>
+          )}
           <div className="min-w-0">
             <p className="pixel text-[9px] opacity-90">{welcome ? "NEW PLAYER JOINED!" : "WELCOME BACK, PLAYER 1"}</p>
             <h1 className="mt-1 truncate text-3xl font-black leading-none">{me.username}</h1>
@@ -160,7 +178,7 @@ export function PlayerHub({
                 <Avatar
                   name={rival.profile.username}
                   color={rival.profile.avatar_color}
-                  emoji={rival.profile.avatar_emoji}
+                  emoji={rival.profile.avatar_emoji} config={rival.profile.avatar_config}
                   size="sm"
                 />
                 <div className="min-w-0">
@@ -184,7 +202,7 @@ export function PlayerHub({
                 <Avatar
                   name={leader.profile.username}
                   color={leader.profile.avatar_color}
-                  emoji={leader.profile.avatar_emoji}
+                  emoji={leader.profile.avatar_emoji} config={leader.profile.avatar_config}
                   size="sm"
                   crown
                 />

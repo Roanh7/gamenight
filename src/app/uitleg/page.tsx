@@ -398,6 +398,12 @@ export default async function UitlegPage() {
               = gedeelde eerste plek), je grootste rivaal en de koploper. Daaronder eerst het nieuws over jou.
             </li>
             <li>
+              <b>🎨 Maak je eigen avatar:</b> tik op je avatar in de Player Hub (of op je account op{" "}
+              <i>Maak je eigen avatar</i>). Kies huidskleur, ogen, mond, kapsel en haarkleur, baard, pet of kroon,
+              bril, kleding en achtergrond. Met 🎲 krijg je een willekeurige. Je poppetje staat daarna overal in de app
+              en groot op je Player Card.
+            </li>
+            <li>
               Je avatar groeit mee: vanaf level 5 een gekleurde rand, vanaf level 10 een bewegend effect en als
               seizoenskampioen een gouden rand. Vanaf level 3 krijg je een pixel-banner, vanaf level 7 een neon-banner.
             </li>
@@ -408,7 +414,13 @@ export default async function UitlegPage() {
             <li>
               <b>Player Cards:</b> iedereen heeft een verzamelkaart met een <b>OVR</b> (40–99): winpercentage 35%,
               gemiddelde eindpositie 25%, prestaties over verschillende games 20% en recente vorm 20%. Met minder dan 10
-              potjes is je OVR nog voorlopig.
+              potjes is je OVR nog voorlopig (dan staat er een * bij).
+            </li>
+            <li>
+              Op de kaart staan ook zes cijfers: <b>WIN</b> (hoe vaak je wint), <b>POS</b> (je gemiddelde plek),{" "}
+              <b>ALL</b> (hoe goed je in verschillende games bent), <b>FRM</b> (je vorm in de laatste 10 potjes),{" "}
+              <b>GMS</b> (aantal gespeelde potjes) en <b>STK</b> (je langste winstreeks). Links staat het icoon van de
+              game die je het meest speelt, en onderaan je trofeeën.
             </li>
             <li>
               Speciale edities speel je vrij: <b>Gold</b> (seizoen gewonnen), <b>Rivalry</b> (10 keer dezelfde
@@ -433,7 +445,7 @@ export default async function UitlegPage() {
             </li>
             <li>
               Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>. Daar kies je ook je{" "}
-              <b>avatar</b>: een emoji, of gewoon je letter.
+              <b>avatar</b>: maak je eigen pixel-poppetje, of kies een emoji of gewoon je letter.
             </li>
             <li>
               <b>🔔 Meldingen:</b> zet ze aan op je account (of via het kaartje op Home). Je krijgt dan een melding bij

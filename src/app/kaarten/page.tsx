@@ -74,10 +74,11 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
                 <PlayerCard
                   name={p.username}
                   color={p.avatar_color}
-                  emoji={p.avatar_emoji}
+                  emoji={p.avatar_emoji} config={p.avatar_config}
                   nickname={c.nickname}
                   edition={c.shown.edition}
                   stats={c.shown.stats}
+                  mainIcon={data.iconOf(c.shown.stats)}
                   season={c.shown.season}
                   size="sm"
                 />
@@ -99,10 +100,11 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
         <PlayerCard
           name={me.profile.username}
           color={me.profile.avatar_color}
-          emoji={me.profile.avatar_emoji}
+          emoji={me.profile.avatar_emoji} config={me.profile.avatar_config}
           nickname={nickname}
           edition={mine.shown.edition}
           stats={mine.shown.stats}
+          mainIcon={data.iconOf(mine.shown.stats)}
           season={mine.shown.season}
           size="lg"
         />
@@ -110,6 +112,9 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
           Dit is de kaart die anderen van je zien.{" "}
           {fav ? "Je hebt hem zelf gekozen." : "Kies hieronder zelf welke kaart je wilt laten zien."}
         </p>
+        <Link href="/account/avatar" className="btn btn-yellow btn-sm w-full max-w-[260px]">
+          🎨 {me.profile.avatar_config ? "Avatar aanpassen" : "Maak je eigen avatar"}
+        </Link>
         <div className="w-full max-w-[260px]">
           <ShareImage
             src={`/kaarten/${encodeURIComponent(me.profile.username)}/kaart.png?kaart=${encodeURIComponent(currentKey)}`}
@@ -130,10 +135,11 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
               <PlayerCard
                 name={me.profile.username}
                 color={me.profile.avatar_color}
-                emoji={me.profile.avatar_emoji}
+                emoji={me.profile.avatar_emoji} config={me.profile.avatar_config}
                 nickname={nickname}
                 edition={e}
                 stats={col.current}
+                mainIcon={data.iconOf(col.current)}
                 size="sm"
                 locked={!earned}
               />
@@ -166,10 +172,11 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
                 <PlayerCard
                   name={me.profile.username}
                   color={me.profile.avatar_color}
-                  emoji={me.profile.avatar_emoji}
+                  emoji={me.profile.avatar_emoji} config={me.profile.avatar_config}
                   nickname={s.rank ? `#${s.rank} IN ${seasonLabel(s.season).toUpperCase()}` : nickname}
                   edition={s.edition}
                   stats={s}
+                  mainIcon={data.iconOf(s)}
                   season={s.season}
                   size="sm"
                 />
@@ -205,6 +212,11 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
           <li>Prestaties in verschillende games: {OVR_WEIGHTS.versatility * 100}%</li>
           <li>Recente vorm (laatste 10 potjes): {OVR_WEIGHTS.form * 100}%</li>
         </ul>
+        <p>
+          De zes cijfers op de kaart: <b>WIN</b> winst, <b>POS</b> gemiddelde plek, <b>ALL</b> allround (verschillende
+          games), <b>FRM</b> vorm, <b>GMS</b> gespeelde potjes en <b>STK</b> langste winstreeks. Het icoon links is de
+          game die je het meest speelt.
+        </p>
         <p>
           Teamspellen tellen voor 75% mee. Met minder dan {PROVISIONAL_BELOW} potjes is je OVR nog <b>voorlopig</b> en
           ligt hij dichter bij het midden, zodat twee gelukkige zeges je niet meteen 99 maken.

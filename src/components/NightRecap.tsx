@@ -35,7 +35,7 @@ export function NightRecap({
       <div className="flex items-center gap-3 bg-yellow-soft px-4 py-4">
         {mvp ? (
           <>
-            <Avatar name={mvp.username} color={mvp.avatar_color} url={mvp.avatar_url} emoji={mvp.avatar_emoji} size="lg" crown />
+            <Avatar name={mvp.username} color={mvp.avatar_color} url={mvp.avatar_url} emoji={mvp.avatar_emoji} config={mvp.avatar_config} size="lg" crown />
             <div className="min-w-0">
               <p className="pixel text-[10px] text-muted">MVP VAN DE AVOND</p>
               <p className="truncate text-xl font-black">{mvp.username}</p>
@@ -56,7 +56,7 @@ export function NightRecap({
           return (
             <li key={r.user_id} className="flex items-center gap-3 px-4 py-2">
               <span className="w-6 text-center text-sm font-black">{MEDALS[i] ?? i + 1}</span>
-              <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="sm" />
+              <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} config={pr.avatar_config} size="sm" />
               <span className="min-w-0 flex-1 truncate font-black">{pr.username}</span>
               <span className="text-xs font-bold text-muted">{r.wins}🏆</span>
               <span className="pixel w-10 text-right text-xs">{r.points}</span>

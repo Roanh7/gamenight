@@ -49,10 +49,11 @@ export default async function ComparePage(props: PageProps<"/kaarten/vergelijk">
               <PlayerCard
                 name={pp.username}
                 color={pp.avatar_color}
-                emoji={pp.avatar_emoji}
+                emoji={pp.avatar_emoji} config={pp.avatar_config}
                 nickname={cc.nickname}
                 edition={cc.shown.edition}
                 stats={cc.shown.stats}
+                mainIcon={data.iconOf(cc.shown.stats)}
                 season={cc.shown.season}
                 size="sm"
               />

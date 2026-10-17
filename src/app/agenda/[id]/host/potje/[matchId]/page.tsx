@@ -46,7 +46,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
     .filter((x) => profiles.byId.has(x.user_id))
     .map((x) => {
       const p = profiles.byId.get(x.user_id)!;
-      return { id: p.id, username: p.username, avatar_color: p.avatar_color, avatar_url: p.avatar_url, avatar_emoji: p.avatar_emoji, team: (x.team as string | null) ?? null };
+      return { id: p.id, username: p.username, avatar_color: p.avatar_color, avatar_url: p.avatar_url, avatar_emoji: p.avatar_emoji, avatar_config: p.avatar_config, team: (x.team as string | null) ?? null };
     });
   const teamOf = new Map(players.map((p) => [p.id, p.team]));
 
@@ -111,7 +111,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
               <>
                 <p className="pixel text-[10px]">WINNER!</p>
                 <div className="mt-3 flex justify-center">
-                  <Avatar name={winner.username} color={winner.avatar_color} url={winner.avatar_url} emoji={winner.avatar_emoji} size="xl" crown />
+                  <Avatar name={winner.username} color={winner.avatar_color} url={winner.avatar_url} emoji={winner.avatar_emoji} config={winner.avatar_config} size="xl" crown />
                 </div>
                 <p className="mt-3 text-2xl font-black">{winner.username}</p>
                 <p className="text-sm font-bold">
@@ -124,7 +124,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
                 <p className="pixel text-[10px]">{match.winning_team ? `${match.winning_team.toUpperCase()} WINNEN!` : "TEAM WINS!"}</p>
                 <div className="mt-3 flex justify-center -space-x-2">
                   {teamWinners.map((p) => (
-                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="lg" crown />
+                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} config={p.avatar_config} size="lg" crown />
                   ))}
                 </div>
                 <p className="mt-3 text-xl font-black">{teamWinners.map((p) => p.username).join(" & ")}</p>

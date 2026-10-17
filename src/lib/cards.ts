@@ -31,5 +31,9 @@ export async function loadCards(supabase: DB) {
     return headToHead(results, a, b);
   }
 
-  return { profiles, games, results, xpOf, collectionFor, versus };
+  function iconOf(stats: { mainGame?: string | null }) {
+    return stats.mainGame ? (games.byId.get(stats.mainGame)?.icon ?? null) : null;
+  }
+
+  return { profiles, games, results, xpOf, collectionFor, versus, iconOf };
 }
