@@ -174,10 +174,33 @@ export default async function UitlegPage() {
             </li>
             <li>
               De score bijhouden. Hoe dat gaat hangt af van de <a href="#soorten" className="underline">soort spel</a>:
-              per speler, per team, of pas na afloop bij geheime rollen. Alles wordt meteen opgeslagen.
+              per speler, per team, of pas na afloop bij geheime rollen.
             </li>
             <li>
-              Op <b>🏁 Potje afronden</b> tikken als het klaar is. De punten gaan dan naar de ranglijst, en de
+              <b>Scores gaan nooit verloren.</b> Elke tik wordt meteen op je telefoon bewaard en daarna naar de server
+              gestuurd. Onderaan zie je hoe het ervoor staat: <i>⏳ Bezig met opslaan</i>, <i>✓ Alles opgeslagen</i> (de
+              server heeft het echt) of <i>📴 Offline</i> (het staat nog alleen op je telefoon en gaat vanzelf mee zodra
+              je weer bereik hebt). Telefoon op slot, per ongeluk naar Home of de app opnieuw geopend? Alles staat er
+              nog. Afronden kan pas als alles echt is opgeslagen.
+            </li>
+            <li>
+              Host en co-host kunnen tegelijk scores invoeren. Tikken jullie allebei op +1, dan tellen beide mee. Vullen
+              jullie bij dezelfde speler tegelijk een ander getal in, dan krijg je een melding om te checken welke klopt.
+            </li>
+            <li>
+              Tijdens een potje zijn de scores een <b>concept</b>. Pas bij <b>🏁 Afronden</b> wordt de uitslag officieel
+              en tellen ranking, XP, winstreeks, de premie op de koploper, records en nieuws mee. Heropen je een potje om een
+              foutje te herstellen, dan wordt dat allemaal teruggedraaid en na het opnieuw afronden opnieuw berekend
+              (ook de avondsamenvatting).
+            </li>
+            <li>
+              <b>⚡ Alleen winnaar:</b> bij een simpel spel hoef je geen punten te tellen. Kies bovenaan{" "}
+              <i>Alleen winnaar</i>, tik de winnaar aan en rond af. De winnaar krijgt de punten van de 1e plek, de rest
+              deelt de 2e plek. De app onthoudt per game welke manier je gebruikt.
+            </li>
+            <li>
+              Op <b>🏁 Afronden</b> tikken als het klaar is (de knop staat altijd onderaan in beeld, en je krijgt eerst
+              nog een vraag of het klopt). De punten gaan dan naar de ranglijst, en de
               winnaar krijgt confetti en een overwinningsdeuntje 🎉.
             </li>
             <li>
@@ -389,7 +412,25 @@ export default async function UitlegPage() {
           </p>
         </Section>
 
-        <Section id="tips" icon={Smartphone} color="bg-teal" title="11. Tips">
+        <Section id="live" icon={Gamepad2} color="bg-red" title="11. Live Game Mode">
+          <ul>
+            <li>
+              Zodra een avond bezig is waar jij bij bent, verandert de menubalk onderaan in een rode <b>livebalk</b>.
+              Daarop zie je of je host bent of meekijkt, en ga je met één tik naar <b>Live</b> (lopende potjes, de
+              stand van vanavond en de afgeronde potjes), de <b>avond</b> of de <b>ranking</b>. De host heeft in het
+              midden een grote knop om een <b>nieuw potje</b> te starten.
+            </li>
+            <li>
+              Bij het scores invoeren zijn de knoppen groot, en staan <b>← Avond</b> en <b>🏁 Afronden</b> altijd
+              onderaan. Meekijkers zien de scores live, maar kunnen niks aanpassen.
+            </li>
+            <li>
+              Liever het gewone menu? Tik op <b>Menu</b>. Met <b>Terug naar live</b> kom je weer terug.
+            </li>
+          </ul>
+        </Section>
+
+        <Section id="tips" icon={Smartphone} color="bg-teal" title="12. Tips">
           <ul>
             <li>
               <b>Zet de app op je beginscherm.</b> Open de site in Safari, tik op de deelknop (vierkantje met

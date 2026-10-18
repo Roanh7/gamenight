@@ -1,15 +1,20 @@
 "use client";
 
 import { unlockAudio } from "@/lib/sfx";
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Shuffle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatScore } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
+import { ActionBar } from "@/components/ActionBar";
+import { ConflictNotice, SyncStatus } from "@/components/SyncStatus";
+import { useScoreSync } from "@/lib/useScoreSync";
+import { splitKey } from "@/lib/scoreSync";
 
 type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
-type Entry = { team: string; round: number; points: number };
+type Entry = { team: string; round: number; points: number | null; version?: number };
 
 const TEAM_COLORS = ["bg-red text-white", "bg-blue text-white", "bg-green text-white", "bg-yellow text-night", "bg-purple text-white", "bg-orange text-white"];
 
@@ -20,6 +25,8 @@ export function TeamScoreBoard({
   teamNames,
   initialEntries,
   lowestWins,
+  label = "",
+  people = {},
 }: {
   matchId: string;
   nightId: string;
@@ -27,6 +34,8 @@ export function TeamScoreBoard({
   teamNames: string[];
   initialEntries: Entry[];
   lowestWins: boolean;
+  label?: string;
+  people?: Record<string, string>;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -68,26 +77,24 @@ export function TeamScoreBoard({
   }
 
   /* ---------- Stap 2: scores per team ---------- */
-  const initialRounds = Math.max(1, ...initialEntries.map((e) => e.round));
-  const [rounds, setRounds] = useState(initialRounds);
-  const [round, setRound] = useState(initialRounds);
-  const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(initialEntries.map((e) => [`${e.team}:${e.round}`, String(e.points)])),
+  const rows = useMemo(
+    () => initialEntries.map((e) => ({ key: `${e.team}:${e.round}`, points: e.points == null ? null : Number(e.points), version: e.version ?? 1 })),
+    [initialEntries],
   );
-  const [saving, setSaving] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const { engine, value } = useScoreSync(matchId, "team", nightId, label, rows);
+  const roundsInUse = Math.max(1, ...engine.keys().map((k) => splitKey(k).round));
+  const [extraRounds, setExtraRounds] = useState(0);
+  const rounds = roundsInUse + extraRounds;
+  const [picked, setRound] = useState<number | null>(null);
+  const round = Math.min(picked ?? rounds, rounds);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [finishing, startFinish] = useTransition();
-  const pendingSaves = useRef(new Set<Promise<void>>());
-  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const text = (key: string) => drafts[key] ?? (value(key) == null ? "" : String(value(key)));
 
-  const num = (s: string | undefined) => {
-    if (s === undefined || s.trim() === "" || s === "-") return 0;
-    const n = Number(s.replace(",", "."));
-    return Number.isFinite(n) ? n : 0;
-  };
   const totals = usedTeams.map((t) => {
     let total = 0;
-    for (let r = 1; r <= rounds; r++) total += num(values[`${t}:${r}`]);
+    for (let r = 1; r <= rounds; r++) total += value(`${t}:${r}`) ?? 0;
     return { team: t, total };
   });
   const better = (a: number, b: number) => (lowestWins ? a < b : a > b);
@@ -95,44 +102,30 @@ export function TeamScoreBoard({
   const anyScore = totals.some((t) => t.total !== 0);
   const leaders = totals.filter((t) => placeOf(t.total) === 1);
 
-  function save(team: string, r: number, raw: string) {
-    const key = `${team}:${r}`;
-    const prev = timers.current.get(key);
-    if (prev) clearTimeout(prev);
-    timers.current.set(
-      key,
-      setTimeout(() => {
-        timers.current.delete(key);
-        setSaving("saving");
-        const isEmpty = raw.trim() === "" || raw === "-";
-        const p: Promise<void> = Promise.resolve(
-          isEmpty
-            ? supabase.from("team_scores").delete().eq("match_id", matchId).eq("team", team).eq("round", r)
-            : supabase
-                .from("team_scores")
-                .upsert({ match_id: matchId, team, round: r, points: num(raw) }, { onConflict: "match_id,team,round" }),
-        ).then(({ error }) => {
-          pendingSaves.current.delete(p);
-          if (error) {
-            setSaving("error");
-            setError("Opslaan mislukt. Check je verbinding.");
-          } else if (pendingSaves.current.size === 0) {
-            setSaving("saved");
-          }
-        });
-        pendingSaves.current.add(p);
-      }, 350),
-    );
-  }
-
   function setValue(team: string, r: number, raw: string) {
-    setValues((v) => ({ ...v, [`${team}:${r}`]: raw }));
-    save(team, r, raw);
+    const key = `${team}:${r}`;
+    setDrafts((d) => ({ ...d, [key]: raw }));
+    const t = raw.trim().replace(",", ".");
+    if (t === "") engine.edit(key, "set", null);
+    else if (t !== "-" && Number.isFinite(Number(t))) engine.edit(key, "set", Number(t));
   }
 
-  async function flush() {
-    while (timers.current.size > 0) await new Promise((r) => setTimeout(r, 120));
-    await Promise.all([...pendingSaves.current]);
+  function bump(team: string, delta: number) {
+    const key = `${team}:${round}`;
+    setDrafts((d) => {
+      const n = { ...d };
+      delete n[key];
+      return n;
+    });
+    engine.edit(key, "add", delta);
+  }
+
+  async function flushAll() {
+    for (let i = 0; i < 3; i++) {
+      if (await engine.flush()) return true;
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    return engine.count() === 0;
   }
 
   function finish() {
@@ -140,12 +133,18 @@ export function TeamScoreBoard({
     if (!window.confirm("Potje afronden? De punten gaan dan naar de ranglijst.")) return;
     startFinish(async () => {
       setError(null);
-      await flush();
+      if (!(await flushAll())) {
+        setError(
+          `Nog ${engine.count()} wijziging(en) staan alleen op dit apparaat. Wacht tot je weer verbinding hebt en probeer het dan opnieuw. Er gaat niks verloren.`,
+        );
+        return;
+      }
       const { error } = await supabase.rpc("finalize_teams_match", { p_match_id: matchId });
-      if (error) {
+      if (error && !/al afgerond/i.test(error.message)) {
         setError(error.message);
         return;
       }
+      engine.discard();
       router.replace(`/agenda/${nightId}/host/potje/${matchId}?klaar=1`);
       router.refresh();
     });
@@ -215,10 +214,7 @@ export function TeamScoreBoard({
         <div className="flex items-center justify-between border-b-2 border-line bg-night px-4 py-2 text-white">
           <span className="pixel text-[10px]">LIVE STAND</span>
           <span className="text-xs font-bold opacity-80">
-            {saving === "saving" && "Opslaan…"}
-            {saving === "saved" && "✓ Opgeslagen"}
-            {saving === "error" && "⚠ Niet opgeslagen"}
-            {saving === "idle" && (lowestWins ? "Laagste score wint" : "Hoogste score wint")}
+            {lowestWins ? "Laagste score wint" : "Hoogste score wint"}
           </span>
         </div>
         <ul className="divide-y-2 divide-soft">
@@ -265,7 +261,7 @@ export function TeamScoreBoard({
         <button
           type="button"
           onClick={() => {
-            setRounds((n) => n + 1);
+            setExtraRounds((n) => n + 1);
             setRound(rounds + 1);
           }}
           className="chip shrink-0 bg-blue px-3 py-1.5 text-sm text-white"
@@ -285,27 +281,34 @@ export function TeamScoreBoard({
                 <span className={`chip min-w-0 flex-1 truncate ${colorOf(t)}`}>{t}</span>
                 <button
                   type="button"
-                  onClick={() => setValue(t, round, String(num(values[key]) - 1))}
-                  className="btn btn-secondary btn-sm h-10 w-10 px-0"
+                  onClick={() => bump(t, -1)}
+                  className="btn btn-secondary h-14 w-14 shrink-0 px-0"
                   aria-label={`1 punt eraf voor ${t}`}
                 >
-                  <Minus size={16} strokeWidth={3} />
+                  <Minus size={22} strokeWidth={3} />
                 </button>
                 <input
                   inputMode="decimal"
-                  className="input h-10 min-h-0 w-20 px-2 text-center font-black"
-                  value={values[key] ?? ""}
+                  className="input h-14 min-h-0 w-16 shrink-0 px-1 text-center text-lg font-black"
+                  value={text(key)}
                   placeholder="0"
                   onChange={(e) => setValue(t, round, e.target.value.replace(/[^0-9,.\-]/g, ""))}
+                  onBlur={() =>
+                    setDrafts((d) => {
+                      const n = { ...d };
+                      delete n[key];
+                      return n;
+                    })
+                  }
                   aria-label={`Punten ${t} ronde ${round}`}
                 />
                 <button
                   type="button"
-                  onClick={() => setValue(t, round, String(num(values[key]) + 1))}
-                  className="btn btn-green btn-sm h-10 w-10 px-0"
+                  onClick={() => bump(t, 1)}
+                  className="btn btn-green h-14 w-14 shrink-0 px-0"
                   aria-label={`1 punt erbij voor ${t}`}
                 >
-                  <Plus size={16} strokeWidth={3} />
+                  <Plus size={22} strokeWidth={3} />
                 </button>
               </li>
             );
@@ -319,15 +322,36 @@ export function TeamScoreBoard({
         </p>
       )}
 
-      <button type="button" onClick={finish} disabled={finishing} className="btn btn-primary mt-6 w-full">
-        {finishing ? "Afronden…" : "🏁 Potje afronden"}
-      </button>
-      <button type="button" onClick={() => setEditingTeams(true)} className="btn btn-secondary btn-sm mt-3 w-full">
+      <ConflictNotice
+        engine={engine}
+        label={(key) => {
+          const { who, round: r } = splitKey(key);
+          return `${who} in ronde ${r}`;
+        }}
+        who={(id) => (id ? (people[id] ?? "De co-host") : "De co-host")}
+      />
+      {engine.closed && (
+        <p role="alert" className="mt-4 rounded-xl border-2 border-line bg-yellow-soft px-3 py-2 text-sm font-bold">
+          Dit potje is intussen al afgerond.{" "}
+          <button type="button" className="underline" onClick={() => router.refresh()}>
+            Bekijk de uitslag
+          </button>
+        </p>
+      )}
+      <button type="button" onClick={() => setEditingTeams(true)} className="btn btn-secondary btn-sm mt-6 w-full">
         Teams aanpassen
       </button>
       <p className="mt-2 text-center text-xs text-muted">
-        Scores worden automatisch opgeslagen. Iedereen in het winnende team krijgt de punten van de 1e plek.
+        Elke score wordt meteen op dit apparaat bewaard en daarna naar de server gestuurd. Iedereen in het winnende team krijgt de punten van de 1e plek.
       </p>
+      <ActionBar top={<SyncStatus engine={engine} />}>
+        <Link href="/live" className="btn btn-secondary shrink-0 px-4">
+          ← Avond
+        </Link>
+        <button type="button" onClick={finish} disabled={finishing} className="btn btn-primary flex-1 py-4 text-lg">
+          {finishing ? "Afronden…" : "🏁 Afronden"}
+        </button>
+      </ActionBar>
     </div>
   );
 }

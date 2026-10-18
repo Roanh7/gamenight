@@ -1,11 +1,13 @@
 "use client";
 
 import { unlockAudio } from "@/lib/sfx";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { GameTeam } from "@/lib/types";
 import { Avatar } from "@/components/Avatar";
+import { ActionBar } from "@/components/ActionBar";
 
 type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
 
@@ -34,6 +36,32 @@ export function TeamResult({
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
+  // Keuzes bewaren op dit apparaat, zodat ze blijven staan als de telefoon op slot gaat of de pagina herlaadt
+  const storeKey = `gn-roles-${matchId}`;
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storeKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as { assign?: Record<string, string>; winner?: string | null };
+        const valid = Object.fromEntries(
+          Object.entries(saved.assign ?? {}).filter(([u, t]) => players.some((p) => p.id === u) && teamList.some((x) => x.name === t)),
+        );
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- eenmalig herstellen na het laden
+        setAssign((a) => ({ ...a, ...valid }));
+        if (saved.winner && teamList.some((x) => x.name === saved.winner)) setWinner(saved.winner);
+      }
+    } catch {}
+    setRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeKey]);
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      localStorage.setItem(storeKey, JSON.stringify({ assign, winner }));
+    } catch {}
+  }, [restored, storeKey, assign, winner]);
+
   const colorOf = (name: string) => TEAM_COLORS[Math.max(0, teamList.findIndex((t) => t.name === name)) % TEAM_COLORS.length];
   const allAssigned = players.every((p) => assign[p.id]);
   const usedTeams = teamList.filter((t) => Object.values(assign).includes(t.name));
@@ -53,9 +81,16 @@ export function TeamResult({
         p_teams: assign,
       });
       if (error) {
-        setError(error.message);
+        setError(
+          error.code
+            ? error.message
+            : "Geen verbinding. Je keuzes staan bewaard op dit apparaat; probeer het zo opnieuw.",
+        );
         return;
       }
+      try {
+        localStorage.removeItem(storeKey);
+      } catch {}
       router.replace(`/agenda/${nightId}/host/potje/${matchId}?klaar=1`);
       router.refresh();
     });
@@ -95,7 +130,7 @@ export function TeamResult({
                         setWinner(null);
                       }}
                       aria-pressed={active}
-                      className={`chip px-3 py-1.5 text-sm ${active ? colorOf(t.name) : "bg-paper"}`}
+                      className={`chip px-4 py-2.5 text-base ${active ? colorOf(t.name) : "bg-paper"}`}
                     >
                       {t.name}
                     </button>
@@ -120,7 +155,7 @@ export function TeamResult({
               disabled={!allAssigned}
               onClick={() => setWinner(t.name)}
               aria-pressed={winner === t.name}
-              className={`btn justify-between ${winner === t.name ? "btn-yellow" : "btn-secondary"}`}
+              className={`btn justify-between py-4 ${winner === t.name ? "btn-yellow" : "btn-secondary"}`}
             >
               <span>🏆 {t.name}</span>
               <span className="text-sm">+{t.points} pt</span>
@@ -142,9 +177,14 @@ export function TeamResult({
         </p>
       )}
 
-      <button type="button" onClick={finish} disabled={!winner || pending} className="btn btn-primary mt-6 w-full">
-        {pending ? "Afronden…" : "🏁 Potje afronden"}
-      </button>
+      <ActionBar>
+        <Link href="/live" className="btn btn-secondary shrink-0 px-4">
+          ← Avond
+        </Link>
+        <button type="button" onClick={finish} disabled={!winner || pending} className="btn btn-primary flex-1 py-4 text-lg">
+          {pending ? "Afronden…" : winner ? "🏁 Afronden" : "Kies de winnaar"}
+        </button>
+      </ActionBar>
     </div>
   );
 }

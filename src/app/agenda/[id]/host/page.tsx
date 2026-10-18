@@ -55,7 +55,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
 
   return (
     <div>
-      <PageHeader back={`/agenda/${id}`} kicker="HOST DASHBOARD" title={night.title} action={<StatusChip status={night.status} />} />
+      <PageHeader back={night.status === "live" ? "/live" : `/agenda/${id}`} kicker="HOST DASHBOARD" title={night.title} action={<StatusChip status={night.status} />} />
       <Flash sp={sp} />
 
       {/* Status */}

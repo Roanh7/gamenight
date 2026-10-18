@@ -209,3 +209,36 @@ export async function getComments(supabase: DB, activityIds: number[]) {
   }
   return out;
 }
+
+export type LiveRole = "host" | "cohost" | "player";
+export type ActiveNight = { id: string; title: string; role: LiveRole; liveMatches: number };
+
+/** De avond die nu bezig is en waar jij bij hoort (als host, co-host of bevestigde speler). */
+export async function getActiveNight(supabase: DB, userId: string): Promise<ActiveNight | null> {
+  const { data: nights } = await supabase
+    .from("game_nights")
+    .select("id, title, host_id, cohost_id, starts_at")
+    .eq("status", "live")
+    .order("starts_at", { ascending: false })
+    .limit(5);
+  if (!nights?.length) return null;
+  const ids = nights.map((n) => n.id);
+  const [{ data: mine }, { data: live }] = await Promise.all([
+    supabase.from("participants").select("night_id, status").eq("user_id", userId).in("night_id", ids),
+    supabase.from("matches").select("night_id").eq("status", "live").in("night_id", ids),
+  ]);
+  for (const n of nights) {
+    const role: LiveRole | null =
+      n.host_id === userId
+        ? "host"
+        : n.cohost_id === userId
+          ? "cohost"
+          : (mine ?? []).some((p) => p.night_id === n.id && p.status === "confirmed")
+            ? "player"
+            : null;
+    if (role) {
+      return { id: n.id, title: n.title, role, liveMatches: (live ?? []).filter((m) => m.night_id === n.id).length };
+    }
+  }
+  return null;
+}
