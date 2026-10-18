@@ -6,6 +6,8 @@ import { Avatar } from "./Avatar";
 import { Reactions } from "./Reactions";
 import { Comments } from "./Comments";
 import type { CommentRow } from "@/lib/comments";
+import { bannerDef, type Rarity } from "@/lib/banners";
+import { Banner } from "./Banner";
 
 type Props = {
   items: Activity[];
@@ -165,6 +167,23 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                       </span>
                     ) : null;
                   })}
+                </span>
+              </>
+            );
+            break;
+          }
+          case "banner_unlocked": {
+            const def = bannerDef(String(a.payload?.banner ?? ""));
+            const rarity = (String(a.payload?.rarity ?? def.rarity)) as Rarity;
+            icon = <span className="text-sm leading-none">{def.emoji}</span>;
+            tone = rarity === "mythic" || rarity === "legendary" ? "bg-yellow-soft" : "bg-purple-soft";
+            text = (
+              <>
+                <b className="pixel text-[9px]">{rarity === "epic" ? "✨ EPIC UNLOCK!" : rarity === "mythic" ? "🌈 MYTHIC UNLOCK!" : "👑 LEGENDARY UNLOCK!"}</b>
+                <br />
+                {name} heeft de <b className="font-black">{def.name}</b>-banner vrijgespeeld.
+                <span className={`rarity-frame r-${rarity} mt-1.5 block h-12`}>
+                  <Banner id={def.id} still />
                 </span>
               </>
             );

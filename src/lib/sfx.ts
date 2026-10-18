@@ -67,6 +67,16 @@ export function playBoot() {
   tone(c, 523.25, t + 0.58, 0.7, "triangle", 0.09);
 }
 
+/** Kort "item gevonden"-deuntje voor een nieuwe banner. */
+export function playUnlock() {
+  const c = getCtx();
+  if (!c) return;
+  if (c.state === "suspended") void c.resume();
+  const t = c.currentTime + 0.05;
+  [783.99, 987.77, 1174.66, 1567.98].forEach((f, i) => tone(c, f, t + i * 0.08, 0.1, "square", 0.05));
+  tone(c, 1975.53, t + 0.36, 0.4, "square", 0.04);
+}
+
 export function soundOn() {
   try {
     return localStorage.getItem("gn-sound") !== "off";

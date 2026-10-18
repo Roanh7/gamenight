@@ -11,6 +11,9 @@ import { Avatar } from "./Avatar";
 import { GameIcon } from "./GameIcon";
 import { EmptyState, RankBadge, SectionTitle } from "./ui";
 import { TrophyCabinet, type CabinetItem } from "./TrophyCabinet";
+import { Banner } from "./Banner";
+import { BannerUnlock } from "./BannerUnlock";
+import { ownedBanners, shownBanner, syncBanners, unseenBanners, type UnlockRow } from "@/lib/bannerSync";
 
 export async function PlayerProfile({
   profile,
@@ -36,7 +39,17 @@ export async function PlayerProfile({
       .eq("is_practice", false),
     getAttendance(supabase),
   ]);
-  const xp = computeXp(allResults, attendance)(profile.id);
+  const xpOf = computeXp(allResults, attendance);
+  const xp = xpOf(profile.id);
+  // Banners: op je eigen profiel meteen bijwerken; bij een vriend alleen zijn gekozen banner tonen
+  let unlockRows: UnlockRow[] = [];
+  if (isMe) {
+    unlockRows = (await syncBanners(supabase, { userIds: profiles.list.map((p) => p.id), results: allResults, attendance, xpOf })).rows;
+  } else {
+    const { data } = await supabase.from("banner_unlocks").select("user_id, banner_id, revoked_at, seen, unlocked_at").eq("user_id", profile.id);
+    unlockRows = (data ?? []) as UnlockRow[];
+  }
+  const banner = shownBanner(profiles.byId.get(profile.id)?.banner, ownedBanners(unlockRows, profile.id));
   const results = allResults.filter((r) => r.user_id === profile.id);
   const wonSeasons = [...seasonChampions(allResults).entries()]
     .filter(([, u]) => u === profile.id)
@@ -93,8 +106,16 @@ export async function PlayerProfile({
   return (
     <div>
       {/* Spelerskaart */}
+      {isMe && <BannerUnlock ids={unseenBanners(unlockRows, profile.id)} userId={profile.id} />}
       <section className="card overflow-hidden">
-        <div className="h-14 border-b-2 border-line bg-red" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,.12) 14px 28px)" }} />
+        <div className="relative h-28 border-b-2 border-line">
+          <Banner id={banner} />
+          {isMe && (
+            <Link href="/account/banners" className="pixel absolute right-2 top-2 rounded-md border-2 border-line bg-paper/90 px-2 py-1.5 text-[8px] text-ink">
+              🎨 CUSTOMIZE PROFILE
+            </Link>
+          )}
+        </div>
         <div className="-mt-10 px-5 pb-5">
           <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} size="xl" crown={titles.length > 0} />
           <h1 className="mt-2 text-2xl font-black">{profile.username}</h1>

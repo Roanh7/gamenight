@@ -18,6 +18,8 @@ export type Profile = {
   avatar_emoji: string | null;
   bio: string | null;
   created_at: string;
+  /** Gekozen profielbanner (zie src/lib/banners.ts) */
+  banner?: string | null;
 };
 
 export type GameTeam = { name: string; points: number };

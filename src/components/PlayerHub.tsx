@@ -21,6 +21,9 @@ import { FuseCountdown } from "./FuseCountdown";
 import { PushPrompt } from "./PushPrompt";
 import { InstallHint } from "./InstallHint";
 import { TrophySprite } from "./TrophyCabinet";
+import { Banner } from "./Banner";
+import { BannerUnlock } from "./BannerUnlock";
+import { ownedBanners, shownBanner, syncBanners, unseenBanners } from "@/lib/bannerSync";
 
 /** Het persoonlijke videogame-dashboard op Home. */
 export async function PlayerHub({ userId, welcome }: { userId: string; welcome: boolean }) {
@@ -53,7 +56,8 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
   const name = me?.username ?? "Player";
 
   // ---------- Speler ----------
-  const xp = computeXp(results, attendance)(userId);
+  const xpOf = computeXp(results, attendance);
+  const xp = xpOf(userId);
   const mine = results.filter((r) => r.user_id === userId);
   const wins = mine.filter((r) => r.is_winner).length;
   const winRate = mine.length ? Math.round((wins / mine.length) * 100) : null;
@@ -132,6 +136,9 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
   ]);
   const nightsById = new Map((feedNights ?? []).map((n) => [n.id, n]));
 
+  // Banners van iedereen bijwerken (schrijft alleen als er iets nieuws is)
+  const { rows: bannerRows } = await syncBanners(supabase, { userIds: profiles.list.map((p) => p.id), results, attendance, xpOf });
+  const banner = shownBanner(me?.banner, ownedBanners(bannerRows, userId));
   const confirmedProfiles = confirmed.map((p) => profiles.byId.get(p.user_id)).filter(Boolean) as Profile[];
   const news = (
     <>
@@ -169,9 +176,14 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
         welcome, active, name, me, xp, mySeason: mySeason ?? null, season, streak, msg, target, targetName, userId,
         winRate, form, mvps, nextNight: nextNight ?? null, confirmedProfiles, myStatus, isFixed, voters: tally.voters,
         gameNames, isHost, myPart: myPart ?? null, myVote, next, earnedCount, achTotal: ach.list.length,
-        rival, rivalProfile: rivalProfile ?? null,
+        rival, rivalProfile: rivalProfile ?? null, banner,
       }}
-      news={news}
+      news={
+        <>
+          <BannerUnlock ids={unseenBanners(bannerRows, userId)} userId={userId} />
+          {news}
+        </>
+      }
     />
   );
 }
@@ -206,6 +218,7 @@ export type HubData = {
   achTotal: number;
   rival: Rival | null;
   rivalProfile: Profile | null;
+  banner: string;
 };
 
 /** Weergave van de Player Hub (los van het ophalen, zodat we hem met testgegevens kunnen bekijken). */
@@ -213,7 +226,7 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
   const {
     welcome, active, name, me, xp, mySeason, season, streak, msg, target, targetName, userId, winRate, form, mvps,
     nextNight, confirmedProfiles, myStatus, isFixed, voters, gameNames, isHost, myPart, myVote, next, earnedCount,
-    achTotal, rival, rivalProfile,
+    achTotal, rival, rivalProfile, banner,
   } = d;
   const blocks = 12;
   const filled = Math.min(blocks, Math.floor((xp.into / xp.span) * blocks));
@@ -233,14 +246,24 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
 
       {/* ---------- Spelerskaart ---------- */}
       <section className="card relative overflow-hidden bg-red text-white" aria-label="Jouw spelerskaart">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full border-2 border-line bg-yellow opacity-90" aria-hidden />
-        <div className="relative p-4 pb-3">
-          <p className="pixel text-[9px] opacity-90">{welcome ? "NEW PLAYER JOINED!" : "PLAYER 1"}</p>
-          <div className="mt-3 flex items-center gap-4">
+        {/* Banner achter de avatar */}
+        <div className="relative h-20 border-b-2 border-line">
+          <Banner id={banner} />
+          <p className="pixel absolute left-3 top-2.5 rounded bg-night/75 px-1.5 py-1 text-[8px]">{welcome ? "NEW PLAYER JOINED!" : "PLAYER 1"}</p>
+          <Link
+            href="/account/banners"
+            aria-label="Banner wijzigen"
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-md border-2 border-line bg-paper/90 text-sm"
+          >
+            🎨
+          </Link>
+        </div>
+        <div className="relative -mt-10 px-4 pb-3">
+          <div className="flex items-start gap-4">
             <span className="hub-avatar shrink-0">
               <Avatar name={name} color={me?.avatar_color} url={me?.avatar_url} emoji={me?.avatar_emoji} size="xl" />
             </span>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 pt-11">
               <h1 className={`break-words font-black leading-tight ${name.length > 12 ? "text-xl" : "text-2xl"}`}>{name}</h1>
               <p className="pixel mt-1 text-[10px] leading-relaxed">
                 LV {xp.level} <span className="opacity-80">· {xp.title.toUpperCase()}</span>

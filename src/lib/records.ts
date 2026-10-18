@@ -30,7 +30,7 @@ function count<T>(items: T[], key: (t: T) => string | null | undefined) {
 }
 
 /** Langste reeks per speler in een rij momenten (bijv. potjes of avonden), op volgorde. */
-function longestStreak(perUser: Map<string, boolean[]>) {
+export function longestStreak(perUser: Map<string, boolean[]>) {
   const out = new Map<string, number>();
   for (const [u, list] of perUser) {
     let cur = 0;

@@ -62,3 +62,20 @@ export async function sendTestPush() {
     tag: "test",
   });
 }
+
+/** Een vrijgespeelde banner kiezen. De database controleert zelf of je hem echt hebt. */
+export async function equipBanner(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const banner = String(formData.get("banner") ?? "");
+  const { BANNER_BY_ID } = await import("@/lib/banners");
+  const def = BANNER_BY_ID.get(banner);
+  if (!def) redirect(`/account/banners?fout=${encodeURIComponent("Die banner bestaat niet.")}`);
+  const { error } = await supabase.from("profiles").update({ banner }).eq("id", user.id);
+  if (error) redirect(`/account/banners?fout=${encodeURIComponent("Die banner heb je nog niet vrijgespeeld.")}`);
+  revalidatePath("/", "layout");
+  redirect(`/account/banners?ok=${encodeURIComponent(`${def.emoji} ${def.name} staat nu op je profiel`)}`);
+}

@@ -513,3 +513,77 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 
 /* ---------- Player Hub ---------- */
 .hub-avatar { display: inline-flex; border-radius: 18px; box-shadow: 0 0 0 3px var(--color-yellow), 0 0 0 5px var(--color-line), 0 5px 0 3px var(--color-line); }
+
+/* ---------- Profielbanners ---------- */
+.bn-drift { animation: bn-drift 40s linear infinite; }
+@keyframes bn-drift { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+.bn-drift-slow { animation: bn-float 6s ease-in-out infinite; }
+@keyframes bn-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+.bn-bob { animation: bn-bob 1.2s steps(2) infinite; }
+@keyframes bn-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+.bn-twinkle { animation: bn-twinkle 2.4s steps(1) infinite; }
+@keyframes bn-twinkle { 0%, 60% { opacity: 1; } 70%, 85% { opacity: 0.25; } }
+.bn-sparkle { opacity: 0; animation: bn-sparkle 3s steps(1) infinite; }
+@keyframes bn-sparkle { 0%, 80% { opacity: 0; } 84%, 92% { opacity: 1; } }
+.bn-glow { animation: bn-glow 2.2s ease-in-out infinite; }
+@keyframes bn-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+.bn-glow-soft { animation: bn-glow-soft 4s ease-in-out infinite; }
+@keyframes bn-glow-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+.bn-ember { animation: bn-ember 3.2s linear infinite; }
+@keyframes bn-ember { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-34px); opacity: 0; } }
+.bn-rise { animation: bn-rise 5s linear infinite; }
+@keyframes bn-rise { from { transform: translateY(6px); opacity: 0.9; } to { transform: translateY(-8px); opacity: 0; } }
+.bn-flash { opacity: 0; animation: bn-flash 4.4s steps(1) infinite; }
+@keyframes bn-flash { 0%, 70% { opacity: 0; } 72%, 76% { opacity: 1; } 78% { opacity: 0; } 80%, 83% { opacity: 1; } 85% { opacity: 0; } }
+.bn-flash-sky { opacity: 0; animation: bn-flash-sky 4.4s steps(1) infinite; }
+@keyframes bn-flash-sky { 0%, 71% { opacity: 0; } 72% { opacity: 0.35; } 74% { opacity: 0; } 80% { opacity: 0.25; } 82% { opacity: 0; } }
+.bn-rain { animation: bn-rain 0.5s linear infinite; }
+@keyframes bn-rain { from { transform: translate(0, 0); } to { transform: translate(-2px, 6px); } }
+.bn-fog { opacity: 0.18; animation: bn-fog 14s ease-in-out infinite alternate; }
+@keyframes bn-fog { from { transform: translateX(-12px); } to { transform: translateX(12px); } }
+.bn-shoot { opacity: 0; animation: bn-shoot 6s linear infinite; }
+@keyframes bn-shoot { 0%, 78% { opacity: 0; transform: translate(40px, 4px); } 80% { opacity: 1; transform: translate(40px, 4px); } 92% { opacity: 1; transform: translate(110px, 30px); } 93%, 100% { opacity: 0; } }
+.bn-blink { animation: bn-blink 4s steps(1) infinite; }
+@keyframes bn-blink { 0%, 88% { opacity: 1; } 90%, 94% { opacity: 0; } 96% { opacity: 1; } }
+.bn-flicker { animation: bn-flicker 0.6s steps(2) infinite; transform-box: fill-box; transform-origin: bottom; }
+@keyframes bn-flicker { 0% { transform: scaleY(1); } 50% { transform: scaleY(0.82); } }
+.bn-rays { animation: bn-rays 5s ease-in-out infinite; }
+@keyframes bn-rays { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.26; } }
+.bn-shine { animation: bn-shine 3.5s steps(1) infinite; }
+@keyframes bn-shine { 0%, 70% { opacity: 0; } 74%, 82% { opacity: 1; } }
+.bn-still *, .bn-locked * { animation: none !important; }
+.bn-locked { filter: grayscale(1) brightness(0.35); }
+@media (prefers-reduced-motion: reduce) {
+  [class*="bn-"] { animation: none !important; }
+  .bn-flash, .bn-flash-sky, .bn-shoot { opacity: 0 !important; }
+}
+
+/* Zeldzaamheid: randen en labels (alleen uiterlijk) */
+.rarity-chip { display: inline-block; padding: 2px 5px; border: 2px solid var(--color-line); border-radius: 4px; font-size: 7px; line-height: 1.2; color: #fff; }
+.rarity-common { background: #7d8394; }
+.rarity-rare { background: #2f6fe4; }
+.rarity-epic { background: #8e44d6; }
+.rarity-legendary { background: #ffc527; color: #1e1b2b; }
+.rarity-mythic { color: #1e1b2b; background: linear-gradient(90deg, #ffd23f, #ff8fd0, #8fd3ff, #9dff9d, #ffd23f); background-size: 200% 100%; animation: mythic-slide 3s linear infinite; }
+@keyframes mythic-slide { to { background-position: 200% 0; } }
+.rarity-frame { border: 3px solid var(--color-line); border-radius: 10px; overflow: hidden; position: relative; }
+.rarity-frame.r-common { box-shadow: 0 0 0 2px #7d8394; }
+.rarity-frame.r-rare { box-shadow: 0 0 0 2px #2f6fe4; }
+.rarity-frame.r-epic { box-shadow: 0 0 0 2px #8e44d6, 0 0 10px #8e44d655; }
+.rarity-frame.r-legendary { box-shadow: 0 0 0 2px #ffc527, 0 0 12px #ffc52766; }
+.rarity-frame.r-mythic { box-shadow: 0 0 0 2px #ffd23f, 0 0 0 4px #ff8fd0, 0 0 14px #ffd23f88; }
+@media (prefers-reduced-motion: reduce) { .rarity-mythic { animation: none; } }
+.unlock-overlay {
+  position: fixed; inset: 0; margin: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(10, 8, 20, 0.82);
+  background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0 2px, transparent 2px 4px);
+  animation: unlock-in 0.25s steps(4) both;
+}
+.unlock-card {
+  width: 100%; max-width: 360px; padding: 18px 16px 16px; color: #fff;
+  background: #1e1b2b; border: 3px solid #050409; border-radius: 12px; box-shadow: 0 6px 0 #050409, 0 0 0 3px #ffc527 inset;
+}
+.unlock-pop { animation: unlock-pop 0.5s steps(5) 0.15s both; }
+@keyframes unlock-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes unlock-pop { 0% { transform: scale(0.3); opacity: 0; } 70% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .unlock-overlay, .unlock-pop { animation: none; } }
