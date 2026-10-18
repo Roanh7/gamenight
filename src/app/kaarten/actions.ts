@@ -15,3 +15,16 @@ export async function setFavoriteCard(formData: FormData) {
   await supabase.from("profiles").update({ favorite_card: value }).eq("id", user.id);
   revalidatePath("/", "layout");
 }
+
+/** Kies de stijl van je kaart (Verzamelkaart, Game Boy, RPG-menu of Arcadekast). */
+export async function setCardStyle(formData: FormData) {
+  const value = String(formData.get("style") ?? "");
+  if (!["gameboy", "rpg", "arcade", "trading"].includes(value)) return;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.from("profiles").update({ card_style: value }).eq("id", user.id);
+  revalidatePath("/", "layout");
+}

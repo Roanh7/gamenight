@@ -156,7 +156,22 @@ export const NICKNAMES: Record<string, string> = {
   Grootmeester: "THE GRANDMASTER",
 };
 
-export type CardStats = { ovr: number | null; provisional: boolean; winPct: number; games: number; streak: number; trophies: number };
+export type CardStats = {
+  ovr: number | null;
+  provisional: boolean;
+  winPct: number;
+  games: number;
+  streak: number;
+  trophies: number;
+  /** Vorm in de laatste 10 potjes, 0–100 */
+  formPct?: number;
+  /** Gemiddelde eindpositie */
+  avgPos?: number | null;
+  /** Beste games (meeste zeges) */
+  top?: { game: string; wins: number; played: number }[];
+  /** Game waarin je het slechtst scoort (minstens 2 keer gespeeld) */
+  weak?: string | null;
+};
 
 export type SeasonCard = CardStats & { season: string; rank: number | null; edition: "standard" | "gold" };
 
@@ -171,7 +186,25 @@ function statsFor(rows: ResultRow[], userId: string, sizes: Map<string, number>,
   const rs = rows.filter((r) => r.user_id === userId);
   const wins = rs.filter((r) => r.is_winner).length;
   const o = computeOvr(rows, userId, sizes, games);
+  const per = new Map<string, { wins: number; played: number; pos: number }>();
+  for (const r of rs) {
+    const e = per.get(r.game_id) ?? { wins: 0, played: 0, pos: 0 };
+    const n = sizes.get(r.match_id) ?? 1;
+    e.played++;
+    if (r.is_winner) e.wins++;
+    e.pos += n > 1 ? 1 - (r.placement - 1) / (n - 1) : 1;
+    per.set(r.game_id, e);
+  }
+  const ranked = [...per.entries()].sort((a, b) => b[1].wins - a[1].wins || b[1].played - a[1].played);
+  const top = ranked.slice(0, 2).map(([game, e]) => ({ game, wins: e.wins, played: e.played }));
+  const weakest = [...per.entries()]
+    .filter(([g, e]) => e.played >= 2 && !top.some((t) => t.game === g))
+    .sort((a, b) => a[1].pos / a[1].played - b[1].pos / b[1].played)[0];
   return {
+    formPct: o ? Math.round(o.parts.form * 100) : 0,
+    avgPos: rs.length ? Math.round((rs.reduce((t, r) => t + r.placement, 0) / rs.length) * 10) / 10 : null,
+    top,
+    weak: weakest?.[0] ?? null,
     ovr: o?.ovr ?? null,
     provisional: o?.provisional ?? true,
     winPct: rs.length ? Math.round((wins / rs.length) * 100) : 0,

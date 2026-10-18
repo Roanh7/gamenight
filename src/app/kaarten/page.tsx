@@ -6,10 +6,11 @@ import { loadCards } from "@/lib/cards";
 import { EDITIONS, EDITION_ORDER, OVR_WEIGHTS, PROVISIONAL_BELOW } from "@/lib/player";
 import { seasonLabel } from "@/lib/stats";
 import { PlayerCard } from "@/components/PlayerCard";
-import { ShareImage } from "@/components/ShareImage";
+import { ShareCard } from "@/components/ShareCard";
+import { CARD_STYLES, safeStyle } from "@/lib/cardStyles";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PageHeader, SectionTitle } from "@/components/ui";
-import { setFavoriteCard } from "./actions";
+import { setCardStyle, setFavoriteCard } from "./actions";
 
 export const metadata: Metadata = { title: "Player Cards" };
 
@@ -22,6 +23,7 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
   const tab = sp.tab === "album" ? "album" : "mijn";
   const mine = data.collectionFor(me.user.id);
   const fav = me.profile.favorite_card;
+  const style = safeStyle(me.profile.card_style);
   const currentKey = mine.shown.kind === "season" ? `season:${mine.shown.season}` : mine.shown.edition;
 
   const Tabs = (
@@ -71,16 +73,7 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
           {everyone.map(({ p, c }) => (
             <li key={p.id}>
               <Link href={p.id === me.user.id ? "/kaarten" : `/kaarten/${p.username}`} className="block active:translate-y-[2px]">
-                <PlayerCard
-                  name={p.username}
-                  color={p.avatar_color}
-                  emoji={p.avatar_emoji}
-                  nickname={c.nickname}
-                  edition={c.shown.edition}
-                  stats={c.shown.stats}
-                  season={c.shown.season}
-                  size="sm"
-                />
+                <PlayerCard card={data.view(p.id)} size="sm" />
               </Link>
             </li>
           ))}
@@ -96,29 +89,34 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
       {Tabs}
 
       <section className="card flex flex-col items-center gap-3 p-4">
-        <PlayerCard
-          name={me.profile.username}
-          color={me.profile.avatar_color}
-          emoji={me.profile.avatar_emoji}
-          nickname={nickname}
-          edition={mine.shown.edition}
-          stats={mine.shown.stats}
-          season={mine.shown.season}
-          size="lg"
-        />
+        <ShareCard filename="gamenight-kaart.png" title={`Player Card van ${me.profile.username}`} label="Deel mijn kaart">
+          <PlayerCard card={data.view(me.user.id)} size="lg" />
+        </ShareCard>
         <p className="text-center text-xs font-bold text-muted">
           Dit is de kaart die anderen van je zien.{" "}
           {fav ? "Je hebt hem zelf gekozen." : "Kies hieronder zelf welke kaart je wilt laten zien."}
         </p>
-        <div className="w-full max-w-[260px]">
-          <ShareImage
-            src={`/kaarten/${encodeURIComponent(me.profile.username)}/kaart.png?kaart=${encodeURIComponent(currentKey)}`}
-            filename="gamenight-kaart.png"
-            title={`Player Card van ${me.profile.username}`}
-            label="Deel mijn kaart"
-          />
-        </div>
       </section>
+
+      <SectionTitle>Kaartstijl</SectionTitle>
+      <ul className="grid grid-cols-2 justify-items-center gap-x-2 gap-y-4">
+        {CARD_STYLES.map((st) => (
+          <li key={st.id} className="flex flex-col items-center gap-1.5">
+            <PlayerCard card={data.view(me.user.id, { style: st.id })} size="sm" />
+            <p className="text-sm font-black">{st.name}</p>
+            {style === st.id ? (
+              <span className="chip bg-green-soft">✓ Gekozen</span>
+            ) : (
+              <form action={setCardStyle}>
+                <input type="hidden" name="style" value={st.id} />
+                <SubmitButton className="btn btn-secondary btn-sm" pendingText="…">
+                  Kies deze
+                </SubmitButton>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
 
       <SectionTitle>Edities</SectionTitle>
       <ul className="grid grid-cols-2 justify-items-center gap-x-2 gap-y-4 sm:grid-cols-3">
@@ -127,16 +125,7 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
           const active = currentKey === e;
           return (
             <li key={e} className="flex flex-col items-center gap-1.5">
-              <PlayerCard
-                name={me.profile.username}
-                color={me.profile.avatar_color}
-                emoji={me.profile.avatar_emoji}
-                nickname={nickname}
-                edition={e}
-                stats={col.current}
-                size="sm"
-                locked={!earned}
-              />
+              <PlayerCard card={data.view(me.user.id, { edition: e, stats: col.current, season: null })} size="sm" locked={!earned} />
               {earned ? (
                 active ? (
                   <span className="chip bg-green-soft">✓ Getoond</span>
@@ -164,13 +153,12 @@ export default async function CardsPage(props: PageProps<"/kaarten">) {
             return (
               <li key={s.season} className="flex flex-col items-center gap-1.5">
                 <PlayerCard
-                  name={me.profile.username}
-                  color={me.profile.avatar_color}
-                  emoji={me.profile.avatar_emoji}
-                  nickname={s.rank ? `#${s.rank} IN ${seasonLabel(s.season).toUpperCase()}` : nickname}
-                  edition={s.edition}
-                  stats={s}
-                  season={s.season}
+                  card={data.view(me.user.id, {
+                    edition: s.edition,
+                    stats: s,
+                    season: s.season,
+                    nickname: s.rank ? `#${s.rank} IN ${seasonLabel(s.season).toUpperCase()}` : nickname,
+                  })}
                   size="sm"
                 />
                 {currentKey === key ? (

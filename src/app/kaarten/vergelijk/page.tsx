@@ -46,16 +46,7 @@ export default async function ComparePage(props: PageProps<"/kaarten/vergelijk">
           const cc = c as typeof ca;
           return (
             <Link key={pp.id} href={pp.id === me.user.id ? "/kaarten" : `/kaarten/${pp.username}`}>
-              <PlayerCard
-                name={pp.username}
-                color={pp.avatar_color}
-                emoji={pp.avatar_emoji}
-                nickname={cc.nickname}
-                edition={cc.shown.edition}
-                stats={cc.shown.stats}
-                season={cc.shown.season}
-                size="sm"
-              />
+              <PlayerCard card={data.view(pp.id)} size="sm" />
             </Link>
           );
         })}

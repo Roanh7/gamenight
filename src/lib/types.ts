@@ -17,6 +17,7 @@ export type Profile = {
   avatar_url: string | null;
   avatar_emoji: string | null;
   favorite_card?: string | null;
+  card_style?: string | null;
   bio: string | null;
   created_at: string;
 };

@@ -345,14 +345,6 @@ body {
 }
 
 /* ---------- Player Cards ---------- */
-.player-card {
-  border: 3px solid var(--color-night);
-  border-radius: 18px 18px 26px 26px;
-  box-shadow: 0 5px 0 var(--color-night);
-  overflow: hidden;
-  /* afgeschuinde bovenhoeken, net een verzamelkaart */
-  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
-}
 .player-card-shine {
   position: absolute;
   inset: 0;
@@ -409,4 +401,23 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .player-card-shine, .hub-avatar.glow, .hub-banner-neon { animation: none; }
+}
+
+/* Retro Player Cards */
+.retro-card { filter: drop-shadow(0 0.3em 0 rgba(30, 27, 43, 0.9)); }
+.retro-card-locked { filter: grayscale(1) opacity(0.45); }
+canvas.pixelated { image-rendering: pixelated; image-rendering: crisp-edges; }
+.arcade-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(transparent 0 0.12em, rgba(0, 0, 0, 0.45) 0.12em 0.24em);
+  pointer-events: none;
+}
+.arcade-blink, .rpg-cursor { animation: retro-blink 1s steps(1) infinite; }
+@keyframes retro-blink { 50% { opacity: 0; } }
+.arcade-rainbow { animation: arcade-rainbow 3s linear infinite; }
+@keyframes arcade-rainbow { to { filter: hue-rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .arcade-blink, .rpg-cursor, .arcade-rainbow { animation: none; }
 }

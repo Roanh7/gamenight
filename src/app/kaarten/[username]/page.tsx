@@ -6,7 +6,7 @@ import { loadCards } from "@/lib/cards";
 import { EDITIONS, EDITION_ORDER } from "@/lib/player";
 import { seasonLabel } from "@/lib/stats";
 import { PlayerCard } from "@/components/PlayerCard";
-import { ShareImage } from "@/components/ShareImage";
+import { ShareCard } from "@/components/ShareCard";
 import { PageHeader, SectionTitle } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Player Card" };
@@ -20,24 +20,16 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
   const p = data.profiles.list.find((x) => x.username.toLowerCase() === decodeURIComponent(username).toLowerCase());
   if (!p) notFound();
   if (p.id === me.user.id) redirect("/kaarten");
-  const { col, nickname, shown } = data.collectionFor(p.id);
-  const key = shown.kind === "season" ? `season:${shown.season}` : shown.edition;
+  const { col, nickname } = data.collectionFor(p.id);
   const earned = EDITION_ORDER.filter((e) => col.earned[e]);
 
   return (
     <div>
       <PageHeader back="/kaarten?tab=album" kicker="PLAYER CARD" title={p.username} />
       <section className="card flex flex-col items-center gap-3 p-4">
-        <PlayerCard
-          name={p.username}
-          color={p.avatar_color}
-          emoji={p.avatar_emoji}
-          nickname={nickname}
-          edition={shown.edition}
-          stats={shown.stats}
-          season={shown.season}
-          size="lg"
-        />
+        <ShareCard filename="gamenight-kaart.png" title={`Player Card van ${p.username}`} label="Deel deze kaart">
+          <PlayerCard card={data.view(p.id)} size="lg" />
+        </ShareCard>
         <div className="grid w-full max-w-[300px] grid-cols-2 gap-2">
           <Link
             href={`/kaarten/vergelijk?a=${encodeURIComponent(me.profile.username)}&b=${encodeURIComponent(p.username)}`}
@@ -49,14 +41,6 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
             Profiel
           </Link>
         </div>
-        <div className="w-full max-w-[300px]">
-          <ShareImage
-            src={`/kaarten/${encodeURIComponent(p.username)}/kaart.png?kaart=${encodeURIComponent(key)}`}
-            filename="gamenight-kaart.png"
-            title={`Player Card van ${p.username}`}
-            label="Deel deze kaart"
-          />
-        </div>
       </section>
 
       <SectionTitle>
@@ -65,16 +49,7 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
       <ul className="grid grid-cols-2 justify-items-center gap-x-2 gap-y-4 sm:grid-cols-3">
         {EDITION_ORDER.map((e) => (
           <li key={e} className="flex flex-col items-center gap-1">
-            <PlayerCard
-              name={p.username}
-              color={p.avatar_color}
-              emoji={p.avatar_emoji}
-              nickname={nickname}
-              edition={e}
-              stats={col.current}
-              size="sm"
-              locked={!col.earned[e]}
-            />
+            <PlayerCard card={data.view(p.id, { edition: e, stats: col.current, season: null })} size="sm" locked={!col.earned[e]} />
             {!col.earned[e] && <p className="max-w-[132px] text-center text-[11px] font-bold text-muted">{EDITIONS[e].how}</p>}
           </li>
         ))}
@@ -87,13 +62,12 @@ export default async function PlayerCardsPage(props: PageProps<"/kaarten/[userna
             {col.seasons.map((s) => (
               <li key={s.season}>
                 <PlayerCard
-                  name={p.username}
-                  color={p.avatar_color}
-                  emoji={p.avatar_emoji}
-                  nickname={s.rank ? `#${s.rank} IN ${seasonLabel(s.season).toUpperCase()}` : nickname}
-                  edition={s.edition}
-                  stats={s}
-                  season={s.season}
+                  card={data.view(p.id, {
+                    edition: s.edition,
+                    stats: s,
+                    season: s.season,
+                    nickname: s.rank ? `#${s.rank} IN ${seasonLabel(s.season).toUpperCase()}` : nickname,
+                  })}
                   size="sm"
                 />
               </li>

@@ -411,6 +411,11 @@ export default async function UitlegPage() {
               potjes is je OVR nog voorlopig.
             </li>
             <li>
+              <b>Kaartstijl:</b> kies bij <i>Mijn kaarten</i> hoe je kaart eruitziet: <b>Verzamelkaart</b> (je beste
+              games als aanvallen, en je zwakte), <b>Game Boy</b>, <b>RPG-menu</b> of <b>Arcadekast</b>. Je emoji wordt
+              automatisch een pixel-poppetje. Iedereen ziet jouw kaart in de stijl die jij kiest.
+            </li>
+            <li>
               Speciale edities speel je vrij: <b>Gold</b> (seizoen gewonnen), <b>Rivalry</b> (10 keer dezelfde
               tegenstander verslagen), <b>Legend</b> (2 seizoenen, level 15 of 100 zeges), <b>Underdog</b> (de koploper
               verslagen) en <b>Undefeated</b> (op één avond al je potjes gewonnen, minstens 3). Wat je verdient, blijf je

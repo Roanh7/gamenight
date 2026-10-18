@@ -2,7 +2,8 @@ import "server-only";
 import type { createClient } from "./supabase/server";
 import { getGames, getLeaderboards, getProfiles, getResults } from "./data";
 import { computeXp, getAttendance } from "./xp";
-import { buildCollection, displayedCard, NICKNAMES } from "./player";
+import { buildCollection, displayedCard, NICKNAMES, type CardStats, type EditionId } from "./player";
+import { safeStyle, type CardStyle, type CardView } from "./cardStyles";
 import { headToHead } from "./stats";
 
 type DB = Awaited<ReturnType<typeof createClient>>;
@@ -31,5 +32,32 @@ export async function loadCards(supabase: DB) {
     return headToHead(results, a, b);
   }
 
-  return { profiles, games, results, xpOf, collectionFor, versus };
+  /** Een kaart klaar om te tekenen; standaard de kaart die iemand zelf laat zien. */
+  function view(
+    userId: string,
+    o: { edition?: EditionId; stats?: CardStats; season?: string | null; nickname?: string; style?: CardStyle } = {},
+  ): CardView {
+    const c = collectionFor(userId);
+    const p = profiles.byId.get(userId);
+    const stats = o.stats ?? c.shown.stats;
+    const g = (id: string) => games.byId.get(id);
+    return {
+      name: p?.username ?? "?",
+      color: p?.avatar_color ?? null,
+      emoji: p?.avatar_emoji ?? null,
+      style: o.style ?? safeStyle(p?.card_style),
+      nickname: o.nickname ?? c.nickname,
+      level: c.xp.level,
+      edition: o.edition ?? c.shown.edition,
+      season: o.season !== undefined ? o.season : o.stats ? null : c.shown.season,
+      stats,
+      top: (stats.top ?? []).flatMap((t) => {
+        const x = g(t.game);
+        return x ? [{ icon: x.icon, name: x.name, wins: t.wins }] : [];
+      }),
+      weak: stats.weak && g(stats.weak) ? { icon: g(stats.weak)!.icon, name: g(stats.weak)!.name } : null,
+    };
+  }
+
+  return { profiles, games, results, xpOf, collectionFor, versus, view };
 }
