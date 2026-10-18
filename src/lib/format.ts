@@ -70,3 +70,8 @@ export function ordinal(n: number) {
 export function hoursAgoIso(hours: number) {
   return new Date(Date.now() - hours * 3600_000).toISOString();
 }
+
+/** Huidige tijd in ms (voor server-rendering, zodat client en server hetzelfde beginnen). */
+export function nowMs() {
+  return Date.now();
+}

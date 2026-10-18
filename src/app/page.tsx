@@ -4,7 +4,7 @@ import { createClient, getMe } from "@/lib/supabase/server";
 import { getActivity, getGames, getProfiles, getComments, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
 import { currentBountyTarget, currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
-import { formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
+import { formatDateLong, formatTime, hoursAgoIso, nowMs, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { PushPrompt } from "@/components/PushPrompt";
@@ -250,7 +250,7 @@ async function Dashboard({
             )}
           </div>
           {next.status === "planned" && !next.date_poll && (
-            <FuseCountdown startsAt={next.starts_at} createdAt={next.created_at} serverNow={Date.now()} />
+            <FuseCountdown startsAt={next.starts_at} createdAt={next.created_at} serverNow={nowMs()} />
           )}
           <div className="mt-3 flex items-center justify-between gap-3">
             <div className="flex -space-x-1.5">
