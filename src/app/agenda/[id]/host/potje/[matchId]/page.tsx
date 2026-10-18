@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getProfiles } from "@/lib/data";
 import type { Game, Match, MatchResult } from "@/lib/types";
-import { deleteMatch, reopenMatch } from "../../../../actions";
+import { deleteMatch, rematch, reopenMatch } from "../../../../actions";
 import { GameIcon } from "@/components/GameIcon";
 import { MatchResults } from "@/components/MatchResults";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -147,8 +147,26 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
           </section>
           <MatchResults match={match} game={game ?? undefined} results={results} profiles={profiles.byId} teams={teamOf} />
           <div className="mt-6 grid gap-2">
-            <Link href={`/agenda/${id}/host#potje`} className="btn btn-primary py-4 text-lg">
-              ▶ Volgend potje
+            <form action={rematch} className="card bg-night p-3 text-white">
+              <input type="hidden" name="night_id" value={id} />
+              <input type="hidden" name="match_id" value={match.id} />
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex -space-x-1.5">
+                  {players.slice(0, 8).map((p) => (
+                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
+                  ))}
+                </div>
+                <p className="min-w-0 flex-1 text-xs font-bold opacity-80">
+                  {game?.name ?? "Zelfde spel"} · {players.length} spelers
+                  {gameType === "teams" ? " · zelfde teams" : ""}
+                </p>
+              </div>
+              <SubmitButton className="btn btn-primary w-full py-4 text-lg" pendingText="Rematch starten…">
+                🔁 Rematch
+              </SubmitButton>
+            </form>
+            <Link href={`/agenda/${id}/host#potje`} className="btn btn-secondary">
+              ▶ Ander potje kiezen
             </Link>
             <Link href="/live" className="btn btn-secondary">
               ← Terug naar de avond

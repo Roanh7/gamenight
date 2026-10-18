@@ -349,6 +349,64 @@ export async function startMatch(formData: FormData) {
   redirect(`/agenda/${id}/host/potje/${match.id}`);
 }
 
+/**
+ * Quick Rematch: hetzelfde spel met dezelfde spelers opnieuw starten.
+ * Bij teamspellen blijven de teams staan (de host kan ze nog wisselen); bij geheime rollen
+ * worden de rollen pas na afloop gekozen, dus die nemen we niet mee.
+ * Tikken host en co-host tegelijk, dan komt er maar één nieuw potje.
+ */
+export async function rematch(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const matchId = str(formData, "match_id");
+  const back = `/agenda/${id}/host/potje/${matchId}`;
+
+  const [{ data: old }, { data: oldPlayers }] = await Promise.all([
+    supabase.from("matches").select("id, night_id, game_id, status, finished_at").eq("id", matchId).maybeSingle(),
+    supabase.from("match_players").select("user_id, team").eq("match_id", matchId),
+  ]);
+  if (!old || old.night_id !== id) fail(`/agenda/${id}/host`, "Dat potje bestaat niet meer.");
+  const players = (oldPlayers ?? []) as { user_id: string; team: string | null }[];
+  if (players.length < 2) fail(back, "Er waren te weinig spelers voor een rematch.");
+
+  const { data: game } = await supabase.from("games").select("game_type, is_team").eq("id", old.game_id).maybeSingle();
+  const keepTeams = (game?.game_type ?? (game?.is_team ? "roles" : "solo")) === "teams";
+
+  // Al een rematch gestart (bijv. door de co-host)? Dan gaan we daarheen.
+  const { data: live } = await supabase
+    .from("matches")
+    .select("id, created_at")
+    .eq("night_id", id)
+    .eq("game_id", old.game_id)
+    .eq("status", "live")
+    .gte("created_at", old.finished_at ?? new Date(0).toISOString())
+    .order("created_at", { ascending: false });
+  const wanted = new Set(players.map((p) => p.user_id));
+  for (const m of live ?? []) {
+    const { data: mp } = await supabase.from("match_players").select("user_id").eq("match_id", m.id);
+    const ids = (mp ?? []).map((x) => x.user_id as string);
+    if (ids.length === wanted.size && ids.every((u) => wanted.has(u))) redirect(`/agenda/${id}/host/potje/${m.id}`);
+  }
+
+  const { data: match, error } = await supabase
+    .from("matches")
+    .insert({ night_id: id, game_id: old.game_id })
+    .select("id")
+    .single();
+  if (error || !match) fail(back, "Alleen de host kan een rematch starten.");
+
+  const { error: pErr } = await supabase
+    .from("match_players")
+    .insert(players.map((p) => ({ match_id: match.id, user_id: p.user_id, team: keepTeams ? p.team : null })));
+  if (pErr) {
+    await supabase.from("matches").delete().eq("id", match.id);
+    fail(back, "Rematch starten lukte niet. Probeer het opnieuw.");
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/agenda/${id}/host/potje/${match.id}?ok=${encodeURIComponent("🔁 Rematch! Zelfde spel, zelfde spelers.")}`);
+}
+
 export async function deleteMatch(formData: FormData) {
   const { supabase } = await requireUser();
   const id = str(formData, "night_id");

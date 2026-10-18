@@ -428,6 +428,11 @@ export default async function UitlegPage() {
               onderaan. Meekijkers zien de scores live, maar kunnen niks aanpassen.
             </li>
             <li>
+              <b>🔁 Rematch:</b> na een potje start de host met één tik hetzelfde spel met dezelfde spelers opnieuw.
+              Bij teamspellen blijven de teams staan (je kunt ze nog wisselen). Wil je iets anders spelen? Kies{" "}
+              <b>Ander potje kiezen</b>.
+            </li>
+            <li>
               Liever het gewone menu? Tik op <b>Menu</b>. Met <b>Terug naar live</b> kom je weer terug.
             </li>
             <li>
