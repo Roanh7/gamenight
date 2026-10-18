@@ -2,11 +2,13 @@
 
 import { unlockAudio } from "@/lib/sfx";
 import { useMemo, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Shuffle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatScore } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
+import { ActionBar } from "@/components/ActionBar";
 
 type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
 type Entry = { team: string; round: number; points: number };
@@ -286,14 +288,14 @@ export function TeamScoreBoard({
                 <button
                   type="button"
                   onClick={() => setValue(t, round, String(num(values[key]) - 1))}
-                  className="btn btn-secondary btn-sm h-10 w-10 px-0"
+                  className="btn btn-secondary h-14 w-14 shrink-0 px-0"
                   aria-label={`1 punt eraf voor ${t}`}
                 >
-                  <Minus size={16} strokeWidth={3} />
+                  <Minus size={22} strokeWidth={3} />
                 </button>
                 <input
                   inputMode="decimal"
-                  className="input h-10 min-h-0 w-20 px-2 text-center font-black"
+                  className="input h-14 min-h-0 w-16 shrink-0 px-1 text-center text-lg font-black"
                   value={values[key] ?? ""}
                   placeholder="0"
                   onChange={(e) => setValue(t, round, e.target.value.replace(/[^0-9,.\-]/g, ""))}
@@ -302,10 +304,10 @@ export function TeamScoreBoard({
                 <button
                   type="button"
                   onClick={() => setValue(t, round, String(num(values[key]) + 1))}
-                  className="btn btn-green btn-sm h-10 w-10 px-0"
+                  className="btn btn-green h-14 w-14 shrink-0 px-0"
                   aria-label={`1 punt erbij voor ${t}`}
                 >
-                  <Plus size={16} strokeWidth={3} />
+                  <Plus size={22} strokeWidth={3} />
                 </button>
               </li>
             );
@@ -319,15 +321,20 @@ export function TeamScoreBoard({
         </p>
       )}
 
-      <button type="button" onClick={finish} disabled={finishing} className="btn btn-primary mt-6 w-full">
-        {finishing ? "Afronden…" : "🏁 Potje afronden"}
-      </button>
-      <button type="button" onClick={() => setEditingTeams(true)} className="btn btn-secondary btn-sm mt-3 w-full">
+      <button type="button" onClick={() => setEditingTeams(true)} className="btn btn-secondary btn-sm mt-6 w-full">
         Teams aanpassen
       </button>
       <p className="mt-2 text-center text-xs text-muted">
         Scores worden automatisch opgeslagen. Iedereen in het winnende team krijgt de punten van de 1e plek.
       </p>
+      <ActionBar>
+        <Link href="/live" className="btn btn-secondary shrink-0 px-4">
+          ← Avond
+        </Link>
+        <button type="button" onClick={finish} disabled={finishing} className="btn btn-primary flex-1 py-4 text-lg">
+          {finishing ? "Afronden…" : "🏁 Afronden"}
+        </button>
+      </ActionBar>
     </div>
   );
 }

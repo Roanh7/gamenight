@@ -63,7 +63,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
 
   return (
     <div>
-      <PageHeader back={`/agenda/${id}/host`} kicker={night.title.toUpperCase()} title={game?.name ?? "Potje"} action={game ? <GameIcon icon={game.icon} color={game.color} /> : null} />
+      <PageHeader back="/live" kicker={night.title.toUpperCase()} title={game?.name ?? "Potje"} action={game ? <GameIcon icon={game.icon} color={game.color} /> : null} />
       <Flash sp={sp} />
 
       {match.status === "live" ? (
@@ -93,6 +93,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             initialEntries={(entries ?? []).map((e) => ({ ...e, points: Number(e.points) }))}
             lowestWins={game?.scoring_mode === "lowest_wins"}
             isTeam={false}
+            gameId={game?.id}
           />
           )}
           <form action={deleteMatch} className="mt-8">
@@ -141,8 +142,11 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
           </section>
           <MatchResults match={match} game={game ?? undefined} results={results} profiles={profiles.byId} teams={teamOf} />
           <div className="mt-6 grid gap-2">
-            <Link href={`/agenda/${id}/host`} className="btn btn-primary">
+            <Link href={`/agenda/${id}/host#potje`} className="btn btn-primary py-4 text-lg">
               ▶ Volgend potje
+            </Link>
+            <Link href="/live" className="btn btn-secondary">
+              ← Terug naar de avond
             </Link>
             <form action={reopenMatch}>
               <input type="hidden" name="night_id" value={id} />

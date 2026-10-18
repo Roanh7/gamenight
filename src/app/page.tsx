@@ -130,7 +130,7 @@ async function Dashboard({
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
-    getActivity(supabase, 30),
+    getActivity(supabase, 4),
     supabase
       .from("game_nights")
       .select("*")
@@ -155,20 +155,8 @@ async function Dashboard({
   const isChampion = [...seasonChampions(results).values()].includes(userId);
   const myAllWins = results.filter((r) => r.user_id === userId && r.is_winner).length;
 
-  // Nieuws over jou (zelf genoemd, winnaar of MVP), daaronder het nieuws van iedereen
-  const aboutMe = activity
-    .filter((a) => {
-      const p = (a.payload ?? {}) as Record<string, unknown>;
-      return (
-        a.actor_id === userId ||
-        ((p.winners as string[] | undefined) ?? []).includes(userId) ||
-        p.mvp === userId ||
-        p.old_host === userId
-      );
-    })
-    .slice(0, 3);
   const groupNews = activity.slice(0, 4);
-  const feedItems = [...new Map([...aboutMe, ...groupNews].map((a) => [a.id, a])).values()];
+  const feedItems = groupNews;
 
   const upcoming = (nightsRes.data ?? []) as GameNight[];
   const next = upcoming.find((n) => n.status === "live") ?? upcoming[0];
@@ -375,23 +363,6 @@ async function Dashboard({
       >
         Latest news
       </SectionTitle>
-      {aboutMe.length > 0 && (
-        <>
-          <p className="pixel mb-1.5 text-[9px] text-muted">OVER JOU</p>
-          <div className="mb-3">
-            <ActivityFeed
-              items={aboutMe}
-              profiles={profiles.byId}
-              games={games.byId}
-              nights={nightsById}
-              me={{ id: userId, name: username }}
-              reactions={reactions}
-              comments={comments}
-            />
-          </div>
-          <p className="pixel mb-1.5 text-[9px] text-muted">IEDEREEN</p>
-        </>
-      )}
       {groupNews.length > 0 ? (
         <ActivityFeed
           items={groupNews}

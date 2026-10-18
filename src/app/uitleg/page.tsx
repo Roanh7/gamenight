@@ -178,7 +178,13 @@ export default async function UitlegPage() {
               per speler, per team, of pas na afloop bij geheime rollen. Alles wordt meteen opgeslagen.
             </li>
             <li>
-              Op <b>🏁 Potje afronden</b> tikken als het klaar is. De punten gaan dan naar de ranglijst, en de
+              <b>⚡ Alleen winnaar:</b> bij een simpel spel hoef je geen punten te tellen. Kies bovenaan{" "}
+              <i>Alleen winnaar</i>, tik de winnaar aan en rond af. De winnaar krijgt de punten van de 1e plek, de rest
+              deelt de 2e plek. De app onthoudt per game welke manier je gebruikt.
+            </li>
+            <li>
+              Op <b>🏁 Afronden</b> tikken als het klaar is (de knop staat altijd onderaan in beeld, en je krijgt eerst
+              nog een vraag of het klopt). De punten gaan dan naar de ranglijst, en de
               winnaar krijgt confetti en een overwinningsdeuntje 🎉.
             </li>
             <li>
@@ -395,15 +401,22 @@ export default async function UitlegPage() {
             <li>
               <b>Home is je Player Hub:</b> je avatar, level en XP (met hoeveel je nog nodig hebt en je volgende
               beloning), je ranking, zeges, winstreeks, je vorm in de laatste 5 potjes (W = gewonnen, L = verloren, D
-              = gedeelde eerste plek), je grootste rivaal en de koploper. Daaronder eerst het nieuws over jou.
+              = gedeelde eerste plek), je grootste rivaal en de koploper. Daaronder het laatste nieuws.
             </li>
             <li>
               Je avatar groeit mee: vanaf level 5 een gekleurde rand, vanaf level 10 een bewegend effect en als
               seizoenskampioen een gouden rand. Vanaf level 3 krijg je een pixel-banner, vanaf level 7 een neon-banner.
             </li>
             <li>
-              <b>Live-modus:</b> tijdens een gamenight waar je bij bent, staat bovenaan Home de lopende stand, jouw
-              punten van die avond en (voor de host) grote knoppen om scores bij te werken of een nieuw potje te starten.
+              <b>Live Game Mode:</b> zodra een avond bezig is waar jij bij bent, verandert de menubalk onderaan in een
+              rode <b>livebalk</b>. Daarop zie je of je host bent of meekijkt, en ga je met één tik naar{" "}
+              <b>Live</b> (lopende potjes, de stand van vanavond en de afgeronde potjes), de <b>avond</b> of de{" "}
+              <b>ranking</b>. De host heeft in het midden een grote knop om een <b>nieuw potje</b> te starten.
+            </li>
+            <li>
+              Bij het scores invoeren zijn de knoppen groot, en staan <b>← Avond</b> en <b>🏁 Afronden</b> altijd
+              onderaan. Meekijkers zien de scores live, maar kunnen niks aanpassen. Liever het gewone menu? Tik op{" "}
+              <b>Menu</b>. Met <b>Terug naar live</b> kom je weer terug.
             </li>
             <li>
               <b>Player Cards:</b> iedereen heeft een verzamelkaart met een <b>OVR</b> (40–99): winpercentage 35%,

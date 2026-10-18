@@ -8,6 +8,7 @@ import { getMe } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
+import { getMyActiveNight } from "@/lib/live";
 
 export const metadata: Metadata = {
   title: { default: "Game Night", template: "%s · Game Night" },
@@ -30,9 +31,15 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [me, jar] = await Promise.all([getMe(), cookies()]);
   const theme = jar.get("gn-theme")?.value;
+  const live = me ? await getMyActiveNight() : null;
+  const liveOff = !!live && jar.get("gn-nav")?.value === `normal:${live.id}`;
 
   return (
-    <html lang="nl" data-theme={theme === "light" || theme === "dark" ? theme : undefined}>
+    <html
+      lang="nl"
+      data-theme={theme === "light" || theme === "dark" ? theme : undefined}
+      style={{ ["--nav-h" as string]: live ? "104px" : "76px" }}
+    >
       <body className="min-h-dvh antialiased">
         <div className="pixel-sky" aria-hidden />
         {me && (
@@ -58,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </header>
         )}
         <main className={`mx-auto max-w-xl px-4 ${me ? "pb-32 pt-5" : "py-8"}`}>{children}</main>
-        {me && <BottomNav />}
+        {me && <BottomNav live={live} liveOff={liveOff} />}
       </body>
     </html>
   );

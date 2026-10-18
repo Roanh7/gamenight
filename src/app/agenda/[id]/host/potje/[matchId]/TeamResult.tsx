@@ -2,10 +2,12 @@
 
 import { unlockAudio } from "@/lib/sfx";
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { GameTeam } from "@/lib/types";
 import { Avatar } from "@/components/Avatar";
+import { ActionBar } from "@/components/ActionBar";
 
 type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
 
@@ -95,7 +97,7 @@ export function TeamResult({
                         setWinner(null);
                       }}
                       aria-pressed={active}
-                      className={`chip px-3 py-1.5 text-sm ${active ? colorOf(t.name) : "bg-paper"}`}
+                      className={`chip px-4 py-2.5 text-base ${active ? colorOf(t.name) : "bg-paper"}`}
                     >
                       {t.name}
                     </button>
@@ -120,7 +122,7 @@ export function TeamResult({
               disabled={!allAssigned}
               onClick={() => setWinner(t.name)}
               aria-pressed={winner === t.name}
-              className={`btn justify-between ${winner === t.name ? "btn-yellow" : "btn-secondary"}`}
+              className={`btn justify-between py-4 ${winner === t.name ? "btn-yellow" : "btn-secondary"}`}
             >
               <span>🏆 {t.name}</span>
               <span className="text-sm">+{t.points} pt</span>
@@ -142,9 +144,14 @@ export function TeamResult({
         </p>
       )}
 
-      <button type="button" onClick={finish} disabled={!winner || pending} className="btn btn-primary mt-6 w-full">
-        {pending ? "Afronden…" : "🏁 Potje afronden"}
-      </button>
+      <ActionBar>
+        <Link href="/live" className="btn btn-secondary shrink-0 px-4">
+          ← Avond
+        </Link>
+        <button type="button" onClick={finish} disabled={!winner || pending} className="btn btn-primary flex-1 py-4 text-lg">
+          {pending ? "Afronden…" : winner ? "🏁 Afronden" : "Kies de winnaar"}
+        </button>
+      </ActionBar>
     </div>
   );
 }

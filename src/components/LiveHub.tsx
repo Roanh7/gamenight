@@ -39,7 +39,7 @@ export function LiveHub({
         <span className="pixel text-[10px]">
           <span className="blink">●</span> LIVE MODE
         </span>
-        <Link href={`/agenda/${night.id}`} className="truncate pl-3 text-sm font-black underline">
+        <Link href="/live" className="truncate pl-3 text-sm font-black underline">
           {night.title}
         </Link>
       </div>
@@ -90,8 +90,8 @@ export function LiveHub({
               ▶ Nieuw potje
             </Link>
           )}
-          <Link href={`/agenda/${night.id}`} className="btn btn-secondary">
-            {isHost ? "Avond bekijken" : "Kijk live mee"}
+          <Link href="/live" className="btn btn-secondary">
+            {isHost ? "Live mode" : "Kijk live mee"}
           </Link>
         </div>
       </div>

@@ -1,12 +1,14 @@
 "use client";
 
 import { unlockAudio } from "@/lib/sfx";
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatScore } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
+import { ActionBar } from "@/components/ActionBar";
 
 type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null };
 type Entry = { user_id: string; round: number; points: number };
@@ -18,6 +20,7 @@ export function ScoreBoard({
   initialEntries,
   lowestWins,
   isTeam = false,
+  gameId,
 }: {
   matchId: string;
   nightId: string;
@@ -25,6 +28,8 @@ export function ScoreBoard({
   initialEntries: Entry[];
   lowestWins: boolean;
   isTeam?: boolean;
+  /** Voor het onthouden van de snelle modus per game */
+  gameId?: string;
 }) {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -40,6 +45,23 @@ export function ScoreBoard({
   const [error, setError] = useState<string | null>(null);
   const [finishing, startFinish] = useTransition();
   const pendingSaves = useRef(new Set<Promise<unknown>>());
+  // Snelle modus: alleen de winnaar aantikken
+  const [quick, setQuick] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+  const quickKey = gameId ? `gn-snel-${gameId}` : null;
+  useEffect(() => {
+    if (!quickKey || initialEntries.length) return;
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- voorkeur uit localStorage na het laden
+      if (localStorage.getItem(quickKey) === "1") setQuick(true);
+    } catch {}
+  }, [quickKey, initialEntries.length]);
+  function chooseMode(q: boolean) {
+    setQuick(q);
+    try {
+      if (quickKey) localStorage.setItem(quickKey, q ? "1" : "0");
+    } catch {}
+  }
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
   const num = (s: string | undefined) => {
@@ -126,13 +148,115 @@ export function ScoreBoard({
     });
   }
 
+  function finishQuick() {
+    unlockAudio();
+    const w = players.find((p) => p.id === winner);
+    if (!w) return;
+    if (!window.confirm(`${w.username} wint dit potje? De punten gaan dan naar de ranglijst.`)) return;
+    startFinish(async () => {
+      setError(null);
+      await flush();
+      const del = await supabase.from("score_entries").delete().eq("match_id", matchId);
+      const ins = del.error
+        ? del
+        : await supabase.from("score_entries").insert(
+            players.map((p) => ({
+              match_id: matchId,
+              user_id: p.id,
+              round: 1,
+              points: (p.id === w.id) !== lowestWins ? 1 : 0,
+            })),
+          );
+      if (ins.error) {
+        setError("Opslaan mislukt. Check je verbinding.");
+        return;
+      }
+      const { error } = await supabase.rpc("finalize_match", { p_match_id: matchId });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      router.replace(`/agenda/${nightId}/host/potje/${matchId}?klaar=1`);
+      router.refresh();
+    });
+  }
+
   function addRound() {
     setRounds((n) => n + 1);
     setRound(rounds + 1);
   }
 
+  const modeSwitch = !isTeam && (
+    <div className="mb-4 grid grid-cols-2 gap-1 rounded-2xl border-2 border-line bg-paper p-1" role="tablist" aria-label="Manier van scoren">
+      {(
+        [
+          [true, "⚡ Alleen winnaar"],
+          [false, "🔢 Punten tellen"],
+        ] as const
+      ).map(([q, label]) => (
+        <button
+          key={label}
+          type="button"
+          role="tab"
+          aria-selected={quick === q}
+          onClick={() => chooseMode(q)}
+          className={`rounded-xl px-2 py-2.5 text-sm font-black ${quick === q ? "bg-night text-white" : "text-muted"}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (quick && !isTeam) {
+    return (
+      <div>
+        {modeSwitch}
+        <section className="card p-3">
+          <p className="mb-3 px-1 text-sm font-black">Wie heeft er gewonnen? Tik de winnaar aan.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {players.map((p) => {
+              const on = winner === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setWinner(on ? null : p.id)}
+                  aria-pressed={on}
+                  className={`flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-line p-3 transition-transform active:translate-y-[2px] ${
+                    on ? "bg-yellow shadow-[0_4px_0_var(--color-line)]" : "bg-paper"
+                  }`}
+                >
+                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="lg" crown={on} />
+                  <span className="w-full truncate text-center font-black">{p.username}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 px-1 text-xs font-bold text-muted">
+            De winnaar krijgt de punten van de 1e plek, de rest deelt de 2e plek. Wil je precies tellen? Kies dan Punten tellen.
+          </p>
+        </section>
+        {error && (
+          <p role="alert" className="mt-4 rounded-xl border-2 border-line bg-red-soft px-3 py-2 text-sm font-bold">
+            {error}
+          </p>
+        )}
+        <ActionBar>
+          <Link href="/live" className="btn btn-secondary shrink-0 px-4">
+            ← Avond
+          </Link>
+          <button type="button" onClick={finishQuick} disabled={!winner || finishing} className="btn btn-primary flex-1 py-4 text-lg">
+            {finishing ? "Afronden…" : winner ? "🏁 Afronden" : "Kies de winnaar"}
+          </button>
+        </ActionBar>
+      </div>
+    );
+  }
+
   return (
     <div>
+      {modeSwitch}
       {/* Live stand */}
       <section className="card overflow-hidden">
         <div className="flex items-center justify-between border-b-2 border-line bg-night px-4 py-2 text-white">
@@ -191,24 +315,24 @@ export function ScoreBoard({
       {/* Invoer actieve ronde */}
       <section className="card mt-3 p-3">
         <p className="mb-2 px-1 text-sm font-black">Punten ronde {round}</p>
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {players.map((p) => {
             const key = `${p.id}:${round}`;
             return (
               <li key={key} className="flex items-center gap-2">
                 <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
-                <span className="min-w-0 flex-1 truncate text-sm font-bold">{p.username}</span>
+                <span className="min-w-0 flex-1 truncate font-black">{p.username}</span>
                 <button
                   type="button"
                   onClick={() => bump(p.id, -1)}
-                  className="btn btn-secondary btn-sm h-10 w-10 px-0"
+                  className="btn btn-secondary h-14 w-14 shrink-0 px-0"
                   aria-label={`1 punt eraf voor ${p.username}`}
                 >
-                  <Minus size={16} strokeWidth={3} />
+                  <Minus size={22} strokeWidth={3} />
                 </button>
                 <input
                   inputMode="decimal"
-                  className="input h-10 min-h-0 w-20 px-2 text-center font-black"
+                  className="input h-14 min-h-0 w-16 shrink-0 px-1 text-center text-lg font-black"
                   value={values[key] ?? ""}
                   placeholder="0"
                   onChange={(e) => setValue(p.id, round, e.target.value.replace(/[^0-9,.\-]/g, ""))}
@@ -217,10 +341,10 @@ export function ScoreBoard({
                 <button
                   type="button"
                   onClick={() => bump(p.id, 1)}
-                  className="btn btn-green btn-sm h-10 w-10 px-0"
+                  className="btn btn-green h-14 w-14 shrink-0 px-0"
                   aria-label={`1 punt erbij voor ${p.username}`}
                 >
-                  <Plus size={16} strokeWidth={3} />
+                  <Plus size={22} strokeWidth={3} />
                 </button>
               </li>
             );
@@ -268,13 +392,18 @@ export function ScoreBoard({
         </p>
       )}
 
-      <button type="button" onClick={finish} disabled={finishing} className="btn btn-primary mt-6 w-full">
-        {finishing ? "Afronden…" : "🏁 Potje afronden"}
-      </button>
       <p className="mt-2 text-center text-xs text-muted">
         Scores worden automatisch opgeslagen.{" "}
         {isTeam ? "Teamspel: iedereen bovenaan wint samen." : "Bij gelijke stand bovenaan is er geen winnaar."}
       </p>
+      <ActionBar>
+        <Link href="/live" className="btn btn-secondary shrink-0 px-4">
+          ← Avond
+        </Link>
+        <button type="button" onClick={finish} disabled={finishing} className="btn btn-primary flex-1 py-4 text-lg">
+          {finishing ? "Afronden…" : "🏁 Afronden"}
+        </button>
+      </ActionBar>
     </div>
   );
 }
