@@ -7,10 +7,14 @@ import type { GameNight, Participant } from "@/lib/types";
 import { NightCard } from "@/components/NightCard";
 import { hoursAgoIso } from "@/lib/format";
 import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { Flash } from "@/components/Flash";
+import { SubmitButton } from "@/components/SubmitButton";
+import { createPracticeNight } from "./actions";
 
 export const metadata: Metadata = { title: "Agenda" };
 
-export default async function AgendaPage() {
+export default async function AgendaPage(props: PageProps<"/agenda">) {
+  const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
   const [{ data: nightsData }, { data: partData }, profiles] = await Promise.all([
@@ -18,7 +22,10 @@ export default async function AgendaPage() {
     supabase.from("participants").select("night_id, user_id, status"),
     getProfiles(supabase),
   ]);
-  const nights = (nightsData ?? []) as GameNight[];
+  // Oefenavonden ziet alleen wie hem maakte of host is
+  const mineOnly = (n: GameNight) =>
+    !n.is_practice || [n.host_id, n.cohost_id, n.created_by].includes(me?.user.id ?? "");
+  const nights = ((nightsData ?? []) as GameNight[]).filter(mineOnly);
   const parts = (partData ?? []) as Participant[];
 
   const cutoff = Date.parse(hoursAgoIso(12));
@@ -58,6 +65,7 @@ export default async function AgendaPage() {
           </Link>
         }
       />
+      <Flash sp={sp} />
 
       {upcoming.length ? (
         <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">{upcoming.map(card)}</ul>
@@ -73,6 +81,22 @@ export default async function AgendaPage() {
           }
         />
       )}
+
+      <form action={createPracticeNight} className="card mt-4 flex items-center gap-3 p-4">
+        <span className="text-3xl" aria-hidden>
+          🧪
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-black">Oefenavond</p>
+          <p className="text-xs font-bold text-muted">
+            Probeer potjes starten, scores invoeren en afronden. Telt niet mee voor ranking, XP of nieuws, en niemand
+            krijgt een melding.
+          </p>
+        </div>
+        <SubmitButton className="btn btn-yellow btn-sm shrink-0" pendingText="…">
+          Oefenen
+        </SubmitButton>
+      </form>
 
       {past.length > 0 && (
         <>

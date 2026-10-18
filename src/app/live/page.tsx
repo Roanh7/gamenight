@@ -70,7 +70,7 @@ export default async function LivePage() {
         <div className="flex items-center justify-between gap-3 bg-red px-4 py-3 text-white">
           <div className="min-w-0">
             <p className="pixel text-[10px]">
-              <span className="blink">●</span> LIVE GAME MODE
+              <span className="blink">●</span> {active.practice ? "OEFENAVOND" : "LIVE GAME MODE"}
             </p>
             <h1 className="mt-1 truncate text-xl font-black">{night.title}</h1>
           </div>
@@ -82,6 +82,11 @@ export default async function LivePage() {
           <span className={`chip ${isHost ? "bg-yellow" : "bg-blue-soft"}`}>{role.label}</span>
           <span className="text-xs font-bold text-muted">{role.text}</span>
         </div>
+        {active.practice && (
+          <p className="border-t-2 border-line bg-purple-soft px-4 py-2 text-xs font-bold">
+            🧪 Oefenavond: niks telt mee en niemand krijgt een melding.
+          </p>
+        )}
       </section>
 
       {isHost && (

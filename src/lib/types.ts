@@ -56,6 +56,8 @@ export type GameNight = {
   game_ids: string[];
   cohost_id: string | null;
   date_poll: boolean;
+  /** Oefenavond: telt nergens voor mee */
+  is_practice?: boolean;
   created_by: string | null;
   created_at: string;
 };

@@ -427,6 +427,11 @@ export default async function UitlegPage() {
             <li>
               Liever het gewone menu? Tik op <b>Menu</b>. Met <b>Terug naar live</b> kom je weer terug.
             </li>
+            <li>
+              <b>🧪 Oefenavond:</b> in de Agenda start je met <b>Oefenen</b> meteen een avond om alles uit te proberen:
+              potjes starten, scores invoeren, afronden, heropenen. Niks telt mee voor ranking, XP, records of nieuws, en
+              niemand krijgt een melding. Alleen jij ziet de oefenavond. Klaar? Gooi hem weg via het host dashboard.
+            </li>
           </ul>
         </Section>
 

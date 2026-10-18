@@ -55,6 +55,7 @@ export async function getAttendance(supabase: DB): Promise<Attendance[]> {
     .select("user_id, night_id, game_nights!inner(status, host_id, starts_at)")
     .eq("status", "confirmed")
     .eq("game_nights.status", "finished")
+    .eq("game_nights.is_practice", false)
     .limit(10000);
   return (
     (data ?? []) as unknown as { user_id: string; night_id: string; game_nights: { host_id: string; starts_at: string } }[]

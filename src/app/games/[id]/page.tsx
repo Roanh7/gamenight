@@ -26,9 +26,10 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
     getResults(supabase),
     supabase
       .from("matches")
-      .select("*")
+      .select("*, game_nights!inner(is_practice)")
       .eq("game_id", id)
       .eq("status", "finished")
+      .eq("game_nights.is_practice", false)
       .order("finished_at", { ascending: false })
       .limit(20),
     getProfiles(supabase),
@@ -43,13 +44,9 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
   const creator = game.created_by ? profiles.byId.get(game.created_by) : undefined;
 
   // Hoogste/laagste score ooit
-  const { data: best } = await supabase
-    .from("match_results")
-    .select("user_id, total")
-    .eq("game_id", id)
-    .order("total", { ascending: game.scoring_mode === "lowest_wins" })
-    .limit(1);
-  const record = best?.[0];
+  const record = [...gameResults].sort((a, b) =>
+    game.scoring_mode === "lowest_wins" ? Number(a.total) - Number(b.total) : Number(b.total) - Number(a.total),
+  )[0];
   const recordHolder = record ? profiles.byId.get(record.user_id) : undefined;
   const champion = rows[0]?.rank === 1 && rows.filter((r) => r.rank === 1).length === 1 ? profiles.byId.get(rows[0].user_id) : undefined;
 

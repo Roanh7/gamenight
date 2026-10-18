@@ -176,9 +176,13 @@ export async function getReactions(supabase: DB, activityIds: number[], meId: st
 export async function getResults(supabase: DB) {
   const { data } = await supabase
     .from("match_results")
-    .select("*, matches!inner(finished_at, night_id)")
+    .select("*, matches!inner(finished_at, night_id, game_nights!inner(is_practice))")
     .limit(10000);
-  return (data ?? []).map((r) => {
+  // Oefenavonden tellen nergens voor mee
+  const real = (data ?? []).filter(
+    (r) => !(r as { matches?: { game_nights?: { is_practice?: boolean } | null } }).matches?.game_nights?.is_practice,
+  );
+  return real.map((r) => {
     const { matches, ...rest } = r as MatchResult & { matches: { finished_at: string | null; night_id: string } };
     return {
       ...rest,
@@ -211,13 +215,13 @@ export async function getComments(supabase: DB, activityIds: number[]) {
 }
 
 export type LiveRole = "host" | "cohost" | "player";
-export type ActiveNight = { id: string; title: string; role: LiveRole; liveMatches: number };
+export type ActiveNight = { id: string; title: string; role: LiveRole; liveMatches: number; practice?: boolean };
 
 /** De avond die nu bezig is en waar jij bij hoort (als host, co-host of bevestigde speler). */
 export async function getActiveNight(supabase: DB, userId: string): Promise<ActiveNight | null> {
   const { data: nights } = await supabase
     .from("game_nights")
-    .select("id, title, host_id, cohost_id, starts_at")
+    .select("id, title, host_id, cohost_id, starts_at, is_practice")
     .eq("status", "live")
     .order("starts_at", { ascending: false })
     .limit(5);
@@ -233,11 +237,17 @@ export async function getActiveNight(supabase: DB, userId: string): Promise<Acti
         ? "host"
         : n.cohost_id === userId
           ? "cohost"
-          : (mine ?? []).some((p) => p.night_id === n.id && p.status === "confirmed")
+          : !n.is_practice && (mine ?? []).some((p) => p.night_id === n.id && p.status === "confirmed")
             ? "player"
             : null;
     if (role) {
-      return { id: n.id, title: n.title, role, liveMatches: (live ?? []).filter((m) => m.night_id === n.id).length };
+      return {
+        id: n.id,
+        title: n.title,
+        role,
+        liveMatches: (live ?? []).filter((m) => m.night_id === n.id).length,
+        practice: !!n.is_practice,
+      };
     }
   }
   return null;

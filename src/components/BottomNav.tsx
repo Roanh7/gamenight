@@ -60,7 +60,7 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
       <nav ref={ref} className={shell} style={safe} aria-label="Live-menu">
         <Link href="/live" className="mx-auto flex h-7 max-w-xl items-center justify-between gap-2 bg-red px-4 text-white">
           <span className="pixel truncate text-[9px]">
-            <span className="blink">●</span> LIVE · {live.title.toUpperCase()}
+            <span className="blink">●</span> {live.practice ? "OEFENING" : "LIVE"} · {live.title.toUpperCase()}
           </span>
           <span className="shrink-0 text-[11px] font-black">
             {ROLE[live.role]}

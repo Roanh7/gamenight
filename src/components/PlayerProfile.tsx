@@ -33,7 +33,8 @@ export async function PlayerProfile({
       .from("game_nights")
       .select("id", { count: "exact", head: true })
       .eq("host_id", profile.id)
-      .eq("status", "finished"),
+      .eq("status", "finished")
+      .eq("is_practice", false),
     getAttendance(supabase),
   ]);
   const xp = computeXp(allResults, attendance)(profile.id);

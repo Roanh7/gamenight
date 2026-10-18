@@ -13,6 +13,7 @@ import {
   setNightStatus,
   startMatch,
   addGameToNight,
+  deletePracticeNight,
 } from "../../actions";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
@@ -57,6 +58,12 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
     <div>
       <PageHeader back={night.status === "live" ? "/live" : `/agenda/${id}`} kicker="HOST DASHBOARD" title={night.title} action={<StatusChip status={night.status} />} />
       <Flash sp={sp} />
+      {night.is_practice && (
+        <p className="mb-4 rounded-2xl border-2 border-line bg-purple-soft px-4 py-3 text-sm font-bold">
+          🧪 <b>Oefenavond.</b> Hier kun je alles uitproberen: niks telt mee voor de ranking, XP, records of het nieuws, en
+          niemand krijgt een melding.
+        </p>
+      )}
 
       {/* Status */}
       <section className="card p-4">
@@ -313,6 +320,15 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
           </form>
         )}
       </section>
+
+      {night.is_practice && (
+        <form action={deletePracticeNight} className="mt-6">
+          <input type="hidden" name="night_id" value={id} />
+          <SubmitButton className="btn btn-secondary w-full text-red" confirm="Oefenavond met alle potjes weggooien?">
+            🗑️ Oefenavond weggooien
+          </SubmitButton>
+        </form>
+      )}
 
       {/* Avond bewerken */}
       <SectionTitle>Avond bewerken</SectionTitle>

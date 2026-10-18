@@ -45,7 +45,7 @@ export function NightCard({
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <h3 className="truncate font-black">{night.title}</h3>
-          <StatusChip status={night.status} />
+          {night.is_practice ? <span className="chip shrink-0 bg-purple-soft">🧪 Oefening</span> : <StatusChip status={night.status} />}
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-bold text-muted">
           <span className="inline-flex items-center gap-1">

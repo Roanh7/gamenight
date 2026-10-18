@@ -131,13 +131,15 @@ async function Dashboard({
     supabase
       .from("game_nights")
       .select("*")
+      .eq("is_practice", false)
       .or(`status.eq.live,and(status.eq.planned,starts_at.gte.${since})`)
       .order("starts_at", { ascending: true })
       .limit(3),
     supabase
       .from("matches")
-      .select("*")
+      .select("*, game_nights!inner(is_practice)")
       .eq("status", "finished")
+      .eq("game_nights.is_practice", false)
       .order("finished_at", { ascending: false })
       .limit(3),
     getAttendance(supabase),

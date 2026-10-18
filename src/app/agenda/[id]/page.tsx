@@ -88,7 +88,13 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
 
   return (
     <div>
-      <PageHeader back="/agenda" kicker="GAMENIGHT" title={night.title} />
+      <PageHeader back="/agenda" kicker={night.is_practice ? "OEFENAVOND" : "GAMENIGHT"} title={night.title} />
+      {night.is_practice && (
+        <p className="mb-4 rounded-2xl border-2 border-line bg-purple-soft px-4 py-3 text-sm font-bold">
+          🧪 <b>Oefenavond.</b> Hier kun je alles uitproberen: niks telt mee voor de ranking, XP, records of het nieuws, en
+          niemand krijgt een melding.
+        </p>
+      )}
       <Flash sp={sp} />
 
       {/* Info */}

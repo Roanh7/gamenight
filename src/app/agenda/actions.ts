@@ -19,7 +19,7 @@ type DBClient = Awaited<ReturnType<typeof createClient>>;
 /** Gegevens voor een melding: titel, datum, host(s), wie er komen en hoe ik heet. */
 async function pushInfo(supabase: DBClient, nightId: string, me: string) {
   const [{ data: night }, { data: people }, { data: profile }] = await Promise.all([
-    supabase.from("game_nights").select("title, starts_at, host_id, cohost_id").eq("id", nightId).maybeSingle(),
+    supabase.from("game_nights").select("title, starts_at, host_id, cohost_id, is_practice").eq("id", nightId).maybeSingle(),
     supabase.from("participants").select("user_id, status").eq("night_id", nightId),
     supabase.from("profiles").select("username").eq("id", me).maybeSingle(),
   ]);
@@ -29,6 +29,8 @@ async function pushInfo(supabase: DBClient, nightId: string, me: string) {
     hosts: [night?.host_id, night?.cohost_id].filter(Boolean) as string[],
     people: (people ?? []).map((p) => p.user_id as string),
     name: profile?.username ?? "Iemand",
+    /** Oefenavond: geen meldingen */
+    practice: !!night?.is_practice,
   };
 }
 
@@ -95,7 +97,7 @@ export async function createNight(formData: FormData) {
     await supabase.from("participants").insert({ night_id: data.id, user_id: user.id, status: "pending" });
   }
   const info = await pushInfo(supabase, data.id, user.id);
-  pushLater(
+  if (!info.practice) pushLater(
     null,
     {
       title: `🎮 Nieuwe gamenight: ${title}`,
@@ -158,7 +160,7 @@ export async function setNightStatus(formData: FormData) {
         : status === "finished"
           ? { title: `🏁 Recap: ${info.title}`, body: "De avond zit erop. Wie was de MVP?", url: `/agenda/${id}#recap` }
           : { title: `❌ ${info.title} gaat niet door`, body: `${info.name} heeft de avond afgelast.`, url: `/agenda/${id}` };
-    pushLater(info.people, { ...msg, tag: `avond-${id}` }, user.id);
+    if (!info.practice) pushLater(info.people, { ...msg, tag: `avond-${id}` }, user.id);
   }
   revalidatePath("/", "layout");
   if (status === "finished") redirect(`/agenda/${id}?klaar=1#recap`);
@@ -184,7 +186,7 @@ export async function joinNight(formData: FormData) {
   if (error && !error.message.includes("duplicate")) fail(`/agenda/${id}`, "Aanmelden lukte niet.");
   if (!error) {
     const info = await pushInfo(supabase, id, user.id);
-    pushLater(
+    if (!info.practice) pushLater(
       info.hosts,
       { title: `✋ ${info.name} wil meedoen`, body: `Aan ${info.title}. Bevestig je hem?`, url: `/agenda/${id}/host` },
       user.id,
@@ -234,7 +236,7 @@ export async function takeOverHost(formData: FormData) {
   const before = await pushInfo(supabase, id, user.id);
   const { error } = await supabase.rpc("take_over_host", { p_night: id });
   if (error) fail(`/agenda/${id}`, error.message);
-  pushLater(
+  if (!before.practice) pushLater(
     before.hosts,
     { title: `🎮 ${before.name} is nu host`, body: `Van ${before.title}. Jij bent co-host.`, url: `/agenda/${id}` },
     user.id,
@@ -258,7 +260,7 @@ export async function confirmParticipant(formData: FormData) {
     .select("user_id");
   if (done?.length) {
     const info = await pushInfo(supabase, id, user.id);
-    pushLater([userId], { title: "✅ Je bent erbij!", body: `${info.name} heeft je bevestigd voor ${info.title}.`, url: `/agenda/${id}` }, user.id);
+    if (!info.practice) pushLater([userId], { title: "✅ Je bent erbij!", body: `${info.name} heeft je bevestigd voor ${info.title}.`, url: `/agenda/${id}` }, user.id);
   }
   revalidatePath(`/agenda/${id}`, "layout");
 }
@@ -274,7 +276,7 @@ export async function confirmAll(formData: FormData) {
     .select("user_id");
   if (done?.length) {
     const info = await pushInfo(supabase, id, user.id);
-    pushLater(
+    if (!info.practice) pushLater(
       done.map((d) => d.user_id as string),
       { title: "✅ Je bent erbij!", body: `${info.name} heeft je bevestigd voor ${info.title}.`, url: `/agenda/${id}` },
       user.id,
@@ -300,7 +302,7 @@ export async function addParticipant(formData: FormData) {
     .from("participants")
     .upsert({ night_id: id, user_id: userId, status: "confirmed" }, { onConflict: "night_id,user_id" });
   const info = await pushInfo(supabase, id, user.id);
-  pushLater([userId], { title: "✅ Je bent erbij!", body: `${info.name} heeft je toegevoegd aan ${info.title}.`, url: `/agenda/${id}` }, user.id);
+  if (!info.practice) pushLater([userId], { title: "✅ Je bent erbij!", body: `${info.name} heeft je toegevoegd aan ${info.title}.`, url: `/agenda/${id}` }, user.id);
   revalidatePath(`/agenda/${id}`, "layout");
 }
 
@@ -340,7 +342,7 @@ export async function startMatch(formData: FormData) {
   await appendToProgram(supabase, id, gameId);
   if (wentLive?.length) {
     const info = await pushInfo(supabase, id, user.id);
-    pushLater(info.people, { title: `🎮 ${info.title} is begonnen!`, body: "Kijk live mee met de scores.", url: `/agenda/${id}`, tag: `avond-${id}` }, user.id);
+    if (!info.practice) pushLater(info.people, { title: `🎮 ${info.title} is begonnen!`, body: "Kijk live mee met de scores.", url: `/agenda/${id}`, tag: `avond-${id}` }, user.id);
   }
 
   revalidatePath("/", "layout");
@@ -397,7 +399,7 @@ export async function pickDate(formData: FormData) {
     .select("id");
   if (error || !data?.length) fail(`/agenda/${id}`, "Alleen de host of co-host kan de datum kiezen.");
   const info = await pushInfo(supabase, id, user.id);
-  pushLater(
+  if (!info.practice) pushLater(
     null,
     { title: `📅 Datum geprikt: ${info.title}`, body: `Het wordt ${dateNl(opt.starts_at)}.`, url: `/agenda/${id}`, tag: `avond-${id}` },
     user.id,
@@ -418,4 +420,51 @@ export async function addGameToNight(formData: FormData) {
   if (!ok) fail(back, "Toevoegen lukte niet.");
   revalidatePath("/", "layout");
   redirect(`${back}?game=${gameId}&ok=${encodeURIComponent("Game toegevoegd aan de avond!")}#potje`);
+}
+
+/* ---------- Oefenavond ---------- */
+
+/** Start meteen een oefenavond: alle games, iedereen erbij (zonder meldingen), telt nergens voor mee. */
+export async function createPracticeNight() {
+  const { supabase, user } = await requireUser();
+  const [{ data: games }, { data: people }] = await Promise.all([
+    supabase.from("games").select("id").order("name"),
+    supabase.from("profiles").select("id"),
+  ]);
+  const { data, error } = await supabase
+    .from("game_nights")
+    .insert({
+      title: "Oefenavond",
+      starts_at: new Date().toISOString(),
+      host_id: user.id,
+      created_by: user.id,
+      is_practice: true,
+      vote_mode: "fixed",
+      game_ids: (games ?? []).map((g) => g.id),
+      notes: "Oefenavond: probeer alles uit. Telt niet mee voor ranking, XP of nieuws.",
+    })
+    .select("id")
+    .single();
+  if (error || !data) fail("/agenda", "De oefenavond starten lukte niet.");
+  const others = (people ?? []).map((p) => p.id as string).filter((id) => id !== user.id);
+  if (others.length) {
+    await supabase
+      .from("participants")
+      .upsert(others.map((u) => ({ night_id: data.id, user_id: u, status: "confirmed" })), { onConflict: "night_id,user_id" });
+  }
+  await supabase.from("game_nights").update({ status: "live" }).eq("id", data.id);
+  revalidatePath("/", "layout");
+  redirect(`/agenda/${data.id}/host?ok=${encodeURIComponent("Oefenavond gestart! Niks telt mee, dus probeer gerust alles.")}`);
+}
+
+/** Oefenavond weggooien (met alle potjes). Alleen voor oefenavonden. */
+export async function deletePracticeNight(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const { data: night } = await supabase.from("game_nights").select("is_practice").eq("id", id).maybeSingle();
+  if (!night?.is_practice) fail(`/agenda/${id}/host`, "Alleen een oefenavond kan zo worden weggegooid.");
+  const { error } = await supabase.from("game_nights").delete().eq("id", id);
+  if (error) fail(`/agenda/${id}/host`, "Weggooien lukte niet.");
+  revalidatePath("/", "layout");
+  redirect(`/agenda?ok=${encodeURIComponent("Oefenavond weggegooid 🧹")}`);
 }
