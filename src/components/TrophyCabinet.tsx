@@ -137,7 +137,7 @@ export type SpriteName = keyof typeof SPRITES;
 const GOLD = { O: "#2b1a08", Y: "#ffc527", y: "#fff1a8", D: "#d18a0c", R: "#e4002b", B: "#2f6fe4", o: "#ff8a1f", w: "#ffffff", N: "#7a4a24", s: "#d9dde8", C: "#46c7e8", b: "#1d8fb8" };
 const SILVER = { ...GOLD, Y: "#c9d1de", y: "#ffffff", D: "#8f9bb0" };
 
-function Sprite({ name, silver, locked, size = 44 }: { name: SpriteName; silver?: boolean; locked?: boolean; size?: number }) {
+export function TrophySprite({ name, silver, locked, size = 44 }: { name: SpriteName; silver?: boolean; locked?: boolean; size?: number }) {
   const grid = SPRITES[name];
   const pal: Record<string, string> = silver ? SILVER : GOLD;
   return (
@@ -189,7 +189,7 @@ export function TrophyCabinet({ cups, achievements, isMe }: { cups: CabinetItem[
       onClick={() => setSel(sel === i.id ? null : i.id)}
     >
       <span className="relative">
-        <Sprite name={i.sprite} silver={i.silver} locked={!i.earned} size={i.plaque ? 46 : 40} />
+        <TrophySprite name={i.sprite} silver={i.silver} locked={!i.earned} size={i.plaque ? 46 : 40} />
         {i.earned && (
           <span className="shelf-glint absolute -right-1 -top-1 text-[10px] leading-none text-white" style={{ ["--d" as string]: `${(n * 0.7) % 3}s` }}>
             ✦
@@ -202,7 +202,7 @@ export function TrophyCabinet({ cups, achievements, isMe }: { cups: CabinetItem[
   );
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 scroll-mt-20" id="trofeekast">
       <div className="cabinet">
         <p className="cabinet-sign pixel text-[10px]">TROFEEKAST {earned}/{achievements.length}</p>
         <div className="cabinet-inside">

@@ -510,3 +510,6 @@ html[data-boot] body { overflow: hidden; }
 /* ---------- Vaste knoppenbalk: ruimte onderaan zodat niets erachter verdwijnt ---------- */
 body:has(.action-bar) main { padding-bottom: calc(var(--nav-h, 100px) + 110px + env(safe-area-inset-bottom)); }
 body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160px + env(safe-area-inset-bottom)); }
+
+/* ---------- Player Hub ---------- */
+.hub-avatar { display: inline-flex; border-radius: 18px; box-shadow: 0 0 0 3px var(--color-yellow), 0 0 0 5px var(--color-line), 0 5px 0 3px var(--color-line); }

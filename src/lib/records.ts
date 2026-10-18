@@ -44,6 +44,28 @@ function longestStreak(perUser: Map<string, boolean[]>) {
   return out;
 }
 
+/** Punten per speler per avond. */
+function pointsPerNight(results: ResultRow[]) {
+  const perNight = new Map<string, Map<string, number>>();
+  for (const r of results) {
+    if (!r.night_id) continue;
+    const m = perNight.get(r.night_id) ?? new Map<string, number>();
+    m.set(r.user_id, (m.get(r.user_id) ?? 0) + Number(r.league_points));
+    perNight.set(r.night_id, m);
+  }
+  return perNight;
+}
+
+/** Hoe vaak iemand MVP van een avond werd: alleen bovenaan in punten op die avond (zoals in de recap). */
+export function mvpCounts(results: ResultRow[]) {
+  const mvps = new Map<string, number>();
+  for (const m of pointsPerNight(results).values()) {
+    const t = top(m);
+    if (t.holders.length === 1) mvps.set(t.holders[0], (mvps.get(t.holders[0]) ?? 0) + 1);
+  }
+  return mvps;
+}
+
 export function computeRecords(results: ResultRow[], attendance: Attendance[], xpOf: (u: string) => { xp: number }) {
   const sorted = [...results].sort((a, b) => a.finished_at.localeCompare(b.finished_at));
   const users = [...new Set([...results.map((r) => r.user_id), ...attendance.map((a) => a.user_id)])];
@@ -53,20 +75,12 @@ export function computeRecords(results: ResultRow[], attendance: Attendance[], x
   for (const r of sorted) winSeq.set(r.user_id, [...(winSeq.get(r.user_id) ?? []), r.is_winner]);
 
   // Punten per avond en MVP per avond
-  const perNight = new Map<string, Map<string, number>>();
-  for (const r of results) {
-    if (!r.night_id) continue;
-    const m = perNight.get(r.night_id) ?? new Map<string, number>();
-    m.set(r.user_id, (m.get(r.user_id) ?? 0) + Number(r.league_points));
-    perNight.set(r.night_id, m);
-  }
+  const perNight = pointsPerNight(results);
   const bestNight = new Map<string, number>();
-  const mvps = new Map<string, number>();
   for (const m of perNight.values()) {
     for (const [u, p] of m) bestNight.set(u, Math.max(bestNight.get(u) ?? 0, p));
-    const t = top(m);
-    if (t.holders.length === 1) mvps.set(t.holders[0], (mvps.get(t.holders[0]) ?? 0) + 1);
   }
+  const mvps = mvpCounts(results);
 
   // Aanwezigheid op volgorde van de afgesloten avonden
   const nights = [...new Map(attendance.map((a) => [a.night_id, a.starts_at])).entries()].sort((a, b) =>

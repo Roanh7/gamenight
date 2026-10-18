@@ -357,6 +357,15 @@ export default async function UitlegPage() {
               zijn profiel te zien.
             </li>
             <li>
+              <b>🕹️ Player Hub:</b> Home is jouw eigen spelersmenu. Bovenaan je spelerskaart met level, XP, je plek in
+              het seizoen en je winstreeks, plus een berichtje dat past bij hoe het gaat (bovenaan? winstreeks? pech?).
+              Daaronder vier cijfers: <b>winrate</b> (hoeveel procent van je potjes je won), <b>streak</b> (zoveel op rij
+              gewonnen), <b>form</b> (je laatste 5 potjes: groen = gewonnen, rood = niet gewonnen) en <b>MVP</b> (zo vaak
+              was je de beste van een avond). Dan de volgende gamenight, je <b>volgende achievement</b> en je{" "}
+              <b>rivaal</b>: de speler die dit seizoen het dichtst bij jou staat in punten. Gewoon voor de lol: jullie
+              spelen altijd met de hele groep.
+            </li>
+            <li>
               <Newspaper size={14} className="mr-1 inline" />
               Op <b>Home</b> staan de 4 nieuwste berichten: wie er won, wie stijgt en wie er nieuw #1 is. Via{" "}
               <b>Alle nieuws →</b> zie je de rest.
