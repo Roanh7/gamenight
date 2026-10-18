@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient as createPlainClient } from "@supabase/supabase-js";
 import type { createClient } from "./supabase/server";
-import { bannerDiff, bannerStats, BANNER_BY_ID, DEFAULT_BANNER, type BannerStats } from "./banners";
+import { bannerDiff, bannerStats, BANNER_BY_ID, DEFAULT_BANNER, FREE_BANNERS, type BannerStats } from "./banners";
 import type { ResultRow } from "./stats";
 import type { Attendance, XpInfo } from "./xp";
 
@@ -44,9 +44,9 @@ export async function syncBanners(
   return { rows, statsOf };
 }
 
-/** Welke banners iemand nu heeft (Rookie Fields altijd). */
+/** Welke banners iemand nu heeft (de gratis starter-banners altijd). */
 export function ownedBanners(rows: UnlockRow[], userId: string) {
-  const set = new Set<string>([DEFAULT_BANNER]);
+  const set = new Set<string>(FREE_BANNERS);
   for (const r of rows) if (r.user_id === userId && !r.revoked_at && BANNER_BY_ID.has(r.banner_id)) set.add(r.banner_id);
   return set;
 }

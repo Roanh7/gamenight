@@ -34,6 +34,10 @@ begin
   begin update public.profiles set banner = 'hall-of-fame' where id = ua; exception when others then ok := true; end;
   rep := rep || case when ok then 'OK' else 'FAIL' end || E' 3 vergrendelde banner kiezen kan niet\n';
 
+  update public.profiles set banner = 'deep-sea' where id = ua;
+  select banner into t from public.profiles where id = ua;
+  rep := rep || case when t = 'deep-sea' then 'OK' else 'FAIL' end || E' 3b gratis starter-banner kiezen kan meteen\n';
+
   ok := false;
   begin perform public.sync_banners('fout-geheim', grant_inferno, null); exception when others then ok := true; end;
   rep := rep || case when ok then 'OK' else 'FAIL' end || E' 4 vrijgeven zonder het juiste geheim kan niet\n';

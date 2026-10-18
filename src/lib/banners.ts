@@ -45,6 +45,11 @@ export const DEFAULT_BANNER = "rookie-fields";
 
 export const BANNERS: BannerDef[] = [
   { id: "rookie-fields", name: "Rookie Fields", emoji: "🌿", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Groene heuvels, blauwe lucht. Waar elk avontuur begint." },
+  { id: "sunset-beach", name: "Sunset Beach", emoji: "🌅", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Zonsondergang aan zee, met een palmboom." },
+  { id: "neon-arcade", name: "Neon Arcade", emoji: "🕹️", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Neonstad met een retro zon en een gloeiend raster." },
+  { id: "snowy-peaks", name: "Snowy Peaks", emoji: "🏔️", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Besneeuwde bergen, dennen en vallende sneeuw." },
+  { id: "cherry-blossom", name: "Cherry Blossom", emoji: "🌸", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Een bloesemboom met dwarrelende blaadjes." },
+  { id: "deep-sea", name: "Deep Sea", emoji: "🌊", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Onder water tussen vissen, zeewier en bubbels." },
   { id: "midnight-gamer", name: "Midnight Gamer", emoji: "🌙", rarity: "common", condition: { kind: "nights", n: 5 }, how: "Wees bij 5 afgesloten gamenights", description: "Sterren, een volle maan en nog één potje." },
   { id: "inferno", name: "Inferno", emoji: "🔥", rarity: "rare", condition: { kind: "wins", n: 10 }, how: "Win 10 potjes", description: "Een vulkaan vol gloeiende lava." },
   { id: "thunderstorm", name: "Thunderstorm", emoji: "⚡", rarity: "rare", condition: { kind: "streak", n: 3 }, how: "Win 3 potjes op rij", description: "Paarse lucht, donderwolken en bliksem." },
@@ -57,6 +62,9 @@ export const BANNERS: BannerDef[] = [
 ];
 
 export const BANNER_BY_ID = new Map(BANNERS.map((b) => [b.id, b]));
+
+/** Banners die iedereen standaard heeft (hoeven niet vrijgespeeld of opgeslagen te worden). */
+export const FREE_BANNERS = BANNERS.filter((b) => b.condition.kind === "default").map((b) => b.id);
 
 export function bannerDef(id: string | null | undefined) {
   return BANNER_BY_ID.get(id ?? "") ?? BANNER_BY_ID.get(DEFAULT_BANNER)!;
@@ -134,7 +142,7 @@ export function bannerDiff(
   const grant: { user_id: string; banner_id: string; announce: boolean; name: string; rarity: Rarity; emoji: string }[] = [];
   const revoke: { user_id: string; banner_id: string }[] = [];
   for (const u of users) {
-    const earned = new Set(earnedIds(statsOf(u)).filter((id) => id !== DEFAULT_BANNER));
+    const earned = new Set(earnedIds(statsOf(u)).filter((id) => !FREE_BANNERS.includes(id)));
     const mine = have.get(u) ?? new Map<string, boolean>();
     for (const id of earned) {
       if (mine.get(id) !== true) {

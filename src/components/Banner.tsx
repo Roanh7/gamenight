@@ -539,7 +539,158 @@ function HallOfFame() {
   );
 }
 
+
+/* ---------- Gratis starter-banners ---------- */
+
+function SunsetBeach() {
+  const sun: Px[] = [];
+  for (let y = -14; y <= 0; y++) for (let x = -14; x <= 14; x++) if (x * x + y * y <= 196) sun.push([100 + x, 36 + y, 1, 1, y > -4 ? "#ff5e7a" : y > -9 ? "#ff8a4c" : "#ffc04d"]);
+  const sea: Px[] = [];
+  const r = rng(17);
+  for (let y = 37; y < 50; y += 2) {
+    for (let i = 0; i < 6; i++) {
+      const w = 4 + Math.floor(r() * 10);
+      sea.push([Math.floor(r() * W), y, w, 1, "#ffb38a"]);
+    }
+  }
+  const palm = grid(
+    ["..LLL..LLL...", ".L...LL...L..", "L...LTTL...L.", "...L..T..L...", "......T......", "......T......", ".....T.......", ".....T.......", ".....T.......", "....T........", "....T........", "...TTT......."],
+    { L: "#2a1530", T: "#2a1530" },
+    150,
+    18,
+    2.4,
+  );
+  return (
+    <>
+      {rects(bands(["#3b1b5a", "#6a2468", "#a83a6a", "#e2566a", "#ff8a5c", "#ffb35c"], 0, 37))}
+      {stars(19, 8, ["#ffe7c2"], 14)}
+      {rects(sun)}
+      {rects([[0, 37, W, 13, "#4a2a6a"], [0, 37, W, 1, "#ff8a5c"]])}
+      <g className="bn-glow">{rects(sea)}</g>
+      {rects([[0, 50, W, 6, "#f0c27a"], [0, 50, W, 1, "#ffe0a8"]])}
+      {rects(palm)}
+      {rects(grid(["..BB..", "BBBBBB"], { B: "#2a1530" }, 30, 34, 2), "bn-bob", { animationDuration: "3s" })}
+    </>
+  );
+}
+
+function NeonArcade() {
+  const sun: Px[] = [];
+  for (let y = -16; y <= 0; y++) {
+    if (y % 3 === 0 && y > -12) continue;
+    for (let x = -16; x <= 16; x++) if (x * x + y * y <= 256) sun.push([100 + x, 30 + y, 1, 1, y > -8 ? "#ff3ea5" : "#ffcf3e"]);
+  }
+  const city: Px[] = [];
+  const r = rng(23);
+  for (let x = 0; x < W; ) {
+    const w = 8 + Math.floor(r() * 10);
+    const h = 8 + Math.floor(r() * 16);
+    if (x < 76 || x > 118 || h < 12) {
+      city.push([x, 32 - h, w, h, "#120a2e"]);
+      for (let wy = 32 - h + 2; wy < 30; wy += 3) for (let wx = x + 2; wx < x + w - 2; wx += 3) if (r() > 0.55) city.push([wx, wy, 1, 1, r() > 0.5 ? "#3ef2ff" : "#ff3ea5"]);
+    }
+    x += w + 1;
+  }
+  const floor: Px[] = [];
+  for (let i = 0; i < 7; i++) floor.push([0, 33 + i * (i + 2) * 0.5, W, 1, "#ff3ea5"]);
+  for (let x = -200; x <= 400; x += 16) for (let y = 33; y < H; y += 1) floor.push([Math.round(100 + (x - 100) * ((y - 30) / 22)), y, 1, 1, "#3ef2ff"]);
+  return (
+    <>
+      {rects(bands(["#0d0221", "#1b0638", "#2d0a52", "#46106a"], 0, 32))}
+      {stars(29, 16, ["#ffffff", "#ffb3e6"], 18)}
+      <g className="bn-glow-soft">{rects(sun)}</g>
+      {rects(city)}
+      {rects([[0, 32, W, 24, "#0d0221"]])}
+      <g className="bn-glow">{rects(floor)}</g>
+    </>
+  );
+}
+
+function SnowyPeaks() {
+  const mountain = (cx: number, top: number, half: number, rock: string, shade: string): Px[] => {
+    const out: Px[] = [];
+    const h = 50 - top;
+    for (let y = 0; y < h; y++) {
+      const w = Math.round((half * y) / h);
+      const snow = y < h * 0.32 + (y % 3);
+      out.push([cx - w, top + y, w, 1, snow ? "#ffffff" : rock], [cx, top + y, w, 1, snow ? "#d8e6f5" : shade]);
+    }
+    return out;
+  };
+  const pine = (x: number, y: number) =>
+    grid(["..S..", ".SGS.", ".GGG.", "SGGGS", "GGGGG", "..T.."], { S: "#ffffff", G: "#1f5a45", T: "#4a2e1c" }, x, y, 2);
+  return (
+    <>
+      {rects(bands(["#7ab8f5", "#94c8f8", "#b0d8fb", "#cbe6fd"], 0, 50))}
+      {rects(mountain(60, 8, 50, "#6a7fa0", "#4e6284"))}
+      {rects(mountain(140, 4, 56, "#7a8fb0", "#56698c"))}
+      {rects(mountain(100, 18, 40, "#8a9cc0", "#62759a"))}
+      {rects([[0, 46, W, 10, "#f3f8ff"], [0, 46, W, 1, "#ffffff"]])}
+      {rects(pine(18, 36))}
+      {rects(pine(30, 38))}
+      {rects(pine(164, 37))}
+      {rects(pine(178, 35))}
+      <g className="bn-snow">{rects(Array.from({ length: 30 }, (_, i) => [((i * 37) % W), ((i * 23) % 50), 1, 1, "#ffffff"] as Px))}</g>
+    </>
+  );
+}
+
+function CherryBlossom() {
+  const crown: Px[] = [];
+  const r = rng(31);
+  const blob = (cx: number, cy: number, rad: number) => {
+    for (let y = -rad; y <= rad; y += 2) for (let x = -rad * 1.4; x <= rad * 1.4; x += 2) if ((x * x) / 1.96 + y * y <= rad * rad && r() > 0.12) crown.push([Math.round(cx + x), cy + y, 2, 2, r() > 0.6 ? "#ffd1e3" : r() > 0.3 ? "#ff9cc4" : "#ff7aae"]);
+  };
+  blob(60, 16, 10);
+  blob(80, 12, 9);
+  blob(44, 20, 7);
+  blob(96, 20, 7);
+  const trunk = grid(["...TT...", "..TT.T..", ".TT...T.", "..TT....", "...TT...", "...TT...", "...TT...", "..TTTT.."], { T: "#5a3426" }, 62, 22, 2.4);
+  const petals = Array.from({ length: 14 }, (_, i) => (
+    <rect key={i} className="bn-petal" style={{ animationDelay: `${(i * 0.53).toFixed(2)}s` }} x={30 + ((i * 41) % 160)} y={4 + ((i * 13) % 20)} width={2} height={1} fill="#ff9cc4" />
+  ));
+  return (
+    <>
+      {rects(bands(["#ffd9e8", "#ffe3ee", "#ffeef4", "#fff5f8"], 0, 44))}
+      {rects(grid(["..WWWW..", ".WWWWWW.", "WWWWWWWW", "WWWWWWWW", ".WWWWWW.", "..WWWW.."], { W: "#ffffff" }, 160, 6, 1.5))}
+      {rects(hills(44, 8, 70, 2.5, "#b9e3b0"))}
+      {rects([[0, 48, W, 8, "#8fcf8a"], [0, 48, W, 1, "#c4ecc0"]])}
+      {rects(trunk)}
+      {rects(crown)}
+      {rects(grid(["RRRRRRRRRRRR", "R..R....R..R", "R..R....R..R"], { R: "#d6334f" }, 128, 38, 2))}
+      <g>{petals}</g>
+    </>
+  );
+}
+
+function DeepSea() {
+  const weed = (x: number, h: number, c: string): Px[] => Array.from({ length: h }, (_, i) => [x + (i % 4 < 2 ? 0 : 1), 54 - i * 2, 2, 2, c] as Px);
+  const fish = (x: number, y: number, body: string, fin: string) => grid(["F..BBB.", "FFBBBBE", "F..BBB."], { F: fin, B: body, E: "#1a1a2e" }, x, y, 2);
+  return (
+    <>
+      {rects(bands(["#1e7fb8", "#176aa3", "#11558c", "#0c4275", "#08325e"], 0, H))}
+      <g className="bn-glow-soft" opacity={0.25}>{rects([[30, 0, 6, 40, "#bfefff"], [70, 0, 4, 34, "#bfefff"], [130, 0, 7, 44, "#bfefff"], [170, 0, 3, 30, "#bfefff"]])}</g>
+      {rects([[0, 50, W, 6, "#c9a86a"], [0, 50, W, 1, "#e6c98c"]])}
+      {rects(weed(14, 9, "#2fae6a"))}
+      {rects(weed(22, 6, "#3ec97c"))}
+      {rects(weed(176, 10, "#2fae6a"))}
+      {rects(weed(186, 7, "#3ec97c"))}
+      {rects(grid(["..CC.C", ".CCCCC", "CCCCC."], { C: "#ff7a6a" }, 120, 44, 2))}
+      <g className="bn-swim">{rects(fish(60, 20, "#ffb02a", "#ff7a2a"))}{rects(fish(100, 30, "#ffe066", "#ffb02a"))}</g>
+      <g className="bn-swim" style={{ animationDelay: "-4s", animationDuration: "11s" }}>{rects(fish(40, 36, "#7fe8ff", "#2ec4e6"))}</g>
+      {Array.from({ length: 8 }, (_, i) => (
+        <rect key={i} className="bn-bubble" style={{ animationDelay: `${(i * 0.6).toFixed(2)}s` }} x={20 + i * 22} y={50} width={2} height={2} fill="#d6f6ff" />
+      ))}
+    </>
+  );
+}
+
 const SCENES: Record<string, () => ReactNode> = {
+  "sunset-beach": SunsetBeach,
+  "neon-arcade": NeonArcade,
+  "snowy-peaks": SnowyPeaks,
+  "cherry-blossom": CherryBlossom,
+  "deep-sea": DeepSea,
   "rookie-fields": RookieFields,
   "midnight-gamer": MidnightGamer,
   inferno: Inferno,

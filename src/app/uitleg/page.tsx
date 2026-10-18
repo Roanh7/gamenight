@@ -366,8 +366,9 @@ export default async function UitlegPage() {
               spelen altijd met de hele groep.
             </li>
             <li>
-              <b>🎨 Banners:</b> bovenaan je profiel en je spelerskaart staat een pixel-banner. Iedereen begint met{" "}
-              <b>Rookie Fields</b>; de rest speel je vrij: Midnight Gamer (5 avonden), Inferno (10 zeges), Thunderstorm (3
+              <b>🎨 Banners:</b> bovenaan je profiel en je spelerskaart staat een pixel-banner. Iedereen heeft meteen zes
+              banners: <b>Rookie Fields</b>, Sunset Beach, Neon Arcade, Snowy Peaks, Cherry Blossom en Deep Sea. De rest speel
+              je vrij: Midnight Gamer (5 avonden), Inferno (10 zeges), Thunderstorm (3
               op rij), Graveyard (10 keer laatste, troostprijs!), Cosmic Legend (level 10), Dragon&apos;s Lair (250 potjes),
               Royal Champion (seizoenskampioen), Diamond Arena (100 zeges) en Hall of Fame (3 keer seizoenskampioen). Ze
               komen vanzelf vrij, ook voor wat je al eerder deed. Kiezen doe je via <b>🎨 Customize profile</b>. Een

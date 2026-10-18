@@ -587,3 +587,11 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 @keyframes unlock-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes unlock-pop { 0% { transform: scale(0.3); opacity: 0; } 70% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .unlock-overlay, .unlock-pop { animation: none; } }
+.bn-snow { animation: bn-snowfall 6s linear infinite; }
+@keyframes bn-snowfall { from { transform: translate(0, -10px); } to { transform: translate(-6px, 10px); } }
+.bn-petal { animation: bn-petal 5s linear infinite; }
+@keyframes bn-petal { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(-24px, 30px); opacity: 0; } }
+.bn-swim { animation: bn-swim 9s linear infinite; }
+@keyframes bn-swim { from { transform: translateX(-90px); } to { transform: translateX(130px); } }
+.bn-bubble { animation: bn-bubble 4s linear infinite; }
+@keyframes bn-bubble { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(-48px); opacity: 0; } }
