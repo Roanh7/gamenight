@@ -58,6 +58,7 @@ export type GameNight = {
   game_ids: string[];
   cohost_id: string | null;
   date_poll: boolean;
+  wanted_off?: boolean;
   created_by: string | null;
   created_at: string;
 };

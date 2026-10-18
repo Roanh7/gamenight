@@ -1,5 +1,6 @@
 import type { createClient } from "./supabase/server";
 import { bountyHits, type ResultRow } from "./stats";
+import { computeWanted } from "./wanted";
 
 type DB = Awaited<ReturnType<typeof createClient>>;
 
@@ -12,6 +13,7 @@ export const XP_RULES = {
   night: 20, // per afgesloten avond waar je bij was
   hosted: 15, // per afgesloten avond die je hostte
   bounty: 10, // extra als je de koploper van het seizoen verslaat
+  // Wanted-premies (15 / 25 / 40) staan in src/lib/wanted.ts
 } as const;
 
 export type XpInfo = {
@@ -77,6 +79,7 @@ export function computeXp(results: ResultRow[], attendance: Attendance[]) {
     else if (r.placement === 3) add(r.user_id, XP_RULES.third);
   }
   for (const [u, n] of bountyHits(results)) add(u, n * XP_RULES.bounty);
+  for (const [u, n] of computeWanted(results).xp) add(u, n);
   for (const a of attendance) {
     add(a.user_id, XP_RULES.night);
     if (a.user_id === a.host_id) add(a.user_id, XP_RULES.hosted);

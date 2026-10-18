@@ -419,3 +419,21 @@ export async function addGameToNight(formData: FormData) {
   revalidatePath("/", "layout");
   redirect(`${back}?game=${gameId}&ok=${encodeURIComponent("Game toegevoegd aan de avond!")}#potje`);
 }
+
+/* ---------- Wanted ---------- */
+
+/** Host zet de Wanted-premies aan of uit voor zijn avond. */
+export async function setWantedOff(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const off = str(formData, "off") === "1";
+  const { error } = await supabase.rpc("set_wanted_off", { p_night: id, p_off: off });
+  if (error) {
+    // Nieuwsberichten bijwerken kan (nog) niet: dan in elk geval de instelling zelf opslaan
+    const { error: e2 } = await supabase.from("game_nights").update({ wanted_off: off }).eq("id", id);
+    if (e2) fail(`/agenda/${id}/host`, "Alleen de host kan dit aanpassen.");
+  }
+  revalidatePath("/", "layout");
+  redirect(`/agenda/${id}/host?ok=${encodeURIComponent(off ? "Wanted staat uit voor deze avond." : "Wanted staat weer aan.")}`);
+}
+

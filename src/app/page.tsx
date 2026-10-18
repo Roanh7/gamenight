@@ -5,6 +5,8 @@ import { getActivity, getGames, getNight, getProfiles, getComments, getReactions
 import { currentBountyTarget, currentSeason, filterSeason, seasonChampions, seasonLabel, standings } from "@/lib/stats";
 import { computeOvr, findRival, matchSizes, recentForm, streaks } from "@/lib/player";
 import { PlayerHub } from "@/components/PlayerHub";
+import { WantedStrip } from "@/components/WantedPoster";
+import { computeWanted, wantedNow } from "@/lib/wanted";
 import { LiveHub } from "@/components/LiveHub";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
 import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
@@ -154,6 +156,10 @@ async function Dashboard({
   const leaderProfile = target ? profiles.byId.get(target) : undefined;
   const isChampion = [...seasonChampions(results).values()].includes(userId);
   const myAllWins = results.filter((r) => r.user_id === userId && r.is_winner).length;
+  const wanted = wantedNow(computeWanted(results))
+    .map((w) => ({ ...w, profile: profiles.byId.get(w.user_id)! }))
+    .filter((w) => w.profile);
+  const meWanted = wanted.find((w) => w.user_id === userId);
 
   const groupNews = activity.slice(0, 4);
   const feedItems = groupNews;
@@ -237,6 +243,18 @@ async function Dashboard({
           leader={leaderProfile ? { profile: leaderProfile, isMe: target === userId } : null}
           isChampion={isChampion}
         />
+      )}
+
+      {wanted.length > 0 && (
+        <>
+          <SectionTitle>🎯 Wanted</SectionTitle>
+          <p className="mb-2 text-sm font-bold text-muted">
+            {meWanted
+              ? `Er staat een premie van +${meWanted.level.xp} XP op jouw hoofd. Iedereen jaagt op je!`
+              : "Versla een van deze spelers in een potje en claim de premie."}
+          </p>
+          <WantedStrip items={wanted} />
+        </>
       )}
 
       {/* Volgende avond */}

@@ -1,5 +1,6 @@
 import type { Game } from "./types";
 import { bountyHits, type ResultRow } from "./stats";
+import { computeWanted } from "./wanted";
 import type { Attendance } from "./xp";
 
 export type RecordEntry = {
@@ -98,6 +99,7 @@ export function computeRecords(results: ResultRow[], attendance: Attendance[], x
     { id: "attend-streak", emoji: "🔁", title: "Trouwste speler", hint: "Zoveel gamenights op rij aanwezig", unit: "op rij", ...top(longestStreak(attendSeq)) },
     { id: "host", emoji: "🏠", title: "Gastheer aller tijden", hint: "Meeste gamenights gehost", unit: "avonden", ...top(hosted) },
     { id: "bounty", emoji: "🎯", title: "Reuzendoder", hint: "Vaakst de koploper van het seizoen verslagen", unit: "keer", ...top(bountyHits(results)) },
+    { id: "bounty-hunter", emoji: "🤠", title: "Bounty Hunter", hint: "Vaakst een Wanted-premie geclaimd", unit: "premies", ...top(computeWanted(results).claims) },
     { id: "xp", emoji: "⚡", title: "Meeste XP", hint: "Hoogste level van de groep", unit: "XP", ...top(xp) },
     { id: "last", emoji: "🧂", title: "Pechvogel aller tijden", hint: "Vaakst als laatste geëindigd", unit: "keer", ...top(last) },
   ];

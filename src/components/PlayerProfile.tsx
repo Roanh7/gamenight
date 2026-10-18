@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getGames, getLeaderboards, getOverall, getProfiles, getResults } from "@/lib/data";
 import { allHeadToHeads, bountyHits, headToHead, seasonChampions, seasonLabel, type HeadToHead } from "@/lib/stats";
 import { computeAchievements } from "@/lib/achievements";
+import { computeWanted, wantedLevel } from "@/lib/wanted";
+import { WantedPoster } from "./WantedPoster";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { XpBar } from "./XpBar";
 import type { Game, Profile } from "@/lib/types";
@@ -41,6 +43,9 @@ export async function PlayerProfile({
   const seasonTitles = [...seasonChampions(allResults).entries()]
     .filter(([, u]) => u === profile.id)
     .map(([season]) => `Seizoenskampioen ${seasonLabel(season)}`);
+  const wanted = computeWanted(allResults);
+  const myStreak = wanted.streak.get(profile.id) ?? 0;
+  const myLevel = wantedLevel(myStreak);
   const ach = computeAchievements({
     userId: profile.id,
     results,
@@ -49,6 +54,7 @@ export async function PlayerProfile({
     hostedNights: hosted ?? 0,
     seasonTitles: seasonTitles.length,
     bounties: bountyHits(allResults).get(profile.id) ?? 0,
+    wantedClaims: wanted.claims.get(profile.id) ?? 0,
   });
   const titles = [...seasonTitles.map((t) => `🏆 ${t}`), ...ach.titles.map((t) => `👑 ${t}`)];
   const versus = !isMe && viewerId ? headToHead(allResults, viewerId, profile.id) : null;
@@ -64,6 +70,11 @@ export async function PlayerProfile({
 
   return (
     <div>
+      {myLevel && (
+        <div className="mb-4">
+          <WantedPoster profile={profile} streak={myStreak} level={myLevel} isMe={isMe} />
+        </div>
+      )}
       {/* Spelerskaart */}
       <section className="card overflow-hidden">
         <div className="h-14 border-b-2 border-line bg-red" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent 0 14px, rgba(255,255,255,.12) 14px 28px)" }} />

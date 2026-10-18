@@ -13,6 +13,7 @@ import {
   setNightStatus,
   startMatch,
   addGameToNight,
+  setWantedOff,
 } from "../../actions";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
@@ -313,6 +314,24 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
           </form>
         )}
       </section>
+
+      {/* Wanted */}
+      <SectionTitle>🤠 Wanted-premies</SectionTitle>
+      <form action={setWantedOff} className="card flex items-center gap-3 p-4">
+        <input type="hidden" name="night_id" value={id} />
+        <input type="hidden" name="off" value={night.wanted_off ? "0" : "1"} />
+        <div className="min-w-0 flex-1">
+          <p className="font-black">{night.wanted_off ? "Staan uit vanavond" : "Staan aan"}</p>
+          <p className="text-xs font-bold text-muted">
+            {night.wanted_off
+              ? "Potjes van vanavond tellen niet mee voor winstreeksen en premies."
+              : "Wie 3 keer op rij wint wordt Wanted. Wil je een ontspannen avond? Zet het uit."}
+          </p>
+        </div>
+        <SubmitButton className={`btn btn-sm shrink-0 ${night.wanted_off ? "btn-green" : "btn-secondary"}`} pendingText="…">
+          {night.wanted_off ? "Zet aan" : "Zet uit"}
+        </SubmitButton>
+      </form>
 
       {/* Avond bewerken */}
       <SectionTitle>Avond bewerken</SectionTitle>

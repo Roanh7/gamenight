@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarPlus, Crown, Flag, Gamepad2, PartyPopper, Shield, Trophy, TrendingUp, Handshake } from "lucide-react";
+import { CalendarPlus, Crown, Crosshair, Flag, Gamepad2, PartyPopper, Shield, Trophy, TrendingUp, Handshake } from "lucide-react";
 import type { Activity, Game, GameNight, Profile } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import { Avatar } from "./Avatar";
@@ -130,6 +130,45 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
               </>
             );
             break;
+          case "wanted": {
+            const lvl = String(a.payload?.level ?? "wanted");
+            icon = <Crosshair size={16} />;
+            tone = "bg-orange-soft";
+            text = (
+              <>
+                <b className="pixel text-[10px] text-red">{lvl === "public_enemy" ? "PUBLIC ENEMY #1" : lvl === "most_wanted" ? "MOST WANTED" : "WANTED"}</b>{" "}
+                {name} heeft <b>{String(a.payload?.streak)} zeges op rij</b>. Premie op zijn hoofd: <b>+{String(a.payload?.xp)} XP</b>
+                {game ? <> (laatste zege: {gameLink})</> : null}
+              </>
+            );
+            break;
+          }
+          case "bounty_claimed": {
+            const target = profiles.get(String(a.payload?.target));
+            const winners = ((a.payload?.winners as string[]) ?? []).map((id) => profiles.get(id)?.username).filter(Boolean);
+            icon = <Crosshair size={16} />;
+            tone = "bg-yellow";
+            text = (
+              <>
+                🎯 <b className="font-black">{winners.join(" & ") || name}</b> {winners.length > 1 ? "beëindigen" : "beëindigt"} de reeks van{" "}
+                <b>{target?.username ?? "de Wanted-speler"}</b> ({String(a.payload?.streak)} op rij) in {gameLink} en{" "}
+                {winners.length > 1 ? "claimen" : "claimt"} <b>+{String(a.payload?.xp)} XP</b>
+                {winners.length > 1 ? " elk" : ""} premie!
+              </>
+            );
+            break;
+          }
+          case "streak_ended": {
+            icon = <Handshake size={16} />;
+            tone = "bg-soft";
+            text = (
+              <>
+                De reeks van {name} ({String(a.payload?.streak)} op rij) stopt na een gelijkspel in {gameLink}. De premie
+                vervalt.
+              </>
+            );
+            break;
+          }
           case "night_recap": {
             icon = <Flag size={16} />;
             tone = "bg-red-soft";

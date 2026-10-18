@@ -316,10 +316,31 @@ export default async function UitlegPage() {
             Eindig je in een potje hoger dan de koploper, dan krijg je <b>+{XP_RULES.bounty} XP</b> extra. Je ziet
             op Home, bij Ranking en bij Players op wie de premie staat.
           </p>
+          <div className="pt-1">
+            <p>
+              <b>🤠 Wanted:</b> wie <b>3 potjes op rij</b> wint, wordt Wanted, waar hij ook in de ranking staat. Er
+              verschijnt een Wanted-poster op zijn profiel, op Home, bij de live-avond en in het nieuws. Hoe langer de
+              reeks, hoe hoger de premie:
+            </p>
+            <ul className="ml-5 mt-1 list-disc">
+              <li>3–4 op rij: <b>Wanted</b>, premie +15 XP</li>
+              <li>5–6 op rij: <b>Most Wanted</b>, premie +25 XP</li>
+              <li>7 of meer: <b>Public Enemy #1</b>, premie +40 XP</li>
+            </ul>
+            <p className="mt-1">
+              Win jij het potje waarin de Wanted-speler verliest, dan claim je de premie (bovenop je gewone XP) en
+              eindigt zijn reeks. Bij een teamwinst wordt de premie verdeeld over het winnende team. Bij een gelijkspel
+              eindigt de reeks zonder premie. Potjes waar iemand niet meedoet, tellen voor zijn reeks niet mee. De
+              Wanted-speler zelf krijgt geen premie-XP. Je kunt in hetzelfde potje zowel de premie op de koploper als
+              een Wanted-premie verdienen. Wil je een ontspannen avond? De host kan Wanted per avond uitzetten op het
+              host dashboard. Wordt een potje heropend en gecorrigeerd, dan worden alle premies en berichten opnieuw
+              berekend.
+            </p>
+          </div>
           <p className="pt-1">
             <b>📜 Recordboek:</b> via de knop bij <b>Ranking</b> zie je de records aller tijden: meeste zeges,
             langste winstreeks, beste avond, vaakst MVP, trouwste speler, meeste avonden gehost, de grootste
-            reuzendoder, de pechvogel aller tijden, en de hoogste score per game.
+            reuzendoder, de grootste Bounty Hunter, de pechvogel aller tijden, en de hoogste score per game.
           </p>
         </Section>
 
@@ -367,8 +388,9 @@ export default async function UitlegPage() {
             </li>
             <li>
               Op je <b>account</b> (je rondje rechtsboven) zie je je rankings per game en je{" "}
-              <b>10 achievements</b>: Eerste zege, Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish,
-              Reuzendoder (versla de koploper van het seizoen), Seizoenskampioen en Kampioen.
+              <b>11 achievements</b>: Eerste zege, Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish,
+              Reuzendoder (versla de koploper van het seizoen), Bounty Hunter (claim een Wanted-premie),
+              Seizoenskampioen en Kampioen.
             </li>
             <li>
               Op het profiel van een ander zie je jullie <b>onderlinge stand</b>: hoe vaak jij hoger eindigde dan
@@ -404,6 +426,9 @@ export default async function UitlegPage() {
             </li>
             <li>
               <b>+{XP_RULES.bounty} XP</b> premie als je in een potje hoger eindigt dan de koploper van het seizoen
+            </li>
+            <li>
+              <b>+15 / +25 / +40 XP</b> Wanted-premie als je de winstreeks van een Wanted-speler beëindigt
             </li>
           </ul>
           <p className="pt-1">

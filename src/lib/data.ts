@@ -176,14 +176,18 @@ export async function getReactions(supabase: DB, activityIds: number[], meId: st
 export async function getResults(supabase: DB) {
   const { data } = await supabase
     .from("match_results")
-    .select("*, matches!inner(finished_at, night_id)")
+    .select("*, matches!inner(finished_at, night_id, created_at, game_nights!inner(wanted_off))")
     .limit(10000);
   return (data ?? []).map((r) => {
-    const { matches, ...rest } = r as MatchResult & { matches: { finished_at: string | null; night_id: string } };
+    const { matches, ...rest } = r as MatchResult & {
+      matches: { finished_at: string | null; night_id: string; created_at: string; game_nights: { wanted_off: boolean } | null };
+    };
     return {
       ...rest,
       finished_at: matches?.finished_at ?? new Date().toISOString(),
       night_id: matches?.night_id,
+      started_at: matches?.created_at,
+      wanted_off: !!matches?.game_nights?.wanted_off,
     } as ResultRow;
   });
 }

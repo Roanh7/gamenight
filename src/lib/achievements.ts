@@ -17,9 +17,19 @@ type Input = {
   hostedNights: number; // afgeronde avonden als host
   seasonTitles?: number; // aantal gewonnen seizoenen
   bounties?: number; // hoe vaak je de koploper versloeg
+  wantedClaims?: number; // hoe vaak je een Wanted-premie claimde
 };
 
-export function computeAchievements({ userId, results, leaderboard, games, hostedNights, seasonTitles = 0, bounties = 0 }: Input) {
+export function computeAchievements({
+  userId,
+  results,
+  leaderboard,
+  games,
+  hostedNights,
+  seasonTitles = 0,
+  bounties = 0,
+  wantedClaims = 0,
+}: Input) {
   const wins = results.filter((r) => r.is_winner).length;
   const played = results.length;
   const distinctGames = new Set(results.map((r) => r.game_id)).size;
@@ -95,6 +105,13 @@ export function computeAchievements({ userId, results, leaderboard, games, hoste
       description: "Versla de nummer 1 van het seizoen in een potje",
       icon: "target",
       earned: bounties >= 1,
+    },
+    {
+      id: "bounty-hunter",
+      title: "Bounty Hunter",
+      description: "Beëindig de winstreeks van een Wanted-speler en claim de premie",
+      icon: "target",
+      earned: wantedClaims >= 1,
     },
     {
       id: "season",

@@ -1,7 +1,14 @@
 import type { MatchResult } from "./types";
 
 /** Resultaat van één speler in één afgerond potje, met het moment van afronden. */
-export type ResultRow = MatchResult & { finished_at: string; night_id?: string };
+export type ResultRow = MatchResult & {
+  finished_at: string;
+  night_id?: string;
+  /** Wanneer het potje begon (vaste volgorde, ook na heropenen) */
+  started_at?: string;
+  /** Host zette Wanted uit voor deze avond */
+  wanted_off?: boolean;
+};
 
 export type Standing = {
   user_id: string;

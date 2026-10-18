@@ -17,6 +17,7 @@ export async function aboutActivity(supabase: DB, activityId: number) {
   for (const w of (payload.winners as string[] | undefined) ?? []) users.add(w);
   if (typeof payload.old_host === "string") users.add(payload.old_host);
   if (typeof payload.mvp === "string") users.add(payload.mvp);
+  if (typeof payload.target === "string") users.add(payload.target);
 
   const [{ data: game }, { data: night }] = await Promise.all([
     a.game_id ? supabase.from("games").select("name").eq("id", a.game_id).maybeSingle() : Promise.resolve({ data: null }),
@@ -41,6 +42,12 @@ export async function aboutActivity(supabase: DB, activityId: number) {
                 ? `de hostwissel bij ${n}`
                 : a.type === "night_recap"
                   ? `de recap van ${n}`
-                  : "een nieuwsbericht";
+                  : a.type === "wanted"
+                    ? "de Wanted-poster"
+                    : a.type === "bounty_claimed"
+                      ? "de geclaimde premie"
+                      : a.type === "streak_ended"
+                        ? "de geëindigde winstreeks"
+                        : "een nieuwsbericht";
   return { users: [...users], label };
 }
