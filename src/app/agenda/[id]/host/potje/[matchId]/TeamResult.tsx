@@ -1,7 +1,7 @@
 "use client";
 
 import { unlockAudio } from "@/lib/sfx";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -36,6 +36,32 @@ export function TeamResult({
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
+  // Keuzes bewaren op dit apparaat, zodat ze blijven staan als de telefoon op slot gaat of de pagina herlaadt
+  const storeKey = `gn-roles-${matchId}`;
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storeKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as { assign?: Record<string, string>; winner?: string | null };
+        const valid = Object.fromEntries(
+          Object.entries(saved.assign ?? {}).filter(([u, t]) => players.some((p) => p.id === u) && teamList.some((x) => x.name === t)),
+        );
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- eenmalig herstellen na het laden
+        setAssign((a) => ({ ...a, ...valid }));
+        if (saved.winner && teamList.some((x) => x.name === saved.winner)) setWinner(saved.winner);
+      }
+    } catch {}
+    setRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeKey]);
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      localStorage.setItem(storeKey, JSON.stringify({ assign, winner }));
+    } catch {}
+  }, [restored, storeKey, assign, winner]);
+
   const colorOf = (name: string) => TEAM_COLORS[Math.max(0, teamList.findIndex((t) => t.name === name)) % TEAM_COLORS.length];
   const allAssigned = players.every((p) => assign[p.id]);
   const usedTeams = teamList.filter((t) => Object.values(assign).includes(t.name));
@@ -55,9 +81,16 @@ export function TeamResult({
         p_teams: assign,
       });
       if (error) {
-        setError(error.message);
+        setError(
+          error.code
+            ? error.message
+            : "Geen verbinding. Je keuzes staan bewaard op dit apparaat; probeer het zo opnieuw.",
+        );
         return;
       }
+      try {
+        localStorage.removeItem(storeKey);
+      } catch {}
       router.replace(`/agenda/${nightId}/host/potje/${matchId}?klaar=1`);
       router.refresh();
     });

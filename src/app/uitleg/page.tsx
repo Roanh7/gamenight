@@ -175,7 +175,24 @@ export default async function UitlegPage() {
             </li>
             <li>
               De score bijhouden. Hoe dat gaat hangt af van de <a href="#soorten" className="underline">soort spel</a>:
-              per speler, per team, of pas na afloop bij geheime rollen. Alles wordt meteen opgeslagen.
+              per speler, per team, of pas na afloop bij geheime rollen.
+            </li>
+            <li>
+              <b>Scores gaan nooit verloren.</b> Elke tik wordt meteen op je telefoon bewaard en daarna naar de server
+              gestuurd. Onderaan zie je hoe het ervoor staat: <i>⏳ Bezig met opslaan</i>, <i>✓ Alles opgeslagen</i> (de
+              server heeft het echt) of <i>📴 Offline</i> (het staat nog alleen op je telefoon en gaat vanzelf mee zodra
+              je weer bereik hebt). Telefoon op slot, per ongeluk naar Home of de app opnieuw geopend? Alles staat er
+              nog. Afronden kan pas als alles echt is opgeslagen.
+            </li>
+            <li>
+              Host en co-host kunnen tegelijk scores invoeren. Tikken jullie allebei op +1, dan tellen beide mee. Vullen
+              jullie bij dezelfde speler tegelijk een ander getal in, dan krijg je een melding om te checken welke klopt.
+            </li>
+            <li>
+              Tijdens een potje zijn de scores een <b>concept</b>. Pas bij <b>🏁 Afronden</b> wordt de uitslag officieel
+              en tellen ranking, XP, winstreeks, Wanted-premie, records en nieuws mee. Heropen je een potje om een
+              foutje te herstellen, dan wordt dat allemaal teruggedraaid en na het opnieuw afronden opnieuw berekend
+              (ook de avondsamenvatting).
             </li>
             <li>
               <b>⚡ Alleen winnaar:</b> bij een simpel spel hoef je geen punten te tellen. Kies bovenaan{" "}

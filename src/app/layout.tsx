@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
 import { getMyActiveNight } from "@/lib/live";
+import { ScoreSyncAgent } from "@/components/ScoreSyncAgent";
 
 export const metadata: Metadata = {
   title: { default: "Game Night", template: "%s · Game Night" },
@@ -63,6 +64,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             </div>
           </header>
+        )}
+        {me && (
+          <div className="pt-3 empty:hidden">
+            <ScoreSyncAgent />
+          </div>
         )}
         <main className={`mx-auto max-w-xl px-4 ${me ? "pb-32 pt-5" : "py-8"}`}>{children}</main>
         {me && <BottomNav live={live} liveOff={liveOff} />}

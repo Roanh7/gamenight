@@ -28,7 +28,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
     supabase.from("game_nights").select("id, title, host_id, cohost_id").eq("id", id).maybeSingle(),
     supabase.from("matches").select("*").eq("id", matchId).maybeSingle(),
     supabase.from("match_players").select("user_id, team").eq("match_id", matchId),
-    supabase.from("score_entries").select("user_id, round, points").eq("match_id", matchId),
+    supabase.from("score_entries").select("user_id, round, points, version").eq("match_id", matchId),
     getProfiles(supabase),
   ]);
   if (!night || !matchData || !me || matchData.night_id !== id) notFound();
@@ -37,7 +37,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
 
   const [{ data: gameData }, { data: teamScores }] = await Promise.all([
     supabase.from("games").select("*").eq("id", match.game_id).maybeSingle(),
-    supabase.from("team_scores").select("team, round, points").eq("match_id", matchId),
+    supabase.from("team_scores").select("team, round, points, version").eq("match_id", matchId),
   ]);
   const game = gameData as Game | null;
   const gameType = game?.game_type ?? (game?.is_team ? "roles" : "solo");
@@ -49,6 +49,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
       return { id: p.id, username: p.username, avatar_color: p.avatar_color, avatar_url: p.avatar_url, avatar_emoji: p.avatar_emoji, team: (x.team as string | null) ?? null };
     });
   const teamOf = new Map(players.map((p) => [p.id, p.team]));
+  const people = Object.fromEntries(profiles.list.map((p) => [p.id, p.username]));
 
   let results: MatchResult[] = [];
   if (match.status === "finished") {
@@ -74,8 +75,10 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
               nightId={id}
               players={players}
               teamNames={(game?.teams ?? []).map((t) => t.name)}
-              initialEntries={(teamScores ?? []).map((e) => ({ ...e, points: Number(e.points) }))}
+              initialEntries={(teamScores ?? []).map((e) => ({ ...e, points: e.points == null ? null : Number(e.points) }))}
               lowestWins={game?.scoring_mode === "lowest_wins"}
+              label={`${game?.name ?? "Potje"} · ${night.title}`}
+              people={people}
             />
           ) : gameType === "roles" && game ? (
             <TeamResult
@@ -90,7 +93,9 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             matchId={match.id}
             nightId={id}
             players={players}
-            initialEntries={(entries ?? []).map((e) => ({ ...e, points: Number(e.points) }))}
+            initialEntries={(entries ?? []).map((e) => ({ ...e, points: e.points == null ? null : Number(e.points) }))}
+            label={`${game?.name ?? "Potje"} · ${night.title}`}
+            people={people}
             lowestWins={game?.scoring_mode === "lowest_wins"}
             isTeam={false}
             gameId={game?.id}
