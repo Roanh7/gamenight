@@ -55,6 +55,18 @@ export function playDraw() {
   tone(c, 392, t + 0.2, 0.3);
 }
 
+/** Opstartgeluidje van de spelcomputer: snel omhoog en dan "pling!". */
+export function playBoot() {
+  const c = getCtx();
+  if (!c) return;
+  if (c.state === "suspended") void c.resume();
+  const t = c.currentTime + 0.05;
+  [261.63, 329.63, 392, 523.25, 659.25, 783.99].forEach((f, i) => tone(c, f, t + i * 0.06, 0.09, "square", 0.06));
+  tone(c, 1046.5, t + 0.46, 0.1, "square", 0.07);
+  tone(c, 2093, t + 0.58, 0.7, "square", 0.045);
+  tone(c, 523.25, t + 0.58, 0.7, "triangle", 0.09);
+}
+
 export function soundOn() {
   try {
     return localStorage.getItem("gn-sound") !== "off";

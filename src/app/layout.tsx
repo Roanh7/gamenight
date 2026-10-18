@@ -10,6 +10,8 @@ import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
 import { getMyActiveNight } from "@/lib/live";
 import { ScoreSyncAgent } from "@/components/ScoreSyncAgent";
+import { BOOT_SCRIPT, BootScreen } from "@/components/BootScreen";
+import { seasonTheme } from "@/lib/season";
 
 export const metadata: Metadata = {
   title: { default: "Game Night", template: "%s · Game Night" },
@@ -34,15 +36,34 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const theme = jar.get("gn-theme")?.value;
   const live = me ? await getMyActiveNight() : null;
   const liveOff = !!live && jar.get("gn-nav")?.value === `normal:${live.id}`;
+  const season = seasonTheme();
 
   return (
     <html
       lang="nl"
       data-theme={theme === "light" || theme === "dark" ? theme : undefined}
+      data-season={season ?? undefined}
+      // Het startscherm-script zet data-boot op <html> vóórdat React start
+      suppressHydrationWarning
       style={{ ["--nav-h" as string]: live ? "104px" : "76px" }}
     >
+      {me && (
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
+        </head>
+      )}
       <body className="min-h-dvh antialiased">
         <div className="pixel-sky" aria-hidden />
+        {season && (
+          <div className="season-layer" aria-hidden>
+            <div className="season-bats a hw" />
+            <div className="season-bats b hw" />
+            <div className="season-pumpkins hw" />
+            <div className="season-snow a xm" />
+            <div className="season-snow b xm" />
+          </div>
+        )}
+        {me && <BootScreen />}
         {me && (
           <header className="sticky top-0 z-30 border-b-2 border-line bg-cream/90 backdrop-blur">
             <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-4">

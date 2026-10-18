@@ -22,7 +22,7 @@ export function Avatar({ name, color, url, emoji, size = "md", crown }: Props) {
   const c = safeColor(color);
   const s = SIZES[size];
   return (
-    <span className="relative inline-flex shrink-0">
+    <span className={`avatar-wrap relative inline-flex shrink-0 ${crown ? "has-crown" : ""}`}>
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img

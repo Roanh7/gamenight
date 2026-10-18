@@ -4,7 +4,7 @@ import { createClient, getMe } from "@/lib/supabase/server";
 import { getActivity, getGames, getProfiles, getComments, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
 import { currentBountyTarget, currentSeason, filterSeason, seasonLabel, standings } from "@/lib/stats";
 import type { GameNight, Match, Participant, Vote as VoteT } from "@/lib/types";
-import { countdown, formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
+import { formatDateLong, formatTime, hoursAgoIso, timeAgo } from "@/lib/format";
 import { Logo, PixelController } from "@/components/Logo";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { PushPrompt } from "@/components/PushPrompt";
@@ -14,6 +14,7 @@ import { GameIcon } from "@/components/GameIcon";
 import { Leaderboard } from "@/components/Leaderboard";
 import { EmptyState, SectionTitle } from "@/components/ui";
 import { InstallHint } from "@/components/InstallHint";
+import { FuseCountdown } from "@/components/FuseCountdown";
 
 export default async function Home(props: PageProps<"/">) {
   const me = await getMe();
@@ -242,10 +243,15 @@ async function Dashboard({
                   : `${formatDateLong(next.starts_at)} · ${formatTime(next.starts_at)}`}
               </p>
             </div>
-            <span className={`chip ${next.status === "live" ? "bg-red text-white" : "bg-yellow"}`}>
-              {next.status === "live" ? "● LIVE" : next.date_poll ? "Prikker" : countdown(next.starts_at)}
-            </span>
+            {(next.status === "live" || next.date_poll) && (
+              <span className={`chip ${next.status === "live" ? "bg-red text-white" : "bg-yellow"}`}>
+                {next.status === "live" ? "● LIVE" : "Prikker"}
+              </span>
+            )}
           </div>
+          {next.status === "planned" && !next.date_poll && (
+            <FuseCountdown startsAt={next.starts_at} createdAt={next.created_at} serverNow={Date.now()} />
+          )}
           <div className="mt-3 flex items-center justify-between gap-3">
             <div className="flex -space-x-1.5">
               {nextParticipants.slice(0, 7).map((p) => {

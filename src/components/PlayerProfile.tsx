@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Crown, Flame, Home, Lock, Medal, Sparkles, Star, Swords, Target, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getGames, getLeaderboards, getOverall, getProfiles, getResults } from "@/lib/data";
 import { allHeadToHeads, bountyHits, headToHead, seasonChampions, seasonLabel, type HeadToHead } from "@/lib/stats";
@@ -10,8 +10,7 @@ import type { Game, Profile } from "@/lib/types";
 import { Avatar } from "./Avatar";
 import { GameIcon } from "./GameIcon";
 import { EmptyState, RankBadge, SectionTitle } from "./ui";
-
-const ICONS = { trophy: Trophy, flame: Flame, crown: Crown, star: Star, sparkles: Sparkles, home: Home, swords: Swords, medal: Medal, target: Target };
+import { TrophyCabinet, type CabinetItem } from "./TrophyCabinet";
 
 export async function PlayerProfile({
   profile,
@@ -39,9 +38,10 @@ export async function PlayerProfile({
   ]);
   const xp = computeXp(allResults, attendance)(profile.id);
   const results = allResults.filter((r) => r.user_id === profile.id);
-  const seasonTitles = [...seasonChampions(allResults).entries()]
+  const wonSeasons = [...seasonChampions(allResults).entries()]
     .filter(([, u]) => u === profile.id)
-    .map(([season]) => `Seizoenskampioen ${seasonLabel(season)}`);
+    .map(([season]) => seasonLabel(season));
+  const seasonTitles = wonSeasons.map((s) => `Seizoenskampioen ${s}`);
   const ach = computeAchievements({
     userId: profile.id,
     results,
@@ -51,6 +51,33 @@ export async function PlayerProfile({
     seasonTitles: seasonTitles.length,
     bounties: bountyHits(allResults).get(profile.id) ?? 0,
   });
+  const cups: CabinetItem[] = [
+    ...wonSeasons.map((s) => ({
+      id: `season-${s}`,
+      sprite: "cup" as const,
+      title: `Seizoenskampioen ${s}`,
+      description: `${profile.username} eindigde seizoen ${s} als #1`,
+      earned: true,
+      plaque: s,
+    })),
+    ...ach.titles.map((t) => ({
+      id: `title-${t}`,
+      sprite: "cup" as const,
+      silver: true,
+      title: t,
+      description: `Staat nu #1 op het leaderboard van ${t.replace(/^Kampioen /, "")}`,
+      earned: true,
+      plaque: t.replace(/^Kampioen /, ""),
+    })),
+  ];
+  const shelf: CabinetItem[] = ach.list.map((a) => ({
+    id: a.id,
+    sprite: a.icon === "trophy" ? "cup" : a.icon,
+    title: a.title,
+    description: a.description,
+    earned: a.earned,
+    progress: a.progress,
+  }));
   const titles = [...seasonTitles.map((t) => `🏆 ${t}`), ...ach.titles.map((t) => `👑 ${t}`)];
   const versus = !isMe && viewerId ? headToHead(allResults, viewerId, profile.id) : null;
   const rivals = isMe ? allHeadToHeads(allResults, profile.id) : [];
@@ -161,34 +188,8 @@ export async function PlayerProfile({
         <EmptyState icon={<Trophy size={32} />} title="Nog geen rankings" text="Speel een potje om op de ranglijst te komen." />
       )}
 
-      {/* Achievements */}
-      <SectionTitle>
-        Achievements ({ach.list.filter((a) => a.earned).length}/{ach.list.length})
-      </SectionTitle>
-      <ul className="grid grid-cols-2 gap-3">
-        {ach.list.map((a) => {
-          const Icon = ICONS[a.icon];
-          return (
-            <li
-              key={a.id}
-              className={`card p-3 ${a.earned ? "" : "border-dashed opacity-60 shadow-none"}`}
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border-2 border-line ${
-                    a.earned ? "bg-yellow" : "bg-soft"
-                  }`}
-                >
-                  {a.earned ? <Icon size={18} strokeWidth={2.5} /> : <Lock size={16} strokeWidth={2.5} />}
-                </span>
-                {!a.earned && a.progress && <span className="pixel text-[9px] text-muted">{a.progress}</span>}
-              </div>
-              <p className="mt-2 text-sm font-black leading-tight">{a.title}</p>
-              <p className="text-xs text-muted">{a.description}</p>
-            </li>
-          );
-        })}
-      </ul>
+      {/* Trofeekast: bekers, titels en achievements */}
+      <TrophyCabinet cups={cups} achievements={shelf} isMe={isMe} />
     </div>
   );
 }

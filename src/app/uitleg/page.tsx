@@ -365,9 +365,12 @@ export default async function UitlegPage() {
               Sta je #1 in een game, dan krijg je de titel <b>👑 Kampioen [game]</b> op je profiel.
             </li>
             <li>
-              Op je <b>account</b> (je rondje rechtsboven) zie je je rankings per game en je{" "}
-              <b>10 achievements</b>: Eerste zege, Hattrick, Legende, Vaste gast, Allrounder, Gastheer, Fotofinish,
-              Reuzendoder (versla de koploper van het seizoen), Seizoenskampioen en Kampioen.
+              Op je <b>account</b> (je rondje rechtsboven) zie je je rankings per game en je <b>🏆 trofeekast</b>.
+              Bovenin staan je bekers: goud voor elk gewonnen seizoen, zilver voor elke game waarin je #1 staat.
+              Daaronder je <b>10 achievements</b>: Eerste zege, Hattrick, Legende, Vaste gast, Allrounder, Gastheer,
+              Fotofinish, Reuzendoder (versla de koploper van het seizoen), Seizoenskampioen en Kampioen. Wat je nog
+              niet hebt, staat er als donkere schaduw met een vraagteken. Tik op een prijs om te zien wat het is.
+              Andere spelers kunnen jouw kast ook bekijken.
             </li>
             <li>
               Op het profiel van een ander zie je jullie <b>onderlinge stand</b>: hoe vaak jij hoger eindigde dan
@@ -457,7 +460,19 @@ export default async function UitlegPage() {
               wolkjes. Op je account kun je ook zelf kiezen: Auto, Licht of Nacht.
             </li>
             <li>
-              Geen zin in geluidjes? Zet <b>🔊 Geluidjes bij winst</b> uit op je account. Dat geldt alleen voor
+              <b>🎮 Startscherm:</b> de eerste keer per dag dat je de app opent, start hij op als een spelcomputer.
+              Tik op het scherm (<i>PRESS START</i>) om naar binnen te gaan.
+            </li>
+            <li>
+              <b>💣 Aftellen:</b> op Home brandt een lontje richting de volgende avond. Hoe dichterbij, hoe korter
+              de lont. Het laatste uur gaat de bom trillen.
+            </li>
+            <li>
+              <b>🎃 Seizoenen:</b> in oktober vliegen er vleermuizen en staan er pompoenen op de heuvels. In december
+              sneeuwt het en krijgt iedereen een kerstmutsje.
+            </li>
+            <li>
+              Geen zin in geluidjes? Zet <b>🔊 Geluidjes bij winst</b> uit op je account (dan is ook het opstartgeluidje stil). Dat geldt alleen voor
               jouw telefoon.
             </li>
             <li>
