@@ -133,8 +133,8 @@ export async function PlayerProfile({
         <div className="relative h-28 border-b-2 border-line">
           <Banner id={banner} />
           {isMe && (
-            <Link href="/account/banners" className="pixel absolute right-2 top-2 rounded-md border-2 border-line bg-paper/90 px-2 py-1.5 text-[8px] text-ink">
-              🎨 CUSTOMIZE PROFILE
+            <Link href="/account#customize" className="pixel absolute right-2 top-2 rounded-md border-2 border-line bg-paper/90 px-2 py-1.5 text-[8px] text-ink">
+              🎨 CUSTOMIZE PLAYER
             </Link>
           )}
         </div>

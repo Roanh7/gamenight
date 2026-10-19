@@ -29,7 +29,7 @@ export default async function AvatarPage() {
       {unseenBanners(rows, me.user.id).length === 0 && (
         <FrameUnlock ids={unseenFrames(rows, me.user.id)} userId={me.user.id} name={p.username} color={p.avatar_color} emoji={p.avatar_emoji} pixel={p.avatar_pixel} />
       )}
-      <PageHeader back="/account" kicker="CUSTOMIZE AVATAR" title="Jouw avatar" />
+      <PageHeader back="/account#customize" kicker="CUSTOMIZE PLAYER" title="Jouw avatar" />
       <AvatarStudio
         name={p.username}
         color={p.avatar_color}

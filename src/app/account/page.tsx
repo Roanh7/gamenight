@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { LogOut } from "lucide-react";
-import { getMe } from "@/lib/supabase/server";
+import { createClient, getMe } from "@/lib/supabase/server";
+import { ownedBanners, shownBanner, type UnlockRow } from "@/lib/bannerSync";
+import { BANNERS, bannerDef } from "@/lib/banners";
+import { Banner } from "@/components/Banner";
 import type { Color, Profile } from "@/lib/types";
 import { logout } from "../(auth)/actions";
 import { changePassword, updateProfile } from "./actions";
@@ -9,7 +12,7 @@ import { PlayerProfile } from "@/components/PlayerProfile";
 import { ColorPicker } from "@/components/ColorPicker";
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
-import { FRAME_BY_ID, safeFrame } from "@/lib/frames";
+import { FRAME_BY_ID, FRAMES, ownedFrames, safeFrame } from "@/lib/frames";
 import { normalizeStyle, PRESET_BY_ID } from "@/lib/pixelAvatar";
 import { SoundToggle } from "@/components/Celebrate";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -25,26 +28,66 @@ export default async function AccountPage(props: PageProps<"/account">) {
   const me = await getMe();
   if (!me) redirect("/login");
   const profile = me.profile as Profile;
+  // Wat je hebt vrijgespeeld (alleen lezen; vrijspelen zelf gebeurt zoals altijd door de server)
+  const supabase = await createClient();
+  const [{ data: unlockData }, { data: bannerRow }] = await Promise.all([
+    supabase.from("banner_unlocks").select("user_id, banner_id, revoked_at, seen, unlocked_at").eq("user_id", me.user.id),
+    supabase.from("profiles").select("banner").eq("id", me.user.id).maybeSingle(),
+  ]);
+  const unlocks = (unlockData ?? []) as UnlockRow[];
+  const frames = ownedFrames(unlocks, me.user.id);
+  const frame = frames.has(safeFrame(profile.avatar_frame)) ? safeFrame(profile.avatar_frame) : "none";
+  const banners = ownedBanners(unlocks, me.user.id);
+  const banner = shownBanner(bannerRow?.banner, banners);
 
   return (
     <div>
       <Flash sp={sp} />
       <PlayerProfile profile={profile} isMe />
 
-      <SectionTitle>Gegevens</SectionTitle>
-      <section className="card mb-3 p-4">
-        <span className="label">Avatar</span>
-        <div className="flex items-center gap-3">
-          <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} frame={profile.avatar_frame} size="lg" />
-          <div className="min-w-0 flex-1 text-sm font-bold">
-            <p className="truncate">{avatarLabel(profile)}</p>
-            <p className="truncate text-xs text-muted">Frame: {FRAME_BY_ID.get(safeFrame(profile.avatar_frame))!.name}</p>
-          </div>
-        </div>
-        <Link href="/account/avatar" className="btn btn-primary btn-sm mt-3 w-full">
-          🎮 CUSTOMIZE AVATAR
+      {/* ---------- 🎨 Customize Player: avatar, frames en banners op één plek ---------- */}
+      <div id="customize" className="scroll-mt-20">
+        <SectionTitle>🎨 Customize Player</SectionTitle>
+      </div>
+      <section className="hub-panel" aria-label="Customize Player">
+        <Link href="/account/avatar" className="customize-row">
+          <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} size="md" />
+          <span className="min-w-0 flex-1">
+            <span className="pixel block text-[8px] text-muted">AVATAR</span>
+            <span className="block truncate font-black">{avatarLabel(profile)}</span>
+            <span className="block truncate text-xs font-bold text-muted">Emoji, Pixel Avatar Creator of een personage</span>
+          </span>
+          <span className="customize-go" aria-hidden>
+            ▶
+          </span>
+        </Link>
+        <Link href="/account/avatar#frames" className="customize-row">
+          <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} frame={frame} size="md" />
+          <span className="min-w-0 flex-1">
+            <span className="pixel block text-[8px] text-muted">AVATAR FRAMES · {frames.size}/{FRAMES.length}</span>
+            <span className="block truncate font-black">{FRAME_BY_ID.get(frame)!.name}</span>
+            <span className="block truncate text-xs font-bold text-muted">Vrijgespeeld kiezen, vergrendeld met voorwaarden</span>
+          </span>
+          <span className="customize-go" aria-hidden>
+            ▶
+          </span>
+        </Link>
+        <Link href="/account/banners" className="customize-row">
+          <span className="relative block h-10 w-16 shrink-0 overflow-hidden rounded-lg border-2 border-line">
+            <Banner id={banner} still />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="pixel block text-[8px] text-muted">PROFILE BANNERS · {banners.size}/{BANNERS.length}</span>
+            <span className="block truncate font-black">{bannerDef(banner).name}</span>
+            <span className="block truncate text-xs font-bold text-muted">Vrijgespeeld kiezen, vergrendeld met voorwaarden</span>
+          </span>
+          <span className="customize-go" aria-hidden>
+            ▶
+          </span>
         </Link>
       </section>
+
+      <SectionTitle>👤 Account</SectionTitle>
       <details className="card overflow-hidden">
         <summary className="cursor-pointer list-none px-4 py-3 font-black">✏️ Profiel bewerken</summary>
         <form action={updateProfile} className="space-y-4 border-t-2 border-line p-4">
@@ -91,7 +134,10 @@ export default async function AccountPage(props: PageProps<"/account">) {
         </form>
       </details>
 
-      <div className="card mt-3 px-4 py-3">
+      <div id="instellingen" className="scroll-mt-20">
+        <SectionTitle>⚙️ Settings</SectionTitle>
+      </div>
+      <div className="card px-4 py-3">
         <p className="mb-2 font-black">🔔 Meldingen op dit toestel</p>
         <PushToggle />
         <p className="mt-2 text-xs text-muted">

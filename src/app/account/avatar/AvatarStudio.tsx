@@ -361,7 +361,7 @@ export function AvatarStudio({
       </ActionBar>
 
       {/* Frames */}
-      <section id="frames" className="card mb-3 p-3">
+      <section id="frames" className="card mb-3 scroll-mt-20 p-3">
         <h2 className="pixel mb-1 text-[11px] leading-relaxed">🖼️ AVATAR FRAMES</h2>
         <p className="mb-3 text-xs font-bold text-muted">
           {frames.filter((f) => f.owned).length} van {frames.length} beschikbaar. Alleen voor de looks, je draagt er één tegelijk.

@@ -43,12 +43,10 @@ export async function getOverall(supabase: DB) {
   return (data ?? []) as OverallRow[];
 }
 
-export async function getActivity(supabase: DB, limit = 15) {
-  const { data } = await supabase
-    .from("activity")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+export async function getActivity(supabase: DB, limit = 15, types?: readonly string[] | null) {
+  let q = supabase.from("activity").select("*");
+  if (types?.length) q = q.in("type", [...types]);
+  const { data } = await q.order("created_at", { ascending: false }).limit(limit);
   return (data ?? []) as Activity[];
 }
 

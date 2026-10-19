@@ -3,16 +3,28 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, Gamepad2, House, LayoutGrid, Plus, Radio, Trophy, Users } from "lucide-react";
 import type { ActiveNight } from "@/lib/data";
+import { PixelIcon, type PixelIconName } from "./PixelIcon";
 
-const ITEMS = [
-  { href: "/", label: "Home", icon: House, match: (p: string) => p === "/" || p.startsWith("/nieuws") },
-  { href: "/agenda", label: "Agenda", icon: CalendarDays, match: (p: string) => p.startsWith("/agenda") },
-  { href: "/games", label: "Games", icon: Gamepad2, match: (p: string) => p.startsWith("/games") },
-  { href: "/spelers", label: "Players", icon: Users, match: (p: string) => p.startsWith("/spelers") || p.startsWith("/account") },
-  { href: "/ranking", label: "Ranking", icon: Trophy, match: (p: string) => p.startsWith("/ranking") || p.startsWith("/records") },
+const ITEMS: { href: string; label: string; icon: PixelIconName; match: (p: string) => boolean }[] = [
+  { href: "/", label: "Home", icon: "home", match: (p) => p === "/" || p.startsWith("/nieuws") },
+  { href: "/agenda", label: "Agenda", icon: "calendar", match: (p) => p.startsWith("/agenda") },
+  { href: "/games", label: "Games", icon: "gamepad", match: (p) => p.startsWith("/games") },
+  { href: "/spelers", label: "Players", icon: "players", match: (p) => p.startsWith("/spelers") || p.startsWith("/account") },
+  { href: "/ranking", label: "Ranking", icon: "trophy", match: (p) => p.startsWith("/ranking") || p.startsWith("/records") },
 ];
+
+/** Eén knop van het console-menu. */
+function Key({ href, label, icon, active, accent }: { href: string; label: string; icon: PixelIconName; active: boolean; accent?: boolean }) {
+  return (
+    <li className="min-w-0">
+      <Link href={href} className={`console-key ${active ? "is-on" : ""} ${accent ? "is-accent" : ""}`} aria-current={active ? "page" : undefined}>
+        <PixelIcon name={icon} size={20} />
+        <span className="console-label">{label}</span>
+      </Link>
+    </li>
+  );
+}
 
 const ROLE = { host: "👑 Host", cohost: "🎙️ Co-host", player: "👀 Kijkt mee" } as const;
 
@@ -22,7 +34,7 @@ function setNavCookie(value: string | null) {
     : "gn-nav=; path=/; max-age=0; samesite=lax";
 }
 
-/** Menubalk onderaan. Tijdens een avond waar je bij bent: de live-balk. */
+/** Menubalk onderaan als bedieningspaneel van een spelcomputer. Tijdens een avond waar je bij bent: de live-balk. */
 export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff: boolean }) {
   const path = usePathname();
   const router = useRouter();
@@ -45,16 +57,16 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
     router.refresh();
   }
 
-  const shell = "fixed inset-x-0 bottom-0 z-40 border-t-2 border-line bg-paper";
+  const shell = "console-nav fixed inset-x-0 bottom-0 z-40";
   const safe = { paddingBottom: "env(safe-area-inset-bottom)" };
 
   if (live && !liveOff) {
     const isHost = live.role !== "player";
-    const items = [
-      { href: "/live", label: "Live", icon: Radio, active: path === "/live" },
-      { href: `/agenda/${live.id}`, label: "Avond", icon: CalendarDays, active: path === `/agenda/${live.id}` },
-      ...(isHost ? [{ href: `/agenda/${live.id}/host#potje`, label: "Potje", icon: Plus, active: false, big: true }] : []),
-      { href: "/ranking", label: "Ranking", icon: Trophy, active: path.startsWith("/ranking") },
+    const items: { href: string; label: string; icon: PixelIconName; active: boolean; accent?: boolean }[] = [
+      { href: "/live", label: "Live", icon: "live", active: path === "/live" },
+      { href: `/agenda/${live.id}`, label: "Avond", icon: "calendar", active: path === `/agenda/${live.id}` },
+      ...(isHost ? [{ href: `/agenda/${live.id}/host#potje`, label: "Potje", icon: "plus" as const, active: false, accent: true }] : []),
+      { href: "/ranking", label: "Ranking", icon: "trophy", active: path.startsWith("/ranking") },
     ];
     return (
       <nav ref={ref} className={shell} style={safe} aria-label="Live-menu">
@@ -67,38 +79,14 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
             {live.liveMatches ? ` · ${live.liveMatches} bezig` : ""}
           </span>
         </Link>
-        <ul className={`mx-auto grid h-16 max-w-xl ${isHost ? "grid-cols-5" : "grid-cols-4"}`}>
-          {items.map(({ href, label, icon: Icon, active, ...rest }) => (
-            <li key={label} className="flex items-center justify-center">
-              {"big" in rest ? (
-                <Link
-                  href={href}
-                  className="flex h-14 w-14 flex-col items-center justify-center rounded-full border-2 border-line bg-yellow text-night shadow-[0_4px_0_var(--color-line)] active:translate-y-[2px]"
-                  aria-label="Nieuw potje starten"
-                >
-                  <Icon size={22} strokeWidth={3} />
-                  <span className="text-[10px] font-black leading-none">{label}</span>
-                </Link>
-              ) : (
-                <Link href={href} className="flex flex-col items-center gap-1" aria-current={active ? "page" : undefined}>
-                  <span
-                    className={`flex h-8 w-11 items-center justify-center rounded-full border-2 ${
-                      active ? "border-line bg-red text-white" : "border-transparent text-muted"
-                    }`}
-                  >
-                    <Icon size={20} strokeWidth={2.5} />
-                  </span>
-                  <span className={`text-[11px] font-extrabold ${active ? "text-ink" : "text-muted"}`}>{label}</span>
-                </Link>
-              )}
-            </li>
+        <ul className={`console-keys ${isHost ? "grid-cols-5" : "grid-cols-4"}`}>
+          {items.map((it) => (
+            <Key key={it.label} {...it} />
           ))}
-          <li className="flex items-center justify-center">
-            <button type="button" onClick={() => toggle(true)} className="flex flex-col items-center gap-1" aria-label="Terug naar het gewone menu">
-              <span className="flex h-8 w-11 items-center justify-center rounded-full border-2 border-transparent text-muted">
-                <LayoutGrid size={20} strokeWidth={2.5} />
-              </span>
-              <span className="text-[11px] font-extrabold text-muted">Menu</span>
+          <li className="min-w-0">
+            <button type="button" onClick={() => toggle(true)} className="console-key w-full" aria-label="Terug naar het gewone menu">
+              <PixelIcon name="grid" size={20} />
+              <span className="console-label">Menu</span>
             </button>
           </li>
         </ul>
@@ -120,24 +108,10 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
           <span className="shrink-0 text-[11px] font-black underline">Terug naar live</span>
         </button>
       )}
-      <ul className="mx-auto grid max-w-xl grid-cols-5">
-        {ITEMS.map(({ href, label, icon: Icon, match }) => {
-          const active = match(path);
-          return (
-            <li key={href}>
-              <Link href={href} className="flex flex-col items-center gap-1 py-2.5" aria-current={active ? "page" : undefined}>
-                <span
-                  className={`flex h-8 w-11 items-center justify-center rounded-full border-2 transition-colors ${
-                    active ? "border-line bg-red text-white" : "border-transparent text-muted"
-                  }`}
-                >
-                  <Icon size={20} strokeWidth={2.5} />
-                </span>
-                <span className={`text-[11px] font-extrabold ${active ? "text-ink" : "text-muted"}`}>{label}</span>
-              </Link>
-            </li>
-          );
-        })}
+      <ul className="console-keys grid-cols-5">
+        {ITEMS.map(({ href, label, icon, match }) => (
+          <Key key={href} href={href} label={label} icon={icon} active={match(path)} />
+        ))}
       </ul>
     </nav>
   );

@@ -8,6 +8,7 @@ import { getMe } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
+import { PlayerMenu } from "@/components/PlayerMenu";
 import { getMyActiveNight } from "@/lib/live";
 import { ScoreSyncAgent } from "@/components/ScoreSyncAgent";
 import { CeremonyListener } from "@/components/CeremonyListener";
@@ -66,23 +67,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
         {me && <BootScreen />}
         {me && (
-          <header className="sticky top-0 z-30 border-b-2 border-line bg-cream/90 backdrop-blur">
-            <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-4">
-              <Link href="/" aria-label="Home">
+          <header className="arcade-header sticky top-0 z-30">
+            <div className="mx-auto flex h-[52px] max-w-xl items-center justify-between gap-2 px-4">
+              <Link href="/" aria-label="Home" className="shrink-0">
                 <Logo />
               </Link>
               <div className="flex items-center gap-2">
-                <Link
-                  href="/uitleg"
-                  aria-label="Uitleg"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-line bg-paper font-black"
-                >
+                <Link href="/uitleg" aria-label="Uitleg en spelregels" className="header-key pixel text-[11px]">
                   ?
                 </Link>
-                <Link href="/account" className="flex items-center gap-2" aria-label="Mijn account">
-                  <span className="hidden text-sm font-extrabold sm:inline">{me.profile.username}</span>
+                <PlayerMenu name={me.profile.username}>
+                  <span className="hidden max-w-[9rem] truncate text-sm font-extrabold sm:inline">{me.profile.username}</span>
                   <Avatar name={me.profile.username} color={me.profile.avatar_color} url={me.profile.avatar_url} emoji={me.profile.avatar_emoji} pixel={me.profile.avatar_pixel} frame={me.profile.avatar_frame} size="sm" />
-                </Link>
+                  <span className="pixel text-[8px] text-muted" aria-hidden>
+                    ▼
+                  </span>
+                </PlayerMenu>
               </div>
             </div>
           </header>

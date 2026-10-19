@@ -9,6 +9,7 @@ import type { CommentRow } from "@/lib/comments";
 import { bannerDef, type Rarity } from "@/lib/banners";
 import { Banner } from "./Banner";
 import { seasonLabel } from "@/lib/stats";
+import { newsKind } from "@/lib/news";
 
 type Props = {
   items: Activity[];
@@ -18,13 +19,15 @@ type Props = {
   me?: { id: string; name: string };
   reactions?: Map<number, Record<string, { n: number; mine: boolean; names: string[] }>>;
   comments?: Map<number, { count: number; latest: CommentRow[] }>;
+  /** Compacte kaartjes (Home): geen reacties/comments, met een link naar het volledige bericht */
+  compact?: boolean;
 };
 
 type RecapStat = { user_id: string; points: number; wins: number; played: number; last: number };
 
-export function ActivityFeed({ items, profiles, games, nights, me, reactions, comments }: Props) {
+export function ActivityFeed({ items, profiles, games, nights, me, reactions, comments, compact }: Props) {
   return (
-    <ul className="card divide-y-2 divide-soft overflow-hidden">
+    <ul className={compact ? "feed-compact divide-y-2 divide-soft" : "card divide-y-2 divide-soft overflow-hidden"}>
       {items.map((a) => {
         const actor = a.actor_id ? profiles.get(a.actor_id) : undefined;
         const game = a.game_id ? games.get(a.game_id) : undefined;
@@ -158,7 +161,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                   <>Gedeelde eerste plek, geen MVP</>
                 )}{" "}
                 · {String(a.payload?.matches ?? 0)} potjes
-                <span className="mt-1.5 flex items-end gap-1.5">
+                <span className="feed-extra mt-1.5 flex items-end gap-1.5">
                   {stats.map((s, i) => {
                     const p = profiles.get(s.user_id);
                     return p ? (
@@ -234,7 +237,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                 <b className="pixel text-[9px]">{rarity === "epic" ? "✨ EPIC UNLOCK!" : rarity === "mythic" ? "🌈 MYTHIC UNLOCK!" : "👑 LEGENDARY UNLOCK!"}</b>
                 <br />
                 {name} heeft de <b className="font-black">{def.name}</b>-banner vrijgespeeld.
-                <span className={`rarity-frame r-${rarity} mt-1.5 block h-12`}>
+                <span className={`feed-extra rarity-frame r-${rarity} mt-1.5 block h-12`}>
                   <Banner id={def.id} still />
                 </span>
               </>
@@ -246,7 +249,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
         }
 
         return (
-          <li key={a.id} id={`a-${a.id}`} className="flex scroll-mt-20 items-start gap-3 px-4 py-3">
+          <li key={a.id} id={compact ? undefined : `a-${a.id}`} className={`flex scroll-mt-20 items-start gap-3 ${compact ? "px-3 py-2.5" : "px-4 py-3"}`}>
             <div className="relative">
               {actor ? (
                 <Avatar name={actor.username} color={actor.avatar_color} url={actor.avatar_url} emoji={actor.avatar_emoji} pixel={actor.avatar_pixel} frame={actor.avatar_frame} size="sm" />
@@ -264,9 +267,23 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm leading-snug">{text}</p>
-              <p className="mt-0.5 text-xs text-muted">{timeAgo(a.created_at)}</p>
-              {me && (
+              {compact && (
+                <p className="pixel mb-0.5 text-[7px] text-muted">
+                  {newsKind(a.type).emoji} {newsKind(a.type).label}
+                </p>
+              )}
+              <p className={`text-sm leading-snug ${compact ? "line-clamp-3" : ""}`}>{text}</p>
+              {compact ? (
+                <p className="mt-0.5 flex items-center justify-between gap-2 text-xs text-muted">
+                  <span>{timeAgo(a.created_at)}</span>
+                  <Link href={`/nieuws#a-${a.id}`} className="shrink-0 font-black text-ink hover:underline" aria-label="Open dit bericht">
+                    Open ▶
+                  </Link>
+                </p>
+              ) : (
+                <p className="mt-0.5 text-xs text-muted">{timeAgo(a.created_at)}</p>
+              )}
+              {me && !compact && (
                 <>
                   <Reactions activityId={a.id} userId={me.id} myName={me.name} initial={reactions?.get(a.id) ?? {}} />
                   <Comments

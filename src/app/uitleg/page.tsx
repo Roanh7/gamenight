@@ -18,6 +18,7 @@ import {
 import { getMe } from "@/lib/supabase/server";
 import { XP_RULES } from "@/lib/xp";
 import { PageHeader } from "@/components/ui";
+import { HelpSearch } from "@/components/HelpSearch";
 
 export const metadata: Metadata = { title: "Uitleg" };
 
@@ -35,21 +36,33 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="card scroll-mt-20 p-5">
-      <div className="mb-3 flex items-center gap-3">
+    <details id={id} data-help className="help-chapter card scroll-mt-20">
+      <summary className="help-summary">
         <span
-          className={`${color} ${color === "bg-yellow" ? "text-night" : "text-white"} flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-line`}
+          className={`${color} ${color === "bg-yellow" ? "text-night" : "text-white"} flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 border-line`}
         >
-          <Icon size={20} strokeWidth={2.5} />
+          <Icon size={18} strokeWidth={2.5} />
         </span>
-        <h2 className="text-lg font-black">{title}</h2>
-      </div>
-      <div className="space-y-2 text-[15px] leading-relaxed [&_b]:font-black [&_li]:ml-5 [&_li]:list-disc [&_ul]:space-y-1">
+        <h2 className="min-w-0 flex-1 text-base font-black leading-tight">{title}</h2>
+        <span className="help-chevron pixel text-[9px]" aria-hidden>
+          ▶
+        </span>
+      </summary>
+      <div className="space-y-2 border-t-2 border-soft px-4 pb-4 pt-3 text-[15px] leading-relaxed [&_b]:font-black [&_li]:ml-5 [&_li]:list-disc [&_ul]:space-y-1">
         {children}
       </div>
-    </section>
+    </details>
   );
 }
+
+/** Quick Start: de vijf stappen zoals de app echt werkt. */
+const QUICK_START: [string, string, string, string][] = [
+  ["📅", "Volgende avond", "Op Home zie je meteen de volgende gamenight. Alles staat in de Agenda.", "/agenda"],
+  ["✋", "Meld je aan", "Open de avond en tik op Ik doe mee! (of Ik kan niet). De host bevestigt je.", "/agenda"],
+  ["🎮", "Welke games?", "Stem op de games waar je zin in hebt, of zie welke vaste games de planner koos.", "/games"],
+  ["🔴", "Live meespelen", "Tijdens de avond wordt de menubalk rood. Via Live volg je de scores.", "/live"],
+  ["🏆", "Resultaten", "Na afloop: recap, podium, ranking, XP en achievements.", "/ranking"],
+];
 
 const TOC = [
   ["start", "Beginnen"],
@@ -62,6 +75,7 @@ const TOC = [
   ["games", "Games"],
   ["extra", "Players & nieuws"],
   ["xp", "Levels & XP"],
+  ["live", "Live Game Mode"],
   ["tips", "Tips"],
 ];
 
@@ -76,6 +90,31 @@ export default async function UitlegPage() {
         spelen, en laat de app bijhouden wie de beste is.
       </p>
 
+      <section className="hub-panel mb-5" style={{ ["--panel" as string]: "var(--color-yellow-soft)" }} aria-label="Quick start">
+        <div className="hub-panel-head">
+          <h2 className="pixel text-[9px]">🎮 QUICK START</h2>
+          <span className="pixel text-[7px] text-muted">5 STAPPEN</span>
+        </div>
+        <ol className="divide-y-2 divide-soft">
+          {QUICK_START.map(([icon, title, text, href], i) => (
+            <li key={title}>
+              <Link href={me ? href : "/registreren"} className="customize-row">
+                <span className="quick-step" aria-hidden>
+                  <span className="pixel text-[8px]">{i + 1}</span>
+                  <span className="text-base leading-none">{icon}</span>
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-black leading-tight">{title}</span>
+                  <span className="block text-xs font-bold text-muted">{text}</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <HelpSearch />
+
       <nav className="mb-5 flex flex-wrap gap-2" aria-label="Inhoud">
         {TOC.map(([id, label]) => (
           <a key={id} href={`#${id}`} className="chip bg-paper px-3 py-1 text-sm hover:bg-yellow-soft">
@@ -84,7 +123,7 @@ export default async function UitlegPage() {
         ))}
       </nav>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <Section id="start" icon={KeyRound} color="bg-red" title="1. Beginnen">
           <ul>
             <li>
@@ -96,7 +135,7 @@ export default async function UitlegPage() {
             <li>Na het aanmelden ben je meteen binnen; je hoeft geen mail te bevestigen.</li>
             <li>
               Onderin zie je de menubalk: <b>Home</b>, <b>Agenda</b>, <b>Games</b>, <b>Players</b> en{" "}
-              <b>Ranking</b>. Je eigen account open je via je rondje rechtsboven.
+              <b>Ranking</b>. Tik rechtsboven op je <b>avatar</b> voor het <b>👾 Player Menu</b>: je profiel, Customize Player, achievements, banners, nieuws, instellingen en deze uitleg.
             </li>
           </ul>
         </Section>
@@ -428,14 +467,16 @@ export default async function UitlegPage() {
             </li>
             <li>
               <Newspaper size={14} className="mr-1 inline" />
-              Op <b>Home</b> staan de 4 nieuwste berichten: wie er won, wie stijgt en wie er nieuw #1 is. Via{" "}
-              <b>Alle nieuws →</b> zie je de rest.
+              Op <b>Home</b> staan de 2 nieuwste berichten. Via <b>BEKIJK ALLES ▶</b> (of het Player Menu → Game Night
+              News) zie je al het nieuws, met reacties en comments. Bovenaan kun je filteren: <b>Results</b> (uitslagen,
+              recaps, underdog-zeges en seizoenscorrecties), <b>Rankings</b> (wie stijgt of #1 wordt), <b>Unlocks</b>
+              (bijzondere banners) en <b>Groep</b> (nieuwe avonden, hosts, spelers en games).
             </li>
             <li>
               Sta je #1 in een game, dan krijg je de titel <b>👑 Kampioen [game]</b> op je profiel.
             </li>
             <li>
-              Op je <b>account</b> (je rondje rechtsboven) zie je je rankings per game en je <b>🏆 trofeekast</b>.
+              Op je <b>account</b> (Player Menu → My Profile) zie je je rankings per game en je <b>🏆 trofeekast</b>.
               Bovenin staan je bekers: goud voor elk gewonnen seizoen, zilver voor elke game waarin je #1 staat.
               Daaronder je <b>10 achievements</b>: Eerste zege, Hattrick, Legende, Vaste gast, Allrounder, Gastheer,
               Fotofinish, Reuzendoder (versla de koploper van het seizoen), Seizoenskampioen en Kampioen. Wat je nog
@@ -521,8 +562,9 @@ export default async function UitlegPage() {
               Game Night-icoon en de app opent zonder Safari-balken. Log daarna één keer opnieuw in.
             </li>
             <li>
-              Je naam, kleur, bio en wachtwoord pas je aan via je <b>rondje rechtsboven</b>. Daar kies je ook je{" "}
-              <b>avatar</b>: een emoji, of gewoon je letter.
+              Je naam, kleur, bio en wachtwoord pas je aan op je account (avatar rechtsboven → <b>My Profile</b>). Je
+              avatar, frame en banner kies je bij <b>🎨 Customize Player</b>. Thema, meldingen en geluid staan onder{" "}
+              <b>Settings</b>.
             </li>
             <li>
               <b>🔔 Meldingen:</b> zet ze aan op je account (of via het kaartje op Home). Je krijgt dan een melding bij

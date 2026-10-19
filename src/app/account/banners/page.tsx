@@ -28,7 +28,7 @@ export default async function BannersPage(props: PageProps<"/account/banners">) 
   return (
     <div>
       <BannerUnlock ids={unseenBanners(rows, me.user.id)} userId={me.user.id} />
-      <PageHeader back="/account" kicker="CUSTOMIZE PROFILE" title="Banner collection" />
+      <PageHeader back="/account#customize" kicker="CUSTOMIZE PLAYER" title="Banner collection" />
       <Flash sp={sp} />
       <p className="-mt-3 mb-4 text-sm font-bold text-muted">
         {owned.size} van {BANNERS.length} vrijgespeeld. Banners zijn alleen voor de looks: ze geven geen punten of XP.

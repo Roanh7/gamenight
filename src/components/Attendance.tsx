@@ -3,6 +3,7 @@ import type { Profile } from "@/lib/types";
 import { ATTENDANCE_MIN_NIGHTS, formatPct, monthLabel, type AttStats, type AttStatus } from "@/lib/attendance";
 import { Avatar } from "./Avatar";
 import { RankBadge } from "./ui";
+import { PixelIcon } from "./PixelIcon";
 
 /** 📅 MY ATTENDANCE — bovenaan de Agenda. */
 export function MyAttendance({ s }: { s: AttStats }) {
@@ -120,23 +121,31 @@ export function AttendanceBoard({
 /** Klein blok voor de Player Hub. */
 export function HubAttendance({ s }: { s: AttStats }) {
   return (
-    <Link href="/agenda#attendance" className="att-hub card mt-3 flex items-center gap-3 px-3 py-2.5">
-      <span className="text-xl" aria-hidden>
-        📅
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="pixel block text-[8px] text-muted">MY ATTENDANCE</span>
-        {s.relevant ? (
-          <span className="block truncate text-sm font-black">
-            🎮 {s.attended} {s.attended === 1 ? "avond" : "avonden"} · 📊 {formatPct(s.pct)}% · 🔥 {s.current} op rij
-          </span>
-        ) : (
-          <span className="block truncate text-sm font-bold text-muted">Nog geen afgesloten gamenights</span>
-        )}
-      </span>
-      <span className="text-lg font-black" aria-hidden>
-        ›
-      </span>
-    </Link>
+    <section className="hub-panel" style={{ ["--panel" as string]: "var(--color-green-soft)" }} aria-label="My attendance">
+      <div className="flex items-center gap-3 px-3 py-2.5">
+        <span className="hub-icon-tile text-green" aria-hidden>
+          <PixelIcon name="calendar" size={22} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="pixel text-[8px] text-muted">MY ATTENDANCE</p>
+          {s.relevant ? (
+            <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-sm font-bold">
+              <span>
+                <b className="pixel text-[13px]">{s.attended}</b> {s.attended === 1 ? "avond" : "avonden"}
+              </span>
+              <span className="text-muted">·</span>
+              <span>
+                <b className="pixel text-[13px]">{formatPct(s.pct)}%</b> aanwezig
+              </span>
+            </p>
+          ) : (
+            <p className="mt-0.5 truncate text-sm font-bold text-muted">Nog geen afgesloten gamenights</p>
+          )}
+        </div>
+        <Link href="/agenda#attendance" className="btn btn-secondary btn-sm shrink-0 px-2.5 text-xs">
+          BEKIJK ▶
+        </Link>
+      </div>
+    </section>
   );
 }
