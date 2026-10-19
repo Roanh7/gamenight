@@ -7,6 +7,7 @@ import { underdogs, underdogTally } from "@/lib/underdog";
 import { UnderdogChip } from "./Underdog";
 import { SPECIALIST_MIN_PLAYED, bestGames, formatRate, specialistBoards, titlesOf } from "@/lib/specialists";
 import { FormDots } from "./Specialists";
+import { ResultsRefresh } from "./ResultsRefresh";
 import { computeAchievements } from "@/lib/achievements";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { XpBar } from "./XpBar";
@@ -120,6 +121,7 @@ export async function PlayerProfile({
 
   return (
     <div>
+      <ResultsRefresh />
       {/* Spelerskaart */}
       {isMe && <BannerUnlock ids={unseenBanners(unlockRows, profile.id)} userId={profile.id} />}
       <section className="card overflow-hidden">
