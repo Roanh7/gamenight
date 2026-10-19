@@ -118,7 +118,18 @@ export default async function UitlegPage() {
               Je staat dan op ⏳ <b>aangemeld</b> tot de host je <b>bevestigt</b> (✓). Alleen bevestigde
               spelers kunnen meedoen aan potjes.
             </li>
-            <li>Kun je toch niet? Tik op <b>Afmelden</b>.</li>
+            <li>
+              Kun je toch niet? Tik op <b>Afmelden</b>. Wist je meteen al dat je niet kunt? Tik op{" "}
+              <b>🙅 Ik kan niet</b>. Zo weet iedereen het, en je afmelding wordt bewaard.
+            </li>
+            <li>
+              <b>📅 My attendance</b> (bovenaan de Agenda): hoeveel avonden je bij was en hoeveel je miste, je
+              aanwezigheid in procenten (vanaf het moment dat je lid werd), je huidige en langste reeks en je actiefste
+              maand. Je bent <b>aanwezig</b> als je minstens één potje meespeelde, of als de host je in het host
+              dashboard op <b>✅ Was er wel</b> zet. Alleen aangemeld of bevestigd zijn telt níet als aanwezig. Bij elke
+              afgelopen avond zie je je eigen resultaat (plek, punten, potjes). Daaronder staan de{" "}
+              <b>🏆 Most loyal players</b> (vanaf 3 avonden). Dit telt niet voor punten of XP.
+            </li>
             <li>
               <b>Iets veranderen?</b> De host, co-host en wie de avond gepland heeft zien op de avond de knop{" "}
               <b>✏️ Avond bewerken</b>. Daar pas je de naam, datum, tijd, locatie, host, co-host, games en notities

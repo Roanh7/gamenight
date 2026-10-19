@@ -53,13 +53,14 @@ export async function getActivity(supabase: DB, limit = 15) {
 }
 
 export async function getNight(supabase: DB, id: string) {
-  const [{ data: night }, { data: participants }, { data: votes }, { data: matches }, { data: dateOptions }] =
+  const [{ data: night }, { data: participants }, { data: votes }, { data: matches }, { data: dateOptions }, { data: declines }] =
     await Promise.all([
       supabase.from("game_nights").select("*").eq("id", id).maybeSingle(),
       supabase.from("participants").select("*").eq("night_id", id).order("created_at"),
       supabase.from("votes").select("*").eq("night_id", id),
       supabase.from("matches").select("*").eq("night_id", id).order("created_at"),
       supabase.from("date_options").select("id, starts_at, date_votes(user_id)").eq("night_id", id).order("starts_at"),
+      supabase.from("night_declines").select("user_id, declined_at").eq("night_id", id),
     ]);
   if (!night) return null;
   const matchIds = (matches ?? []).map((m) => m.id);
@@ -120,6 +121,10 @@ export async function getNight(supabase: DB, id: string) {
   return {
     night: night as GameNight,
     participants: (participants ?? []) as Participant[],
+    /** Afgemeld (zonder dat ze nu toch aangemeld zijn) */
+    declined: ((declines ?? []) as { user_id: string }[])
+      .map((d) => d.user_id)
+      .filter((u) => !(participants ?? []).some((p) => p.user_id === u)),
     votes: (votes ?? []) as Vote[],
     matches: (matches ?? []) as Match[],
     results: (results ?? []) as MatchResult[],
@@ -251,4 +256,16 @@ export async function getActiveNight(supabase: DB, userId: string): Promise<Acti
     }
   }
   return null;
+}
+
+/** Afmeldingen en door de host gezette aanwezigheid (📅 My Attendance). */
+export async function getAttendanceExtras(supabase: DB) {
+  const [{ data: declines }, { data: marks }] = await Promise.all([
+    supabase.from("night_declines").select("night_id, user_id").limit(20000),
+    supabase.from("night_attendance").select("night_id, user_id, present").limit(20000),
+  ]);
+  return {
+    declines: (declines ?? []) as { night_id: string; user_id: string }[],
+    marks: (marks ?? []) as { night_id: string; user_id: string; present: boolean }[],
+  };
 }

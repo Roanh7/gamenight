@@ -233,9 +233,35 @@ export async function joinNight(formData: FormData) {
 export async function leaveNight(formData: FormData) {
   const { supabase, user } = await requireUser();
   const id = str(formData, "night_id");
+  // 📅 Afmelding bewaren (voor de aanwezigheid), daarna de aanmelding weghalen zoals altijd
+  await supabase.from("night_declines").upsert({ night_id: id, user_id: user.id }, { onConflict: "night_id,user_id", ignoreDuplicates: true });
   await supabase.from("participants").delete().eq("night_id", id).eq("user_id", user.id);
   revalidatePath(`/agenda/${id}`);
   revalidatePath("/");
+}
+
+/** "Kan niet": afmelden zonder dat je je eerst had aangemeld. */
+export async function declineNight(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const id = str(formData, "night_id");
+  const { error } = await supabase
+    .from("night_declines")
+    .upsert({ night_id: id, user_id: user.id }, { onConflict: "night_id,user_id", ignoreDuplicates: true });
+  if (error) fail(`/agenda/${id}`, "Afmelden lukte niet.");
+  revalidatePath(`/agenda/${id}`);
+  revalidatePath("/agenda");
+}
+
+/** Host/co-host: iemand was er wel (of toch niet) zonder mee te spelen. */
+export async function setAttendance(formData: FormData) {
+  const { supabase } = await requireUser();
+  const id = str(formData, "night_id");
+  const userId = str(formData, "user_id");
+  const present = str(formData, "present") === "1";
+  const { error } = await supabase.rpc("set_attendance", { p_night: id, p_user: userId, p_present: present });
+  if (error) fail(`/agenda/${id}/host`, error.message);
+  revalidatePath(`/agenda/${id}`, "layout");
+  revalidatePath("/agenda");
 }
 
 export async function castVote(formData: FormData) {

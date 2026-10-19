@@ -6,7 +6,7 @@ import { createClient, getMe } from "@/lib/supabase/server";
 import { getGames, getNight, getProfiles, tallyVotes } from "@/lib/data";
 import { formatDateLong, formatTime } from "@/lib/format";
 import { computeRecap } from "@/lib/recap";
-import { castVote, joinNight, leaveNight, pickDate, takeOverHost, toggleDateVote } from "../actions";
+import { castVote, declineNight, joinNight, leaveNight, pickDate, takeOverHost, toggleDateVote } from "../actions";
 import { Avatar } from "@/components/Avatar";
 import { GameIcon } from "@/components/GameIcon";
 import { MatchResults } from "@/components/MatchResults";
@@ -31,7 +31,8 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
     getGames(supabase),
   ]);
   if (!data || !me) notFound();
-  const { night, participants, votes, matches, results, live, liveTeams, teams, dateOptions } = data;
+  const { night, participants, votes, matches, results, live, liveTeams, teams, dateOptions, declined } = data;
+  const iDeclined = !!me && declined.includes(me.user.id);
   const recap = night.status === "finished" ? computeRecap(matches, results) : null;
   const isPoll = night.date_poll && night.status === "planned";
   const isPlanner = isPollPlanner(night, me.user.id);
@@ -265,6 +266,11 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         {pending.length > 0 && (
           <p className="mt-2 text-xs text-muted">⏳ = wacht op bevestiging van de host</p>
         )}
+        {declined.length > 0 && (
+          <p className="mt-3 text-xs font-bold text-muted">
+            🙅 Afgemeld: {declined.map((u) => profiles.byId.get(u)?.username ?? "?").join(", ")}
+          </p>
+        )}
         {canJoin && (
           <form action={mine ? leaveNight : joinNight} className="mt-4">
             <input type="hidden" name="night_id" value={night.id} />
@@ -275,10 +281,21 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                 </SubmitButton>
               )
             ) : (
-              <SubmitButton className="btn btn-green w-full" pendingText="Aanmelden…">
-                ✋ Ik doe mee!
-              </SubmitButton>
+              <>
+                {iDeclined && <p className="mb-2 text-center text-xs font-bold text-muted">🙅 Je hebt je afgemeld. Kun je toch?</p>}
+                <SubmitButton className="btn btn-green w-full" pendingText="Aanmelden…">
+                  ✋ Ik doe mee!
+                </SubmitButton>
+              </>
             )}
+          </form>
+        )}
+        {canJoin && !mine && !iDeclined && !night.is_practice && (
+          <form action={declineNight} className="mt-2">
+            <input type="hidden" name="night_id" value={night.id} />
+            <SubmitButton className="btn btn-secondary btn-sm w-full" pendingText="…">
+              🙅 Ik kan niet
+            </SubmitButton>
           </form>
         )}
       </section>

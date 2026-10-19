@@ -13,6 +13,7 @@ import {
   confirmParticipant,
   removeParticipant,
   setCohost,
+  setAttendance,
   setNightStatus,
   startMatch,
   addGameToNight,
@@ -31,14 +32,15 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const [data, profiles, games, results] = await Promise.all([
+  const [data, profiles, games, results, { data: markData }] = await Promise.all([
     getNight(supabase, id),
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
+    supabase.from("night_attendance").select("user_id, present").eq("night_id", id),
   ]);
   if (!data || !me) notFound();
-  const { night, participants, votes, matches } = data;
+  const { night, participants, votes, matches, results: nightResults } = data;
   if (night.host_id !== me.user.id && night.cohost_id !== me.user.id) {
     redirect(`/agenda/${id}?fout=${encodeURIComponent("Alleen de host kan het host dashboard openen.")}`);
   }
@@ -57,6 +59,12 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   const picked = typeof sp.game === "string" && order.includes(sp.game) ? sp.game : undefined;
   const defaultGame = picked ?? tonight[0]?.id;
   const notTonight = games.list.filter((g) => !order.includes(g.id));
+  // 📅 Aanwezigheid: meegespeeld = automatisch; anders kan de host iemand aanwezig zetten
+  const finishedIds = new Set(matches.filter((m) => m.status === "finished").map((m) => m.id));
+  const playedBy = new Set(nightResults.filter((r) => finishedIds.has(r.match_id)).map((r) => r.user_id));
+  const markedIds = new Set(((markData ?? []) as { user_id: string; present: boolean }[]).filter((m) => m.present).map((m) => m.user_id));
+  const attendanceIds = [...new Set([...participants.map((p) => p.user_id), ...playedBy, ...markedIds])];
+  const others = profiles.list.filter((p) => !attendanceIds.includes(p.id));
   // 🐺 Underdogs van dit seizoen (niet op een oefenavond). De database legt de status vast bij de start.
   const ud = night.is_practice ? new Map<string, UnderdogInfo>() : underdogs(standings(filterSeason(results, currentSeason())));
   const udHere = confirmed
@@ -339,6 +347,65 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
             🗑️ Oefenavond weggooien
           </SubmitButton>
         </form>
+      )}
+
+      {/* Aanwezigheid (alleen tijdens of na de avond) */}
+      {!night.is_practice && (night.status === "live" || night.status === "finished") && (
+        <>
+          <SectionTitle>📅 Aanwezigheid</SectionTitle>
+          <p className="-mt-1 mb-2.5 text-xs font-bold text-muted">
+            Wie een potje speelde, staat vanzelf op aanwezig. Was iemand er wel maar speelde hij niet mee? Zet hem hier op aanwezig.
+            Telt alleen voor de aanwezigheid, niet voor punten of XP.
+          </p>
+          <section className="card divide-y-2 divide-soft overflow-hidden">
+            {attendanceIds.map((uid) => {
+              const pr = profiles.byId.get(uid);
+              if (!pr) return null;
+              const played = playedBy.has(uid);
+              const marked = markedIds.has(uid);
+              return (
+                <div key={uid} className="flex items-center gap-3 px-3 py-2">
+                  <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-black">{pr.username}</p>
+                    <p className="text-xs font-bold text-muted">
+                      {played ? "🎮 Speelde mee · aanwezig" : marked ? "✅ Aanwezig (door host)" : "🔴 Niet gekomen (nog)"}
+                    </p>
+                  </div>
+                  {!played && (
+                    <form action={setAttendance}>
+                      <input type="hidden" name="night_id" value={id} />
+                      <input type="hidden" name="user_id" value={uid} />
+                      <input type="hidden" name="present" value={marked ? "0" : "1"} />
+                      <SubmitButton className={`btn btn-sm px-2 ${marked ? "btn-secondary" : "btn-green"}`} pendingText="…">
+                        <span className="text-xs">{marked ? "Toch niet" : "✅ Was er wel"}</span>
+                      </SubmitButton>
+                    </form>
+                  )}
+                </div>
+              );
+            })}
+            {others.length > 0 && (
+              <form action={setAttendance} className="flex gap-2 bg-cream p-3">
+                <input type="hidden" name="night_id" value={id} />
+                <input type="hidden" name="present" value="1" />
+                <select name="user_id" className="input min-h-[40px] flex-1 py-1.5 text-base" defaultValue="" required aria-label="Iemand anders aanwezig zetten">
+                  <option value="" disabled>
+                    Iemand anders was er ook…
+                  </option>
+                  {others.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.username}
+                    </option>
+                  ))}
+                </select>
+                <SubmitButton className="btn btn-green btn-sm" pendingText="…">
+                  ✅
+                </SubmitButton>
+              </form>
+            )}
+          </section>
+        </>
       )}
 
       {/* Avond bewerken */}

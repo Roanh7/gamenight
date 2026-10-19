@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, MapPin, Newspaper } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getActivity, getComments, getGames, getLeaderboards, getProfiles, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
+import { getActivity, getAttendanceExtras, getComments, getGames, getLeaderboards, getProfiles, getReactions, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
 import { bountyHits, currentBountyTarget, currentSeason, filterSeason, seasonChampions, seasonLabel, standings } from "@/lib/stats";
 import { computeAchievements } from "@/lib/achievements";
 import { mvpCounts } from "@/lib/records";
@@ -23,6 +23,8 @@ import { InstallHint } from "./InstallHint";
 import { TrophySprite } from "./TrophyCabinet";
 import { Banner } from "./Banner";
 import { BannerUnlock } from "./BannerUnlock";
+import { HubAttendance } from "./Attendance";
+import { attendanceModel, type AttStats } from "@/lib/attendance";
 import { ownedBanners, shownBanner, syncBanners, unseenBanners } from "@/lib/bannerSync";
 
 /** Het persoonlijke videogame-dashboard op Home. */
@@ -30,7 +32,7 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
   const supabase = await createClient();
   const since = hoursAgoIso(12);
 
-  const [profiles, games, results, activity, nightsRes, attendance, boards, hostedRes, active] = await Promise.all([
+  const [profiles, games, results, activity, nightsRes, attendance, boards, hostedRes, active, allNights, allParts, attExtras] = await Promise.all([
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
@@ -51,8 +53,19 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
       .eq("status", "finished")
       .eq("is_practice", false),
     getMyActiveNight(),
+    supabase.from("game_nights").select("id, starts_at, status, is_practice"),
+    supabase.from("participants").select("night_id, user_id, status"),
+    getAttendanceExtras(supabase),
   ]);
   const me = profiles.byId.get(userId);
+  // 📅 Aanwezigheid (zelfde berekening als in de Agenda)
+  const attStats = attendanceModel({
+    nights: (allNights.data ?? []) as { id: string; starts_at: string; status: string; is_practice: boolean }[],
+    results,
+    participants: (allParts.data ?? []) as { night_id: string; user_id: string; status: string }[],
+    declines: attExtras.declines,
+    marks: attExtras.marks,
+  }).stats(userId, me?.created_at ?? new Date(0).toISOString());
   const name = me?.username ?? "Player";
 
   // ---------- Speler ----------
@@ -176,7 +189,7 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
         welcome, active, name, me, xp, mySeason: mySeason ?? null, season, streak, msg, target, targetName, userId,
         winRate, form, mvps, nextNight: nextNight ?? null, confirmedProfiles, myStatus, isFixed, voters: tally.voters,
         gameNames, isHost, myPart: myPart ?? null, myVote, next, earnedCount, achTotal: ach.list.length,
-        rival, rivalProfile: rivalProfile ?? null, banner,
+        rival, rivalProfile: rivalProfile ?? null, banner, attStats,
       }}
       news={
         <>
@@ -219,6 +232,7 @@ export type HubData = {
   rival: Rival | null;
   rivalProfile: Profile | null;
   banner: string;
+  attStats?: AttStats;
 };
 
 /** Weergave van de Player Hub (los van het ophalen, zodat we hem met testgegevens kunnen bekijken). */
@@ -226,7 +240,7 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
   const {
     welcome, active, name, me, xp, mySeason, season, streak, msg, target, targetName, userId, winRate, form, mvps,
     nextNight, confirmedProfiles, myStatus, isFixed, voters, gameNames, isHost, myPart, myVote, next, earnedCount,
-    achTotal, rival, rivalProfile, banner,
+    achTotal, rival, rivalProfile, banner, attStats,
   } = d;
   const blocks = 12;
   const filled = Math.min(blocks, Math.floor((xp.into / xp.span) * blocks));
@@ -325,6 +339,8 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
         </div>
         <Stat label="MVP" value={String(mvps)} hint={mvps ? "👑" : undefined} />
       </section>
+
+      {attStats && <HubAttendance s={attStats} />}
 
       {/* ---------- Volgende avond ---------- */}
       <SectionTitle

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Clock, MapPin } from "lucide-react";
+import type { ReactNode } from "react";
 import type { GameNight, Profile } from "@/lib/types";
 import { dayParts, formatTime } from "@/lib/format";
 import { Avatar } from "./Avatar";
@@ -10,11 +11,14 @@ export function NightCard({
   host,
   people,
   myStatus,
+  extra,
 }: {
   night: GameNight;
   host?: Profile;
   people: Profile[];
-  myStatus?: "pending" | "confirmed" | null;
+  myStatus?: "pending" | "confirmed" | "declined" | null;
+  /** Extra regel onderaan (bijv. je eigen resultaat op een afgesloten avond) */
+  extra?: ReactNode;
 }) {
   const { day, month } = dayParts(night.starts_at);
   const live = night.status === "live";
@@ -71,7 +75,9 @@ export function NightCard({
           </div>
           {myStatus === "confirmed" && <span className="chip bg-green-soft">✓ Je bent erbij</span>}
           {myStatus === "pending" && <span className="chip bg-yellow-soft">⏳ Aangemeld</span>}
+          {myStatus === "declined" && <span className="chip bg-soft">🙅 Afgemeld</span>}
         </div>
+        {extra}
       </div>
     </Link>
   );
