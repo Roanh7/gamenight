@@ -10,7 +10,8 @@
  *  - AFGEMELD       zelf afgemeld (pas sinds deze functie bewaard; oude avonden kennen dit niet)
  *  - NIET GEREAGEERD geen aanmelding en geen afmelding
  *
- * Percentages tellen pas vanaf het moment dat iemand lid werd. Dit staat los van XP, records en banners.
+ * Percentages tellen pas vanaf het moment dat iemand lid werd. Avond-XP, de records "Meeste avonden" /
+ * "Trouwste speler" en de banner Midnight Gamer gebruiken dezelfde aanwezigheidsregel (presentAttendance in xp.ts).
  */
 
 /** Minimaal aantal relevante avonden (sinds je lid bent) voor de officiële aanwezigheidsranglijst. */

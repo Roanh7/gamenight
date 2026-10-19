@@ -48,23 +48,45 @@ export function xpInfo(xp: number): XpInfo {
 
 export type Attendance = { user_id: string; host_id: string; night_id: string; starts_at: string };
 
-/** Wie was bij welke afgesloten avond (bevestigd), plus wie die avond hostte. */
+/**
+ * Wie was er ECHT bij welke afgesloten avond, plus wie die avond hostte.
+ * Zelfde regel als My Attendance (src/lib/attendance.ts):
+ *  - de avond telt als hij is afgesloten, geen oefenavond is en er minstens één potje is afgerond;
+ *  - aanwezig = minstens één afgerond potje gespeeld, of door de host/co-host op "aanwezig" gezet.
+ * Alleen aangemeld/bevestigd en niet gekomen telt dus niet (geen XP, records of banner).
+ */
+export function presentAttendance(
+  nights: { id: string; host_id: string; starts_at: string }[],
+  results: { night_id: string | null | undefined; user_id: string }[],
+  marks: { night_id: string; user_id: string; present: boolean }[],
+): Attendance[] {
+  const present = new Map<string, Set<string>>(); // avond → spelers
+  const add = (n: string, u: string) => present.set(n, (present.get(n) ?? new Set()).add(u));
+  for (const r of results) if (r.night_id) add(r.night_id, r.user_id);
+  const relevant = new Set(present.keys()); // avonden met minstens één afgerond potje
+  for (const m of marks) if (m.present && relevant.has(m.night_id)) add(m.night_id, m.user_id);
+  const out: Attendance[] = [];
+  for (const n of nights) {
+    for (const u of present.get(n.id) ?? []) out.push({ user_id: u, host_id: n.host_id, night_id: n.id, starts_at: n.starts_at });
+  }
+  return out;
+}
+
 export async function getAttendance(supabase: DB): Promise<Attendance[]> {
-  const { data } = await supabase
-    .from("participants")
-    .select("user_id, night_id, game_nights!inner(status, host_id, starts_at)")
-    .eq("status", "confirmed")
-    .eq("game_nights.status", "finished")
-    .eq("game_nights.is_practice", false)
-    .limit(10000);
-  return (
-    (data ?? []) as unknown as { user_id: string; night_id: string; game_nights: { host_id: string; starts_at: string } }[]
-  ).map((r) => ({
+  const [{ data: nights }, { data: res }, { data: marks }] = await Promise.all([
+    supabase.from("game_nights").select("id, host_id, starts_at").eq("status", "finished").eq("is_practice", false).limit(5000),
+    supabase.from("match_results").select("user_id, matches!inner(night_id)").limit(20000),
+    supabase.from("night_attendance").select("night_id, user_id, present").eq("present", true).limit(20000),
+  ]);
+  const results = ((res ?? []) as unknown as { user_id: string; matches: { night_id: string } | null }[]).map((r) => ({
     user_id: r.user_id,
-    host_id: r.game_nights.host_id,
-    night_id: r.night_id,
-    starts_at: r.game_nights.starts_at,
+    night_id: r.matches?.night_id,
   }));
+  return presentAttendance(
+    (nights ?? []) as { id: string; host_id: string; starts_at: string }[],
+    results,
+    (marks ?? []) as { night_id: string; user_id: string; present: boolean }[],
+  );
 }
 
 /** XP per speler, uitgerekend uit alle uitslagen en avonden. */

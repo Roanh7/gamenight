@@ -50,7 +50,7 @@ export const BANNERS: BannerDef[] = [
   { id: "snowy-peaks", name: "Snowy Peaks", emoji: "🏔️", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Besneeuwde bergen, dennen en vallende sneeuw." },
   { id: "cherry-blossom", name: "Cherry Blossom", emoji: "🌸", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Een bloesemboom met dwarrelende blaadjes." },
   { id: "deep-sea", name: "Deep Sea", emoji: "🌊", rarity: "common", condition: { kind: "default" }, how: "Heeft iedereen", description: "Onder water tussen vissen, zeewier en bubbels." },
-  { id: "midnight-gamer", name: "Midnight Gamer", emoji: "🌙", rarity: "common", condition: { kind: "nights", n: 5 }, how: "Wees bij 5 afgesloten gamenights", description: "Sterren, een volle maan en nog één potje." },
+  { id: "midnight-gamer", name: "Midnight Gamer", emoji: "🌙", rarity: "common", condition: { kind: "nights", n: 5 }, how: "Wees echt aanwezig bij 5 afgesloten gamenights", description: "Sterren, een volle maan en nog één potje." },
   { id: "inferno", name: "Inferno", emoji: "🔥", rarity: "rare", condition: { kind: "wins", n: 10 }, how: "Win 10 potjes", description: "Een vulkaan vol gloeiende lava." },
   { id: "thunderstorm", name: "Thunderstorm", emoji: "⚡", rarity: "rare", condition: { kind: "streak", n: 3 }, how: "Win 3 potjes op rij", description: "Paarse lucht, donderwolken en bliksem." },
   { id: "graveyard", name: "Graveyard", emoji: "💀", rarity: "rare", condition: { kind: "last", n: 10 }, how: "Eindig 10 keer als laatste", description: "Voor wie vaak onderaan eindigt. Met liefde." },

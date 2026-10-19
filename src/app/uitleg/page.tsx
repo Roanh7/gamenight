@@ -128,7 +128,8 @@ export default async function UitlegPage() {
               maand. Je bent <b>aanwezig</b> als je minstens één potje meespeelde, of als de host je in het host
               dashboard op <b>✅ Was er wel</b> zet. Alleen aangemeld of bevestigd zijn telt níet als aanwezig. Bij elke
               afgelopen avond zie je je eigen resultaat (plek, punten, potjes). Daaronder staan de{" "}
-              <b>🏆 Most loyal players</b> (vanaf 3 avonden). Dit telt niet voor punten of XP.
+              <b>🏆 Most loyal players</b> (vanaf 3 avonden). Dezelfde regel geldt voor je avond-XP, de records
+              &quot;Meeste avonden&quot; en &quot;Trouwste speler&quot; en de banner Midnight Gamer. Competitiepunten verandert dit niet.
             </li>
             <li>
               <b>Iets veranderen?</b> De host, co-host en wie de avond gepland heeft zien op de avond de knop{" "}
@@ -468,10 +469,10 @@ export default async function UitlegPage() {
               <b>+{XP_RULES.third}</b> voor een 3e plek
             </li>
             <li>
-              <b>+{XP_RULES.night} XP</b> per gamenight waar je bij was (zodra de host hem afsluit)
+              <b>+{XP_RULES.night} XP</b> per gamenight waar je echt bij was: minstens één potje gespeeld, of door de host op ✅ Was er wel gezet (zodra de host hem afsluit)
             </li>
             <li>
-              <b>+{XP_RULES.hosted} XP</b> extra als jij de host was
+              <b>+{XP_RULES.hosted} XP</b> extra als jij de host was (en er zelf bij was)
             </li>
             <li>
               <b>+{XP_RULES.bounty} XP</b> premie als je in een potje hoger eindigt dan de koploper van het seizoen

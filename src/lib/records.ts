@@ -108,7 +108,7 @@ export function computeRecords(results: ResultRow[], attendance: Attendance[], x
     { id: "night", emoji: "⭐", title: "Beste avond ooit", hint: "Meeste punten op één gamenight", unit: "punten", ...top(bestNight) },
     { id: "mvp", emoji: "👑", title: "Vaakst MVP", hint: "Alleen bovenaan geëindigd op een avond", unit: "keer", ...top(mvps) },
     { id: "played", emoji: "🎮", title: "Meeste potjes", hint: "Gespeelde potjes, alle games bij elkaar", unit: "potjes", ...top(count(results, (r) => r.user_id)) },
-    { id: "nights", emoji: "📅", title: "Meeste avonden", hint: "Bij zoveel afgesloten gamenights geweest", unit: "avonden", ...top(count(attendance, (a) => a.user_id)) },
+    { id: "nights", emoji: "📅", title: "Meeste avonden", hint: "Bij zoveel afgesloten gamenights echt aanwezig geweest", unit: "avonden", ...top(count(attendance, (a) => a.user_id)) },
     { id: "attend-streak", emoji: "🔁", title: "Trouwste speler", hint: "Zoveel gamenights op rij aanwezig", unit: "op rij", ...top(longestStreak(attendSeq)) },
     { id: "host", emoji: "🏠", title: "Gastheer aller tijden", hint: "Meeste gamenights gehost", unit: "avonden", ...top(hosted) },
     { id: "bounty", emoji: "🎯", title: "Reuzendoder", hint: "Vaakst de koploper van het seizoen verslagen", unit: "keer", ...top(bountyHits(results)) },
