@@ -722,3 +722,27 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 .att-line { display: inline-block; max-width: 100%; line-height: 1.5;
   margin-top: 6px; padding: 2px 6px; border: 2px solid var(--color-line); border-radius: 6px; font-size: 11px; font-weight: 700; }
 .att-line b { font-family: var(--font-pixel); font-size: 8px; font-weight: 400; }
+
+/* ---------- Avatar-frames: lichte animaties (uit bij prefers-reduced-motion) ---------- */
+.frame-anim { transform-box: fill-box; transform-origin: center; }
+.fa-flicker { animation: fa-flicker 0.9s steps(2, jump-none) infinite; }
+.fa-flash { animation: fa-flash 2.6s steps(1, end) infinite; }
+.fa-twinkle { animation: fa-twinkle 2.2s ease-in-out infinite; }
+.fa-shine { animation: fa-twinkle 3s ease-in-out infinite; }
+@keyframes fa-flicker { 0% { opacity: 1; } 100% { opacity: 0.25; } }
+@keyframes fa-flash { 0%, 70% { opacity: 1; } 74% { opacity: 0.2; } 78% { opacity: 1; } 82% { opacity: 0.3; } 86%, 100% { opacity: 1; } }
+@keyframes fa-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+@media (prefers-reduced-motion: reduce) { .frame-anim { animation: none !important; } }
+
+/* ---------- Avatar-editor ---------- */
+.av-opt { display: block; min-width: 0; border: 2px solid transparent; border-radius: 0.75rem; background: var(--color-cream); padding: 0.3rem; text-align: center; }
+.av-opt:hover { border-color: var(--color-line); }
+.av-opt.is-on { border-color: var(--color-line); background: var(--color-yellow); color: var(--color-night); box-shadow: 2px 2px 0 var(--color-line); }
+.av-swatch { height: 2.25rem; width: 2.25rem; border-radius: 0.6rem; border: 2px solid var(--color-line); }
+.av-swatch.is-on { outline: 3px solid var(--color-yellow); outline-offset: 2px; }
+.av-frame { display: block; min-width: 0; border: 2px solid var(--color-line); border-radius: 0.9rem; background: var(--color-paper); padding: 0.6rem 0.4rem; text-align: center; }
+.av-frame:not(:disabled):hover { background: var(--color-cream); }
+.av-frame.is-on { background: var(--color-yellow); color: var(--color-night); box-shadow: 3px 3px 0 var(--color-line); }
+.av-frame.is-on .text-muted { color: var(--color-night); }
+.av-frame.is-locked { border-style: dashed; }
+.av-frame.is-locked .avatar-wrap { filter: saturate(0.6); opacity: 0.8; }

@@ -89,7 +89,7 @@ export function Comments({
               <Avatar
                 name={c.profiles?.username ?? "?"}
                 color={c.profiles?.avatar_color}
-                emoji={c.profiles?.avatar_emoji}
+                emoji={c.profiles?.avatar_emoji} pixel={c.profiles?.avatar_pixel} frame={c.profiles?.avatar_frame}
                 size="xs"
               />
               <div className="min-w-0 flex-1 rounded-xl bg-cream px-2.5 py-1.5">

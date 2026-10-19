@@ -65,7 +65,7 @@ export function NightCard({
         <div className="mt-2 flex items-center justify-between">
           <div className="flex -space-x-1.5">
             {people.slice(0, 6).map((p) => (
-              <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" />
+              <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="xs" />
             ))}
             {people.length > 6 && (
               <span className="flex h-6 w-6 items-center justify-center rounded-md border-2 border-line bg-paper text-[10px] font-black">

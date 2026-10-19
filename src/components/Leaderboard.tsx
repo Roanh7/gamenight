@@ -45,7 +45,7 @@ export function Leaderboard({
               }`}
             >
               <RankBadge rank={r.rank} />
-              <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown={r.rank === 1} />
+              <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" crown={r.rank === 1} />
               <div className="min-w-0 flex-1">
                 <p className="flex min-w-0 items-center gap-1.5 font-black">
                   <span className="truncate">

@@ -9,7 +9,7 @@ import type { GameTeam } from "@/lib/types";
 import { Avatar } from "@/components/Avatar";
 import { ActionBar } from "@/components/ActionBar";
 
-type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
+type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; avatar_pixel?: unknown; avatar_frame?: string | null; team: string | null };
 
 const TEAM_COLORS = ["bg-blue text-white", "bg-red text-white", "bg-purple text-white", "bg-green text-white", "bg-orange text-white", "bg-teal text-white"];
 
@@ -115,7 +115,7 @@ export function TeamResult({
           {players.map((p) => (
             <li key={p.id} className="px-4 py-3">
               <div className="flex items-center gap-2">
-                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
+                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" />
                 <span className="font-black">{p.username}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">

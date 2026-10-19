@@ -63,7 +63,7 @@ export function SpecialistCards({
                     <span className="flex shrink-0 -space-x-2">
                       {top.slice(0, 3).map((s) => {
                         const p = profiles.get(s.user_id);
-                        return p ? <Avatar key={s.user_id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown /> : null;
+                        return p ? <Avatar key={s.user_id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" crown /> : null;
                       })}
                     </span>
                     <span className="min-w-0 truncate text-sm font-black">{names}</span>
@@ -127,7 +127,7 @@ export function SpecialistTable({
             return (
               <li key={s.user_id} className={`flex items-center gap-2 px-3 py-2 ${s.rank === 1 ? "spec-top" : ""} ${s.user_id === meId ? "bg-yellow-soft" : ""}`}>
                 <RankBadge rank={s.rank!} />
-                <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} size="sm" crown={s.rank === 1} />
+                <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} pixel={p?.avatar_pixel} frame={p?.avatar_frame} size="sm" crown={s.rank === 1} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-black">{p?.username ?? "Oud-speler"}</span>
                   {isHolder ? <SpecialistBadge title={title.split(" ").pop() ?? title} className="mt-0.5" /> : <FormDots form={s.form} />}
@@ -154,7 +154,7 @@ export function SpecialistTable({
                   <span className="w-8 text-center text-sm" aria-hidden>
                     🔒
                   </span>
-                  <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} size="xs" />
+                  <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} pixel={p?.avatar_pixel} frame={p?.avatar_frame} size="xs" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-black">{p?.username ?? "Oud-speler"}</span>
                     <span className="block text-[11px] font-bold text-muted">

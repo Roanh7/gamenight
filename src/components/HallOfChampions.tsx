@@ -39,7 +39,7 @@ export function HallOfChampions({
                     <span className="w-7 shrink-0 text-center text-lg leading-none">
                       {MEDAL[e.rank - 1] ?? <span className="pixel text-[10px] text-[#e9dcff]/70">{e.rank}</span>}
                     </span>
-                    {p && <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size={top ? "lg" : "md"} crown />}
+                    {p && <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size={top ? "lg" : "md"} crown />}
                     <div className="min-w-0 flex-1">
                       <p className={`truncate font-black ${top ? "text-lg" : ""}`}>{p?.username ?? "Oud-speler"}</p>
                       <div className="mt-1 flex flex-wrap gap-1">
@@ -89,7 +89,7 @@ export function HallOfChampions({
                     <span className="hall-plaque shrink-0">{seasonLabel(t.season)}</span>
                     {t.champion ? (
                       <>
-                        {p && <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" />}
+                        {p && <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="xs" />}
                         <span className="min-w-0 flex-1 truncate font-black">{p?.username ?? "Oud-speler"}</span>
                         <span aria-hidden>🏆</span>
                       </>

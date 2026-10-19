@@ -81,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </Link>
                 <Link href="/account" className="flex items-center gap-2" aria-label="Mijn account">
                   <span className="hidden text-sm font-extrabold sm:inline">{me.profile.username}</span>
-                  <Avatar name={me.profile.username} color={me.profile.avatar_color} url={me.profile.avatar_url} emoji={me.profile.avatar_emoji} size="sm" />
+                  <Avatar name={me.profile.username} color={me.profile.avatar_color} url={me.profile.avatar_url} emoji={me.profile.avatar_emoji} pixel={me.profile.avatar_pixel} frame={me.profile.avatar_frame} size="sm" />
                 </Link>
               </div>
             </div>

@@ -92,7 +92,7 @@ export function AttendanceBoard({
     return (
       <li key={s.user_id} className={`flex items-center gap-2.5 px-3 py-2 ${s.user_id === meId ? "bg-yellow-soft" : ""}`}>
         {rank ? <RankBadge rank={rank} /> : <span className="w-8 text-center text-sm">🔒</span>}
-        <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} size="sm" crown={rank === 1} />
+        <Avatar name={p?.username ?? "?"} color={p?.avatar_color} url={p?.avatar_url} emoji={p?.avatar_emoji} pixel={p?.avatar_pixel} frame={p?.avatar_frame} size="sm" crown={rank === 1} />
         <Link href={p ? `/spelers/${p.username}` : "#"} className="min-w-0 flex-1">
           <span className="block truncate font-black">{p?.username ?? "Oud-speler"}</span>
           <span className="block text-[11px] font-bold text-muted">

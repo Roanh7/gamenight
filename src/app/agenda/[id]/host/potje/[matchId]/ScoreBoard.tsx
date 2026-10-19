@@ -13,7 +13,7 @@ import { ConflictNotice, SyncStatus } from "@/components/SyncStatus";
 import { useScoreSync } from "@/lib/useScoreSync";
 import { splitKey } from "@/lib/scoreSync";
 
-type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null };
+type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; avatar_pixel?: unknown; avatar_frame?: string | null };
 type Entry = { user_id: string; round: number; points: number | null; version?: number };
 
 export function ScoreBoard({
@@ -216,7 +216,7 @@ export function ScoreBoard({
                     on ? "bg-yellow shadow-[0_4px_0_var(--color-line)]" : "bg-paper"
                   }`}
                 >
-                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="lg" crown={on} />
+                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="lg" crown={on} />
                   <span className="w-full truncate text-center font-black">{p.username}</span>
                 </button>
               );
@@ -263,7 +263,7 @@ export function ScoreBoard({
               return (
                 <li key={p.id} className={`flex items-center gap-3 px-4 py-2.5 ${crown ? "bg-yellow-soft" : ""}`}>
                   <span className="pixel w-5 text-[11px] text-muted">{anyScore ? place : "–"}</span>
-                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown={crown} />
+                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" crown={crown} />
                   <span className="min-w-0 flex-1 truncate font-black">{p.username}</span>
                   <span className="pixel text-base">{formatScore(t)}</span>
                 </li>
@@ -304,7 +304,7 @@ export function ScoreBoard({
             const key = `${p.id}:${round}`;
             return (
               <li key={key} className="flex items-center gap-2">
-                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
+                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" />
                 <span className="min-w-0 flex-1 truncate font-black">{p.username}</span>
                 <button
                   type="button"

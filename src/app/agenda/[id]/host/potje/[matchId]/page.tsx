@@ -52,7 +52,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
     .filter((x) => profiles.byId.has(x.user_id))
     .map((x) => {
       const p = profiles.byId.get(x.user_id)!;
-      return { id: p.id, username: p.username, avatar_color: p.avatar_color, avatar_url: p.avatar_url, avatar_emoji: p.avatar_emoji, team: (x.team as string | null) ?? null };
+      return { id: p.id, username: p.username, avatar_color: p.avatar_color, avatar_url: p.avatar_url, avatar_emoji: p.avatar_emoji, avatar_pixel: p.avatar_pixel, avatar_frame: p.avatar_frame, team: (x.team as string | null) ?? null };
     });
   const teamOf = new Map(players.map((p) => [p.id, p.team]));
   const people = Object.fromEntries(profiles.list.map((p) => [p.id, p.username]));
@@ -162,7 +162,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
               <>
                 <p className="pixel text-[10px]">WINNER!</p>
                 <div className="mt-3 flex justify-center">
-                  <Avatar name={winner.username} color={winner.avatar_color} url={winner.avatar_url} emoji={winner.avatar_emoji} size="xl" crown />
+                  <Avatar name={winner.username} color={winner.avatar_color} url={winner.avatar_url} emoji={winner.avatar_emoji} pixel={winner.avatar_pixel} frame={winner.avatar_frame} size="xl" crown />
                 </div>
                 <p className="mt-3 text-2xl font-black">{winner.username}</p>
                 <p className="text-sm font-bold">
@@ -175,7 +175,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
                 <p className="pixel text-[10px]">{match.winning_team ? `${match.winning_team.toUpperCase()} WINNEN!` : "TEAM WINS!"}</p>
                 <div className="mt-3 flex justify-center -space-x-2">
                   {teamWinners.map((p) => (
-                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="lg" crown />
+                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="lg" crown />
                   ))}
                 </div>
                 <p className="mt-3 text-xl font-black">{teamWinners.map((p) => p.username).join(" & ")}</p>
@@ -201,7 +201,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
               <div className="mb-3 flex items-center gap-3">
                 <div className="flex -space-x-1.5">
                   {players.slice(0, 8).map((p) => (
-                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
+                    <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" />
                   ))}
                 </div>
                 <p className="min-w-0 flex-1 text-xs font-bold opacity-80">

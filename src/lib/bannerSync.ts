@@ -2,6 +2,7 @@ import "server-only";
 import { createClient as createPlainClient } from "@supabase/supabase-js";
 import type { createClient } from "./supabase/server";
 import { bannerDiff, bannerStats, BANNER_BY_ID, DEFAULT_BANNER, FREE_BANNERS, type BannerStats } from "./banners";
+import { frameDiff } from "./frames";
 import type { ResultRow } from "./stats";
 import type { Attendance, XpInfo } from "./xp";
 
@@ -10,7 +11,7 @@ type DB = Awaited<ReturnType<typeof createClient>>;
 export type UnlockRow = { user_id: string; banner_id: string; revoked_at: string | null; seen: boolean; unlocked_at: string };
 
 /**
- * Houdt de vrijgespeelde banners van álle spelers gelijk aan hun geschiedenis.
+ * Houdt de vrijgespeelde banners (en avatar-frames) van álle spelers gelijk aan hun geschiedenis.
  * - Nieuw verdiend → vrijgeven (met nieuwsbericht bij EPIC en hoger, maar één keer).
  * - Na een gecorrigeerde uitslag niet meer verdiend → intrekken (niet tijdens een lopend/heropend potje).
  * Alleen de server kan dit (geheime sleutel). Schrijft alleen als er echt iets verandert.
@@ -22,7 +23,10 @@ export async function syncBanners(
   const statsOf = bannerStats(input.results, input.attendance, (u) => input.xpOf(u).level);
   const { data } = await supabase.from("banner_unlocks").select("user_id, banner_id, revoked_at, seen, unlocked_at").limit(5000);
   let rows = (data ?? []) as UnlockRow[];
-  const { grant, revoke } = bannerDiff(input.userIds, statsOf, rows);
+  const b = bannerDiff(input.userIds, statsOf, rows);
+  const f = frameDiff(input.userIds, statsOf, rows); // avatar-frames: zelfde opslag, nooit een nieuwsbericht
+  const grant = [...b.grant, ...f.grant];
+  const revoke = [...b.revoke, ...f.revoke];
 
   let toRevoke = revoke;
   if (revoke.length) {

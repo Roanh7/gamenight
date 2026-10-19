@@ -134,7 +134,7 @@ export default async function LivePage() {
               return (
                 <li key={uid} className={`flex items-center gap-3 px-3 py-2.5 ${uid === me.user.id ? "bg-yellow-soft" : ""}`}>
                   <span className="pixel w-5 text-[11px] text-muted">{i + 1}</span>
-                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown={i === 0} />
+                  <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" crown={i === 0} />
                   <span className="min-w-0 flex-1 truncate font-black">{p.username}</span>
                   <span className="text-xs font-bold text-muted">{e.wins}× gewonnen</span>
                   <span className="pixel text-sm">{e.points}</span>

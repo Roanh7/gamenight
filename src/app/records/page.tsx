@@ -43,7 +43,7 @@ export default async function RecordsPage() {
       <div className="flex shrink-0 -space-x-1.5">
         {ids.slice(0, 3).map((id) => {
           const p = profiles.byId.get(id);
-          return p ? <Avatar key={id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" /> : null;
+          return p ? <Avatar key={id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" /> : null;
         })}
       </div>
       <span className="truncate text-sm font-black">
@@ -101,7 +101,7 @@ export default async function RecordsPage() {
                   return (
                     <li key={l.user_id} className="flex items-center gap-3 px-3 py-2.5">
                       <span className="w-6 text-center text-lg">{["🥇", "🥈", "🥉"][i] ?? <span className="pixel text-[10px] text-muted">{i + 1}</span>}</span>
-                      {p && <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />}
+                      {p && <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" />}
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-black">{p?.username ?? "?"}</p>
                         <p className="text-xs text-muted">+{l.bonus} bonuspunten</p>

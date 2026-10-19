@@ -20,6 +20,10 @@ export type Profile = {
   created_at: string;
   /** Gekozen profielbanner (zie src/lib/banners.ts) */
   banner?: string | null;
+  /** Pixel-personage of kant-en-klaar personage (zie src/lib/pixelAvatar.ts). Leeg = emoji/letter. */
+  avatar_pixel?: unknown;
+  /** Gekozen avatar-frame (zie src/lib/frames.ts) */
+  avatar_frame?: string | null;
 };
 
 export type GameTeam = { name: string; points: number };

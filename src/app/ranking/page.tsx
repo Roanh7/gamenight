@@ -91,7 +91,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             </>
           ) : champProfile ? (
             <div className="mt-2 flex items-center gap-3">
-              <Avatar name={champProfile.username} color={champProfile.avatar_color} url={champProfile.avatar_url} emoji={champProfile.avatar_emoji} size="md" crown />
+              <Avatar name={champProfile.username} color={champProfile.avatar_color} url={champProfile.avatar_url} emoji={champProfile.avatar_emoji} pixel={champProfile.avatar_pixel} frame={champProfile.avatar_frame} size="md" crown />
               <div>
                 <p className="text-lg font-black leading-tight">{champProfile.username}</p>
                 <p className="text-sm font-bold">Seizoenskampioen {seasonLabel(season)}</p>
@@ -135,7 +135,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             name={targetProfile.username}
             color={targetProfile.avatar_color}
             url={targetProfile.avatar_url}
-            emoji={targetProfile.avatar_emoji}
+            emoji={targetProfile.avatar_emoji} pixel={targetProfile.avatar_pixel} frame={targetProfile.avatar_frame}
             size="md"
           />
           <div className="min-w-0">

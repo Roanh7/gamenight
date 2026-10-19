@@ -19,6 +19,8 @@ import { TrophyCabinet, type CabinetItem } from "./TrophyCabinet";
 import { Banner } from "./Banner";
 import { BannerUnlock } from "./BannerUnlock";
 import { ownedBanners, shownBanner, syncBanners, unseenBanners, type UnlockRow } from "@/lib/bannerSync";
+import { unseenFrames } from "@/lib/frames";
+import { FrameUnlock } from "./FrameUnlock";
 
 export async function PlayerProfile({
   profile,
@@ -124,6 +126,9 @@ export async function PlayerProfile({
       <ResultsRefresh />
       {/* Spelerskaart */}
       {isMe && <BannerUnlock ids={unseenBanners(unlockRows, profile.id)} userId={profile.id} />}
+      {isMe && unseenBanners(unlockRows, profile.id).length === 0 && (
+        <FrameUnlock ids={unseenFrames(unlockRows, profile.id)} userId={profile.id} name={profile.username} color={profile.avatar_color} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} />
+      )}
       <section className="card overflow-hidden">
         <div className="relative h-28 border-b-2 border-line">
           <Banner id={banner} />
@@ -134,7 +139,14 @@ export async function PlayerProfile({
           )}
         </div>
         <div className="-mt-10 px-5 pb-5">
-          <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} size="xl" crown={titles.length > 0} />
+          <div className="flex items-end justify-between gap-2">
+            <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} frame={profile.avatar_frame} size="xl" crown={titles.length > 0} />
+            {isMe && (
+              <Link href="/account/avatar" className="pixel rounded-md border-2 border-line bg-paper px-2 py-1.5 text-[8px] text-ink">
+                🎮 EDIT AVATAR
+              </Link>
+            )}
+          </div>
           <h1 className="mt-2 text-2xl font-black">{profile.username}</h1>
           {profile.bio && <p className="mt-0.5 text-sm">{profile.bio}</p>}
           <p className="mt-1 text-xs font-bold text-muted">Speler sinds {since}</p>
@@ -198,7 +210,7 @@ export async function PlayerProfile({
               return (
                 <li key={h.opponent}>
                   <Link href={`/spelers/${p.username}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-cream">
-                    <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
+                    <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" />
                     <span className="min-w-0 flex-1 truncate font-black">vs {p.username}</span>
                     <span className={`chip ${lead} pixel text-[10px]`}>
                       {h.wins}–{h.losses}

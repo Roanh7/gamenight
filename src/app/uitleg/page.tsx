@@ -414,6 +414,18 @@ export default async function UitlegPage() {
               uitslag later gecorrigeerd en klopt een banner daardoor niet meer, dan gaat hij weer op slot.
             </li>
             <li>
+              <b>🎮 Avatar:</b> via <b>Account → Customize avatar</b> kies je een emoji, bouw je je eigen pixel-personage
+              (gezicht, ogen, haar, baard, outfit, accessoires en achtergrond) of neem je een kant-en-klaar personage, zoals
+              Shadow Ninja of Royal King. Wisselen is altijd veilig: punten, XP, achievements, banners en je oude emoji
+              blijven gewoon bewaard.
+            </li>
+            <li>
+              <b>🖼️ Frames:</b> een rand om je avatar, overal in de app. Classic, Blue Pixel, Green Pixel en No Frame heeft
+              iedereen. Vrij te spelen: Inferno (5 zeges), Thunder (3 op rij), Dragon (30 potjes), Diamond (10 zeges),
+              Royal Champion (seizoenskampioen), Cosmic (level 10), Graveyard (10 keer laatste) en Hall of Fame (3 keer
+              seizoenskampioen). Ook wat je al eerder deed telt mee. Alleen voor de looks.
+            </li>
+            <li>
               <Newspaper size={14} className="mr-1 inline" />
               Op <b>Home</b> staan de 4 nieuwste berichten: wie er won, wie stijgt en wie er nieuw #1 is. Via{" "}
               <b>Alle nieuws →</b> zie je de rest.

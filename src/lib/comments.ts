@@ -5,7 +5,7 @@ export type CommentRow = {
   user_id: string;
   body: string;
   created_at: string;
-  profiles: { username: string; avatar_color: string; avatar_emoji: string | null } | null;
+  profiles: { username: string; avatar_color: string; avatar_emoji: string | null; avatar_pixel?: unknown; avatar_frame?: string | null } | null;
   comment_reactions: { user_id: string; emoji: string; profiles: { username: string } | null }[];
 };
 
@@ -24,4 +24,4 @@ export function countReactions(rows: CommentRow["comment_reactions"], meId: stri
   return out;
 }
 
-export const COMMENT_SELECT = "id, activity_id, user_id, body, created_at, profiles!comments_user_id_fkey(username, avatar_color, avatar_emoji), comment_reactions(user_id, emoji, profiles!comment_reactions_user_id_fkey(username))";
+export const COMMENT_SELECT = "id, activity_id, user_id, body, created_at, profiles!comments_user_id_fkey(username, avatar_color, avatar_emoji, avatar_pixel, avatar_frame), comment_reactions(user_id, emoji, profiles!comment_reactions_user_id_fkey(username))";

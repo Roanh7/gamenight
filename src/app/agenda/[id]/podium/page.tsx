@@ -28,7 +28,7 @@ export default async function PodiumPage(props: PageProps<"/agenda/[id]/podium">
   const recap = computeRecap(matches, results);
   const player = (uid: string): CeremonyPlayer => {
     const p = profiles.byId.get(uid);
-    return { id: uid, name: p?.username ?? "Speler", color: p?.avatar_color ?? null, url: p?.avatar_url ?? null, emoji: p?.avatar_emoji ?? null };
+    return { id: uid, name: p?.username ?? "Speler", color: p?.avatar_color ?? null, url: p?.avatar_url ?? null, emoji: p?.avatar_emoji ?? null, pixel: p?.avatar_pixel ?? null, frame: p?.avatar_frame ?? null };
   };
 
   let ceremonyData: CeremonyData = { nightId: id, title: night.title, closedAt: ceremony?.closed_at ?? null, steps: [], standings: [], stats: [] };

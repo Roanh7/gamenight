@@ -26,6 +26,8 @@ import { BannerUnlock } from "./BannerUnlock";
 import { HubAttendance } from "./Attendance";
 import { attendanceModel, type AttStats } from "@/lib/attendance";
 import { ownedBanners, shownBanner, syncBanners, unseenBanners } from "@/lib/bannerSync";
+import { unseenFrames } from "@/lib/frames";
+import { FrameUnlock } from "./FrameUnlock";
 
 /** Het persoonlijke videogame-dashboard op Home. */
 export async function PlayerHub({ userId, welcome }: { userId: string; welcome: boolean }) {
@@ -194,6 +196,9 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
       news={
         <>
           <BannerUnlock ids={unseenBanners(bannerRows, userId)} userId={userId} />
+          {unseenBanners(bannerRows, userId).length === 0 && me && (
+            <FrameUnlock ids={unseenFrames(bannerRows, userId)} userId={userId} name={me.username} color={me.avatar_color} emoji={me.avatar_emoji} pixel={me.avatar_pixel} />
+          )}
           {news}
         </>
       }
@@ -275,7 +280,7 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
         <div className="relative -mt-10 px-4 pb-3">
           <div className="flex items-start gap-4">
             <span className="hub-avatar shrink-0">
-              <Avatar name={name} color={me?.avatar_color} url={me?.avatar_url} emoji={me?.avatar_emoji} size="xl" />
+              <Avatar name={name} color={me?.avatar_color} url={me?.avatar_url} emoji={me?.avatar_emoji} pixel={me?.avatar_pixel} frame={me?.avatar_frame} size="xl" />
             </span>
             <div className="min-w-0 flex-1 pt-11">
               <h1 className={`break-words font-black leading-tight ${name.length > 12 ? "text-xl" : "text-2xl"}`}>{name}</h1>
@@ -376,7 +381,7 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <div className="flex shrink-0 -space-x-1.5">
               {confirmedProfiles.slice(0, 5).map((pr) => (
-                <Avatar key={pr.id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
+                <Avatar key={pr.id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} pixel={pr.avatar_pixel} frame={pr.avatar_frame} size="xs" />
               ))}
             </div>
             <span className="flex-1 whitespace-nowrap text-xs font-bold text-muted">{confirmedProfiles.length} bevestigd</span>
@@ -451,7 +456,7 @@ export function HubView({ d, news }: { d: HubData; news: ReactNode }) {
           <h2 className="pixel text-[10px]">YOUR RIVAL</h2>
           {rival && rivalProfile ? (
             <div className="mt-2.5 flex items-center gap-3">
-              <Avatar name={rivalProfile.username} color={rivalProfile.avatar_color} url={rivalProfile.avatar_url} emoji={rivalProfile.avatar_emoji} size="md" />
+              <Avatar name={rivalProfile.username} color={rivalProfile.avatar_color} url={rivalProfile.avatar_url} emoji={rivalProfile.avatar_emoji} pixel={rivalProfile.avatar_pixel} frame={rivalProfile.avatar_frame} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-black">{rivalProfile.username}</p>
                 <p className="text-xs font-bold text-muted">

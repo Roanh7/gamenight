@@ -209,7 +209,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                           {o.voters.map((uid) => {
                             const pr = profiles.byId.get(uid);
                             return pr ? (
-                              <Avatar key={uid} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
+                              <Avatar key={uid} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} pixel={pr.avatar_pixel} frame={pr.avatar_frame} size="xs" />
                             ) : null;
                           })}
                         </div>
@@ -246,7 +246,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
             const pr = profiles.byId.get(p.user_id);
             return pr ? (
               <li key={p.user_id} className="chip bg-green-soft py-1 pl-1 text-sm">
-                <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
+                <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} pixel={pr.avatar_pixel} frame={pr.avatar_frame} size="xs" />
                 {pr.username}
                 <Check size={13} strokeWidth={3} />
               </li>
@@ -256,7 +256,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
             const pr = profiles.byId.get(p.user_id);
             return pr ? (
               <li key={p.user_id} className="chip bg-paper py-1 pl-1 text-sm text-muted">
-                <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
+                <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} pixel={pr.avatar_pixel} frame={pr.avatar_frame} size="xs" />
                 {pr.username}
                 <Hourglass size={13} strokeWidth={3} />
               </li>
@@ -381,7 +381,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
                         <div className="mt-0.5 flex -space-x-1">
                           {voters.map((v) => {
                             const pr = profiles.byId.get(v.user_id);
-                            return pr ? <Avatar key={v.user_id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" /> : null;
+                            return pr ? <Avatar key={v.user_id} name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} pixel={pr.avatar_pixel} frame={pr.avatar_frame} size="xs" /> : null;
                           })}
                         </div>
                       </div>

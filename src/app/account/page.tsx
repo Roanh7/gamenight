@@ -7,7 +7,10 @@ import { logout } from "../(auth)/actions";
 import { changePassword, updateProfile } from "./actions";
 import { PlayerProfile } from "@/components/PlayerProfile";
 import { ColorPicker } from "@/components/ColorPicker";
-import { AvatarPicker } from "@/components/AvatarPicker";
+import Link from "next/link";
+import { Avatar } from "@/components/Avatar";
+import { FRAME_BY_ID, safeFrame } from "@/lib/frames";
+import { normalizeStyle, PRESET_BY_ID } from "@/lib/pixelAvatar";
 import { SoundToggle } from "@/components/Celebrate";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PushToggle } from "@/components/PushToggle";
@@ -30,12 +33,17 @@ export default async function AccountPage(props: PageProps<"/account">) {
 
       <SectionTitle>Gegevens</SectionTitle>
       <section className="card mb-3 p-4">
-        <AvatarPicker
-          userId={me.user.id}
-          name={profile.username}
-          color={profile.avatar_color}
-          emoji={profile.avatar_emoji}
-        />
+        <span className="label">Avatar</span>
+        <div className="flex items-center gap-3">
+          <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} frame={profile.avatar_frame} size="lg" />
+          <div className="min-w-0 flex-1 text-sm font-bold">
+            <p className="truncate">{avatarLabel(profile)}</p>
+            <p className="truncate text-xs text-muted">Frame: {FRAME_BY_ID.get(safeFrame(profile.avatar_frame))!.name}</p>
+          </div>
+        </div>
+        <Link href="/account/avatar" className="btn btn-primary btn-sm mt-3 w-full">
+          🎮 CUSTOMIZE AVATAR
+        </Link>
       </section>
       <details className="card overflow-hidden">
         <summary className="cursor-pointer list-none px-4 py-3 font-black">✏️ Profiel bewerken</summary>
@@ -110,4 +118,12 @@ export default async function AccountPage(props: PageProps<"/account">) {
       </form>
     </div>
   );
+}
+
+function avatarLabel(p: Profile) {
+  const st = normalizeStyle(p.avatar_pixel);
+  if (st?.k === "preset") return `Personage: ${PRESET_BY_ID.get(st.id)?.name}`;
+  if (st) return "Eigen pixel-personage";
+  if (p.avatar_emoji) return `Emoji: ${p.avatar_emoji}`;
+  return "Je letter";
 }

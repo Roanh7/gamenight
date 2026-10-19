@@ -13,7 +13,7 @@ import { ConflictNotice, SyncStatus } from "@/components/SyncStatus";
 import { useScoreSync } from "@/lib/useScoreSync";
 import { splitKey } from "@/lib/scoreSync";
 
-type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; team: string | null };
+type Player = { id: string; username: string; avatar_color: string; avatar_url?: string | null; avatar_emoji?: string | null; avatar_pixel?: unknown; avatar_frame?: string | null; team: string | null };
 type Entry = { team: string; round: number; points: number | null; version?: number };
 
 const TEAM_COLORS = ["bg-red text-white", "bg-blue text-white", "bg-green text-white", "bg-yellow text-night", "bg-purple text-white", "bg-orange text-white"];
@@ -168,7 +168,7 @@ export function TeamScoreBoard({
           <ul className="divide-y-2 divide-soft">
             {players.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-2 px-4 py-3">
-                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" />
+                <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="sm" />
                 <span className="min-w-0 flex-1 truncate font-black">{p.username}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {names.map((t) => (
@@ -231,7 +231,7 @@ export function TeamScoreBoard({
                   </span>
                   <span className="flex min-w-0 flex-1 -space-x-1.5">
                     {membersOf(t.team).map((p) => (
-                      <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" />
+                      <Avatar key={p.id} name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="xs" />
                     ))}
                   </span>
                   <span className="pixel text-base">{formatScore(t.total)}</span>

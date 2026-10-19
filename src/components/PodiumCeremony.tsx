@@ -6,7 +6,7 @@ import { Avatar } from "./Avatar";
 import { audioReady, playDrumroll, playFanfare, playReveal, playTick, playUnlock, setSound, soundOn, unlockAudio } from "@/lib/sfx";
 import { markCeremonySeen } from "./CeremonyListener";
 
-export type CeremonyPlayer = { id: string; name: string; color: string | null; url: string | null; emoji: string | null };
+export type CeremonyPlayer = { id: string; name: string; color: string | null; url: string | null; emoji: string | null; pixel?: unknown; frame?: string | null };
 export type CeremonyData = {
   nightId: string;
   title: string;
@@ -156,7 +156,7 @@ export function PodiumCeremony({ data, auto = false }: { data: CeremonyData; aut
                 <div className="relative mt-9 flex flex-wrap justify-center gap-3">
                   {champs.slice(0, 4).map(({ player }) => (
                     <span key={player.id} className="pd-bounce inline-flex">
-                      <Avatar name={player.name} color={player.color} url={player.url} emoji={player.emoji} size="xl" crown />
+                      <Avatar name={player.name} color={player.color} url={player.url} emoji={player.emoji} pixel={player.pixel} frame={player.frame} size="xl" crown />
                     </span>
                   ))}
                 </div>
@@ -227,7 +227,7 @@ function Reveal({ step }: { step: CeremonyData["steps"][number] }) {
       </p>
       <div className="pd-pop relative mt-6 flex flex-wrap justify-center gap-3">
         {step.players.slice(0, 4).map(({ player }) => (
-          <Avatar key={player.id} name={player.name} color={player.color} url={player.url} emoji={player.emoji} size="xl" />
+          <Avatar key={player.id} name={player.name} color={player.color} url={player.url} emoji={player.emoji} pixel={player.pixel} frame={player.frame} size="xl" />
         ))}
       </div>
       <p className="pd-pop relative mt-4 line-clamp-2 w-full break-words text-2xl font-black">
@@ -262,7 +262,7 @@ function Final({ data, run }: { data: CeremonyData; run: number }) {
                   name={player.name}
                   color={player.color}
                   url={player.url}
-                  emoji={player.emoji}
+                  emoji={player.emoji} pixel={player.pixel} frame={player.frame}
                   size={s.place === 1 && s.players.length === 1 ? "xl" : "lg"}
                   crown={s.place === 1}
                 />
@@ -291,7 +291,7 @@ function Final({ data, run }: { data: CeremonyData; run: number }) {
               <span className="w-7 text-center text-sm font-black">
                 {r.place <= 3 ? MEDAL[r.place as 1 | 2 | 3] : <span className="pixel text-[10px] opacity-70">{r.place}</span>}
               </span>
-              <Avatar name={r.player.name} color={r.player.color} url={r.player.url} emoji={r.player.emoji} size="sm" />
+              <Avatar name={r.player.name} color={r.player.color} url={r.player.url} emoji={r.player.emoji} pixel={r.player.pixel} frame={r.player.frame} size="sm" />
               <span className="min-w-0 flex-1 truncate font-black">{r.player.name}</span>
               <span className="shrink-0 text-xs font-bold opacity-70">{r.wins}🏆</span>
               <span className="pixel shrink-0 whitespace-nowrap text-right text-[10px]">{r.points} PT</span>

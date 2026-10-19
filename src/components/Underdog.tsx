@@ -28,7 +28,7 @@ export function UnderdogActive({
       <ul className="divide-y-2 divide-[#2b2640]">
         {players.map(({ profile: p, bonus }) => (
           <li key={p.id} className="flex items-center gap-2.5 px-3 py-2">
-            <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" />
+            <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="xs" />
             <span className="min-w-0 flex-1 truncate text-sm font-black">{p.username}</span>
             <span className="shrink-0 text-xs font-bold text-yellow">+{bonus} competitiepunten bij winst</span>
           </li>

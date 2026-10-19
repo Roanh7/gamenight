@@ -79,3 +79,55 @@ export async function equipBanner(formData: FormData) {
   revalidatePath("/", "layout");
   redirect(`/account/banners?ok=${encodeURIComponent(`${def.emoji} ${def.name} staat nu op je profiel`)}`);
 }
+
+/**
+ * Avatar opslaan (alleen je eigen profiel: de database staat niets anders toe).
+ *  - emoji:  een emoji kiezen → je pixel-avatar gaat uit, de emoji wordt getoond
+ *  - back:   terug naar je bewaarde emoji (of letter), zonder iets kwijt te raken
+ *  - letter: geen emoji en geen pixel-avatar
+ *  - pixel / preset: een pixel-personage. Je emoji blijft bewaard voor later.
+ * Alles wordt eerst gecontroleerd; onbekende onderdelen vallen terug op een veilige standaard.
+ */
+export async function saveAvatar(input: { mode: "emoji" | "back" | "letter" | "pixel" | "preset"; emoji?: string | null; style?: unknown }): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Je bent niet ingelogd." };
+  const { normalizeStyle } = await import("@/lib/pixelAvatar");
+  const { EMOJI_GROUPS } = await import("@/lib/emojis");
+
+  let update: Record<string, unknown>;
+  if (input.mode === "emoji") {
+    const e = typeof input.emoji === "string" ? input.emoji : "";
+    if (!EMOJI_GROUPS.some((g) => g.emojis.includes(e))) return { error: "Die emoji kan niet." };
+    update = { avatar_emoji: e, avatar_url: null, avatar_pixel: null };
+  } else if (input.mode === "back") {
+    update = { avatar_pixel: null };
+  } else if (input.mode === "letter") {
+    update = { avatar_emoji: null, avatar_url: null, avatar_pixel: null };
+  } else {
+    const style = normalizeStyle(input.style);
+    if (!style || style.k !== input.mode) return { error: "Dit personage klopt niet." };
+    update = { avatar_pixel: style, avatar_url: null };
+  }
+  const { error } = await supabase.from("profiles").update(update).eq("id", user.id);
+  if (error) return { error: "Opslaan lukte niet. Probeer het nog eens." };
+  revalidatePath("/", "layout");
+  return {};
+}
+
+/** Een frame dragen. Alleen gratis of vrijgespeelde frames: de database controleert dat zelf ook. */
+export async function equipFrame(frame: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Je bent niet ingelogd." };
+  const { FRAME_BY_ID } = await import("@/lib/frames");
+  if (typeof frame !== "string" || !FRAME_BY_ID.has(frame)) return { error: "Dat frame bestaat niet." };
+  const { error } = await supabase.from("profiles").update({ avatar_frame: frame }).eq("id", user.id);
+  if (error) return { error: "Dit frame heb je nog niet vrijgespeeld." };
+  revalidatePath("/", "layout");
+  return {};
+}

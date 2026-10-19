@@ -163,7 +163,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                     const p = profiles.get(s.user_id);
                     return p ? (
                       <span key={s.user_id} className="inline-flex items-center gap-1 rounded-full bg-cream py-0.5 pl-0.5 pr-2 text-xs font-black">
-                        <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="xs" />
+                        <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} pixel={p.avatar_pixel} frame={p.avatar_frame} size="xs" />
                         {["🥇", "🥈", "🥉"][i]} {s.points}
                       </span>
                     ) : null;
@@ -249,7 +249,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
           <li key={a.id} id={`a-${a.id}`} className="flex scroll-mt-20 items-start gap-3 px-4 py-3">
             <div className="relative">
               {actor ? (
-                <Avatar name={actor.username} color={actor.avatar_color} url={actor.avatar_url} emoji={actor.avatar_emoji} size="sm" />
+                <Avatar name={actor.username} color={actor.avatar_color} url={actor.avatar_url} emoji={actor.avatar_emoji} pixel={actor.avatar_pixel} frame={actor.avatar_frame} size="sm" />
               ) : (
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-line bg-soft">
                   {icon}
