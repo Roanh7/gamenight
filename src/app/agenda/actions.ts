@@ -158,12 +158,13 @@ export async function setNightStatus(formData: FormData) {
       status === "live"
         ? { title: `🎮 ${info.title} is begonnen!`, body: "Kijk live mee met de scores.", url: `/agenda/${id}` }
         : status === "finished"
-          ? { title: `🏁 Recap: ${info.title}`, body: "De avond zit erop. Wie was de MVP?", url: `/agenda/${id}#recap` }
+          ? { title: `🏆 Podium: ${info.title}`, body: "De avond zit erop. Bekijk de Podium Ceremony!", url: `/agenda/${id}/podium` }
           : { title: `❌ ${info.title} gaat niet door`, body: `${info.name} heeft de avond afgelast.`, url: `/agenda/${id}` };
     if (!info.practice) pushLater(info.people, { ...msg, tag: `avond-${id}` }, user.id);
   }
   revalidatePath("/", "layout");
-  if (status === "finished") redirect(`/agenda/${id}?klaar=1#recap`);
+  // Pas na succesvol afsluiten (anders is fail() hierboven al gestopt): de Podium Ceremony
+  if (status === "finished") redirect(`/agenda/${id}/podium?auto=1`);
 }
 
 export async function deleteNight(formData: FormData) {

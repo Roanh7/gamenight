@@ -605,3 +605,64 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 .ud-star { animation: ud-twinkle 1.6s steps(2) infinite; }
 @keyframes ud-twinkle { 50% { opacity: 0.2; } }
 @media (prefers-reduced-motion: reduce) { .ud-in, .ud-howl, .ud-bonus, .ud-star { animation: none; } }
+
+/* Podium Ceremony 🏆 */
+.podium-root { --pd-gold: #ffc527; --pd-silver: #d7dbe6; --pd-bronze: #e08a4f; -webkit-tap-highlight-color: transparent; }
+.pd-star { position: absolute; background: #fff3cc; animation: pd-twinkle 3s steps(2) infinite; }
+@keyframes pd-twinkle { 50% { opacity: 0.15; } }
+.pd-btn {
+  display: flex; min-height: 50px; align-items: center; justify-content: center; gap: 6px; padding: 10px 12px;
+  border: 3px solid #000; border-radius: 12px; background: #2b2640; color: #fff; box-shadow: 0 4px 0 #000;
+  font-family: var(--font-pixel, "Press Start 2P"), monospace; font-size: 10px; line-height: 1.4; text-align: center;
+}
+.pd-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+.pd-btn-gold { background: #ffc527; color: #1e1b2b; }
+.pd-intro { animation: pd-in 0.6s steps(6) both; }
+@keyframes pd-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+.pd-flicker { animation: pd-flicker 1.2s steps(2) 0.6s 2; }
+@keyframes pd-flicker { 50% { opacity: 0.35; } }
+.pd-count { animation: pd-count 0.9s steps(6) both; text-shadow: 6px 6px 0 #000; }
+@keyframes pd-count { 0% { transform: scale(2.4); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 80% { opacity: 1; } 100% { transform: scale(0.8); opacity: 0; } }
+.pd-zoom { animation: pd-in 0.5s steps(5) both; }
+.pd-pop { animation: unlock-pop 0.5s steps(5) 0.25s both; }
+.pd-dots { display: inline-block; animation: pd-flicker 0.6s steps(2) infinite; }
+.pd-champ { animation: pd-in 0.6s steps(6) both; }
+.pd-bounce { animation: pd-bounce 0.8s steps(4) 0.5s 3; }
+@keyframes pd-bounce { 50% { transform: translateY(-14px); } }
+.pd-rays {
+  position: absolute; left: 50%; top: 50%; width: 560px; height: 560px; margin: -300px 0 0 -280px; border-radius: 50%; opacity: 0.32;
+  background: repeating-conic-gradient(from 0deg, var(--ray, #ffc527) 0 10deg, transparent 10deg 30deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, transparent 68%); mask-image: radial-gradient(circle, #000 0, transparent 68%);
+  animation: pd-spin 16s steps(48) infinite;
+}
+.pd-rays.gold { --ray: var(--pd-gold); opacity: 0.45; }
+.pd-rays.silver { --ray: var(--pd-silver); opacity: 0.3; }
+.pd-rays.bronze { --ray: var(--pd-bronze); opacity: 0.2; animation-duration: 24s; }
+@keyframes pd-spin { to { transform: rotate(360deg); } }
+.pd-block {
+  display: flex; align-items: flex-start; justify-content: center; padding-top: 6px;
+  border: 3px solid #000; border-bottom: 0; border-radius: 6px 6px 0 0; color: #1e1b2b; font-size: 16px;
+  box-shadow: inset -6px 0 0 rgba(0, 0, 0, 0.18), inset 6px 0 0 rgba(255, 255, 255, 0.3);
+  transform-origin: bottom; animation: pd-rise 0.7s steps(7) 0.2s both;
+}
+.pd-block.gold { background: var(--pd-gold); }
+.pd-block.silver { background: var(--pd-silver); }
+.pd-block.bronze { background: var(--pd-bronze); }
+@keyframes pd-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.pd-final .pd-rise { animation-delay: 0.1s; }
+.pd-spot {
+  position: absolute; bottom: 30px; left: 50%; width: 140%; height: 230px; transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent, var(--spot) 100%);
+  clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); opacity: 0.22;
+  animation: pd-spotlight 2.4s steps(4) infinite alternate;
+}
+.pd-spot.gold { --spot: var(--pd-gold); opacity: 0.38; height: 280px; }
+.pd-spot.silver { --spot: var(--pd-silver); }
+.pd-spot.bronze { --spot: var(--pd-bronze); }
+@keyframes pd-spotlight { to { opacity: 0.12; } }
+.pd-confetti span { position: absolute; top: -12px; animation-name: pd-fall; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes pd-fall { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(110vh) rotate(540deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .pd-star, .pd-intro, .pd-flicker, .pd-count, .pd-zoom, .pd-pop, .pd-dots, .pd-champ, .pd-bounce, .pd-rays, .pd-block, .pd-spot { animation: none !important; }
+  .pd-confetti { display: none; }
+}

@@ -113,3 +113,53 @@ export function playUnderdog() {
   tone(c, 1046.5, t + 1.32, 0.5, "square", 0.05);
   tone(c, 523.25, t + 1.32, 0.5, "triangle", 0.09);
 }
+
+/** Staat het geluid echt aan (iPhone: pas na een tik)? */
+export function audioReady() {
+  const c = getCtx();
+  return !!c && c.state === "running";
+}
+
+/** Aftellen: korte blip (laatste tel hoger). */
+export function playTick(high = false) {
+  const c = getCtx();
+  if (!c || c.state !== "running") return;
+  const t = c.currentTime + 0.02;
+  tone(c, high ? 880 : 440, t, 0.12, "square", 0.06);
+}
+
+/** Onthulling van een podiumplek: brons = kort, zilver = iets meer. */
+export function playReveal(level: 1 | 2 = 1) {
+  const c = getCtx();
+  if (!c || c.state !== "running") return;
+  const t = c.currentTime + 0.03;
+  const notes = level === 1 ? [392, 493.88, 587.33] : [440, 554.37, 659.25, 880];
+  notes.forEach((f, i) => tone(c, f, t + i * 0.09, 0.12, "square", 0.055));
+  tone(c, notes[notes.length - 1] * 2, t + notes.length * 0.09, 0.3, "triangle", 0.06);
+}
+
+/** Tromgeroffel voor "And the winner is…". */
+export function playDrumroll(seconds = 1.6) {
+  const c = getCtx();
+  if (!c || c.state !== "running") return;
+  const t = c.currentTime + 0.03;
+  const n = Math.floor(seconds / 0.06);
+  for (let i = 0; i < n; i++) tone(c, 110 + (i % 2) * 8, t + i * 0.06, 0.05, "square", 0.02 + (0.04 * i) / n);
+}
+
+/** Overwinningsmelodie voor de kampioen. */
+export function playFanfare() {
+  const c = getCtx();
+  if (!c || c.state !== "running") return;
+  const t = c.currentTime + 0.05;
+  const mel: [number, number, number][] = [
+    [523.25, 0, 0.12], [523.25, 0.14, 0.12], [523.25, 0.28, 0.12], [698.46, 0.42, 0.42],
+    [587.33, 0.9, 0.12], [659.25, 1.04, 0.12], [698.46, 1.18, 0.12], [880, 1.32, 0.7],
+  ];
+  for (const [f, d, len] of mel) {
+    tone(c, f, t + d, len, "square", 0.06);
+    tone(c, f / 2, t + d, len, "triangle", 0.07);
+  }
+  tone(c, 1046.5, t + 2.1, 0.6, "square", 0.05);
+  tone(c, 523.25, t + 2.1, 0.6, "triangle", 0.08);
+}

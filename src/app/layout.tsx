@@ -10,6 +10,7 @@ import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
 import { getMyActiveNight } from "@/lib/live";
 import { ScoreSyncAgent } from "@/components/ScoreSyncAgent";
+import { CeremonyListener } from "@/components/CeremonyListener";
 import { BOOT_SCRIPT, BootScreen } from "@/components/BootScreen";
 import { seasonTheme } from "@/lib/season";
 
@@ -93,6 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
         <main className={`mx-auto max-w-xl px-4 ${me ? "pb-32 pt-5" : "py-8"}`}>{children}</main>
         {me && <BottomNav live={live} liveOff={liveOff} />}
+        {me && <CeremonyListener />}
       </body>
     </html>
   );

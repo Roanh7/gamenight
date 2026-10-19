@@ -1,6 +1,7 @@
 import type { Profile } from "@/lib/types";
 import type { Recap } from "@/lib/recap";
 import { Avatar } from "./Avatar";
+import Link from "next/link";
 import { RecapShare } from "./RecapShare";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -77,7 +78,10 @@ export function NightRecap({
           </p>
         </div>
       </div>
-      <div className="px-3 pb-3">
+      <div className="space-y-2 px-3 pb-3">
+        <Link href={`/agenda/${nightId}/podium`} className="btn btn-yellow w-full">
+          🏆 BEKIJK PODIUM CEREMONY
+        </Link>
         <RecapShare nightId={nightId} title={title} />
       </div>
     </section>
