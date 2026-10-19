@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getProfiles } from "@/lib/data";
+import { getProfiles, getResults } from "@/lib/data";
+import { isHistoricMatch, matchMoment, seasonImpact } from "@/lib/history";
+import { seasonLabel, seasonOf } from "@/lib/stats";
+import { HistoryWarning } from "@/components/HistoryWarning";
 import type { Game, Match, MatchResult, MatchUnderdog } from "@/lib/types";
 import { UnderdogActive } from "@/components/Underdog";
 import { UnderdogVictory } from "@/components/UnderdogVictory";
@@ -27,7 +30,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   const supabase = await createClient();
 
   const [{ data: night }, { data: matchData }, { data: mp }, { data: entries }, profiles, { data: udData }] = await Promise.all([
-    supabase.from("game_nights").select("id, title, host_id, cohost_id").eq("id", id).maybeSingle(),
+    supabase.from("game_nights").select("id, title, host_id, cohost_id, is_practice").eq("id", id).maybeSingle(),
     supabase.from("matches").select("*").eq("id", matchId).maybeSingle(),
     supabase.from("match_players").select("user_id, team").eq("match_id", matchId),
     supabase.from("score_entries").select("user_id, round, points, version").eq("match_id", matchId),
@@ -66,6 +69,10 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   const udWinners = results
     .filter((r) => (r.underdog_bonus ?? 0) > 0)
     .map((r) => ({ name: profiles.byId.get(r.user_id)?.username ?? "Speler", bonus: r.underdog_bonus ?? 0 }));
+  // 📜 Hoort dit potje bij een afgesloten seizoen?
+  const historic = !night.is_practice && isHistoricMatch(match);
+  const histSeason = historic ? seasonOf(matchMoment(match)!) : null;
+  const histImpacts = historic && match.status === "finished" ? seasonImpact(await getResults(supabase), new Set([match.id])) : [];
   const winner = match.winner_id ? profiles.byId.get(match.winner_id) : undefined;
   const teamWinners = results
     .filter((r) => r.is_winner)
@@ -79,6 +86,12 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
 
       {match.status === "live" ? (
         <>
+          {histSeason && (
+            <p className="mb-4 rounded-2xl border-2 border-line bg-yellow-soft px-4 py-3 text-sm font-bold">
+              📜 <b>Correctie van seizoen {seasonLabel(histSeason)}.</b> Na opslaan telt dit potje weer mee voor{" "}
+              {seasonLabel(histSeason)}, niet voor het huidige seizoen. Tot die tijd staan de punten niet op de ranglijst.
+            </p>
+          )}
           <UnderdogActive players={udActive} note="Vastgelegd bij de start van dit potje. De bonus gaat er pas bij als de uitslag is opgeslagen." />
           {gameType === "teams" ? (
             <TeamScoreBoard
@@ -112,13 +125,34 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             gameId={game?.id}
           />
           )}
-          <form action={deleteMatch} className="mt-8">
-            <input type="hidden" name="night_id" value={id} />
-            <input type="hidden" name="match_id" value={match.id} />
-            <SubmitButton className="btn btn-secondary btn-sm w-full text-red" confirm="Dit potje en de ingevoerde scores weggooien?">
-              Potje weggooien
-            </SubmitButton>
-          </form>
+          {histSeason ? (
+            <details className="mt-8">
+              <summary className="btn btn-secondary btn-sm w-full cursor-pointer list-none text-red">Potje weggooien…</summary>
+              <form action={deleteMatch} className="mt-3">
+                <input type="hidden" name="night_id" value={id} />
+                <input type="hidden" name="match_id" value={match.id} />
+                <HistoryWarning
+                  seasons={[histSeason]}
+                  impacts={[]}
+                  profiles={profiles.byId}
+                  word="VERWIJDER"
+                  intro="Als je dit potje weggooit, komt de oude uitslag niet meer terug."
+                >
+                  <SubmitButton className="btn btn-secondary w-full text-red" confirm="Potje definitief weggooien uit een afgesloten seizoen?">
+                    📜 Potje definitief weggooien
+                  </SubmitButton>
+                </HistoryWarning>
+              </form>
+            </details>
+          ) : (
+            <form action={deleteMatch} className="mt-8">
+              <input type="hidden" name="night_id" value={id} />
+              <input type="hidden" name="match_id" value={match.id} />
+              <SubmitButton className="btn btn-secondary btn-sm w-full text-red" confirm="Dit potje en de ingevoerde scores weggooien?">
+                Potje weggooien
+              </SubmitButton>
+            </form>
+          )}
         </>
       ) : (
         <>
@@ -185,13 +219,35 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
             <Link href="/live" className="btn btn-secondary">
               ← Terug naar de avond
             </Link>
-            <form action={reopenMatch}>
-              <input type="hidden" name="night_id" value={id} />
-              <input type="hidden" name="match_id" value={match.id} />
-              <SubmitButton className="btn btn-secondary btn-sm w-full" confirm="Potje heropenen om scores te corrigeren? De punten gaan tijdelijk van de ranglijst af.">
-                Foutje? Heropen dit potje
-              </SubmitButton>
-            </form>
+            {histSeason ? (
+              <details>
+                <summary className="btn btn-secondary btn-sm w-full cursor-pointer list-none">📜 Foutje? Corrigeer dit potje…</summary>
+                <form action={reopenMatch} className="mt-3">
+                  <input type="hidden" name="night_id" value={id} />
+                  <input type="hidden" name="match_id" value={match.id} />
+                  <HistoryWarning
+                    seasons={[histSeason]}
+                    impacts={histImpacts}
+                    profiles={profiles.byId}
+                    word="CORRECTIE"
+                    intro="Om te corrigeren gaat het potje weer open; de punten staan dan tijdelijk niet op de ranglijst. Na opslaan telt het weer mee voor het oorspronkelijke seizoen."
+                    temporary
+                  >
+                    <SubmitButton className="btn btn-secondary w-full" confirm="Potje uit een afgesloten seizoen heropenen voor een correctie?">
+                      📜 Heropen voor correctie
+                    </SubmitButton>
+                  </HistoryWarning>
+                </form>
+              </details>
+            ) : (
+              <form action={reopenMatch}>
+                <input type="hidden" name="night_id" value={id} />
+                <input type="hidden" name="match_id" value={match.id} />
+                <SubmitButton className="btn btn-secondary btn-sm w-full" confirm="Potje heropenen om scores te corrigeren? De punten gaan tijdelijk van de ranglijst af.">
+                  Foutje? Heropen dit potje
+                </SubmitButton>
+              </form>
+            )}
           </div>
         </>
       )}

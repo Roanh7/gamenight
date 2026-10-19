@@ -308,7 +308,14 @@ export default async function UitlegPage() {
             <b>Seizoenen:</b> elk kwartaal begint een nieuw seizoen (jan–mrt, apr–jun, jul–sep, okt–dec). Wie
             aan het eind van een seizoen alleen bovenaan staat, krijgt voor altijd de titel{" "}
             <b>🏆 Seizoenskampioen</b>. Onder <b>Ranking</b> kun je wisselen tussen het huidige seizoen, eerdere
-            seizoenen en <b>All-time</b>.
+            seizoenen en <b>All-time</b>. Bij <b>All-time</b> staat de <b>👑 Hall of Champions</b>: alle
+            seizoenskampioenen, hun aantal titels en de seizoenen.
+          </p>
+          <p className="pt-1">
+            <b>📜 Afgesloten seizoenen zijn beschermd:</b> een potje blijft altijd bij het seizoen waarin het werd
+            gespeeld, ook als het later wordt gecorrigeerd. Iets veranderen aan een afgesloten seizoen (een oud potje
+            corrigeren of weggooien, of een oude avond verwijderen) kan alleen de host, na een waarschuwing die laat
+            zien wat er verandert en een getypte bevestiging. Iedereen ziet zo&apos;n correctie in het nieuws.
           </p>
           <p className="pt-1">
             <b>🎯 Premie op de koploper:</b> wie dit seizoen alleen bovenaan staat, heeft een premie op zijn hoofd.

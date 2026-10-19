@@ -82,6 +82,7 @@ export type Match = {
   winning_team: string | null;
   created_at: string;
   finished_at: string | null;
+  original_finished_at?: string | null; // bij een heropend potje: wanneer het oorspronkelijk werd afgerond
 };
 
 export type MatchResult = {

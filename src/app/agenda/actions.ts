@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { appendToProgram } from "@/lib/program";
 import { dateNl, pushLater } from "@/lib/push";
+import { isHistoricMatch } from "@/lib/history";
 
 function str(fd: FormData, key: string) {
   return String(fd.get(key) ?? "").trim();
@@ -15,6 +16,30 @@ function fail(path: string, message: string): never {
 }
 
 type DBClient = Awaited<ReturnType<typeof createClient>>;
+
+/** Hoort dit potje bij een afgesloten seizoen (en niet bij een oefenavond)? */
+async function historicInfo(supabase: DBClient, matchId: string) {
+  const { data } = await supabase
+    .from("matches")
+    .select("finished_at, original_finished_at, game_nights(is_practice)")
+    .eq("id", matchId)
+    .maybeSingle();
+  if (!data) return null;
+  const practice = !!(data as { game_nights?: { is_practice?: boolean } | null }).game_nights?.is_practice;
+  return { historic: !practice && isHistoricMatch(data) };
+}
+
+/**
+ * 📜 Wijziging in een afgesloten seizoen: alleen met de getypte bevestiging, en dan eerst
+ * tijdelijke toestemming bij de database vragen (die weigert het anders).
+ */
+async function confirmHistory(supabase: DBClient, fd: FormData, word: string, target: string, kind: "night" | "match", back: string) {
+  if (str(fd, "bevestiging").toUpperCase() !== word) {
+    fail(back, `Typ ${word} om deze correctie in een afgesloten seizoen te bevestigen.`);
+  }
+  const { error } = await supabase.rpc("allow_history_change", { p_target: target, p_kind: kind });
+  if (error) fail(back, "Alleen de host of co-host kan een afgesloten seizoen corrigeren.");
+}
 
 /** Gegevens voor een melding: titel, datum, host(s), wie er komen en hoe ik heet. */
 async function pushInfo(supabase: DBClient, nightId: string, me: string) {
@@ -170,8 +195,16 @@ export async function setNightStatus(formData: FormData) {
 export async function deleteNight(formData: FormData) {
   const { supabase } = await requireUser();
   const id = str(formData, "night_id");
+  const back = `/agenda/${id}/bewerken`;
+  const [{ data: night }, { data: matches }] = await Promise.all([
+    supabase.from("game_nights").select("is_practice").eq("id", id).maybeSingle(),
+    supabase.from("matches").select("finished_at, original_finished_at").eq("night_id", id),
+  ]);
+  if (!night?.is_practice && (matches ?? []).some((m) => isHistoricMatch(m))) {
+    await confirmHistory(supabase, formData, "VERWIJDER", id, "night", back);
+  }
   const { error } = await supabase.from("game_nights").delete().eq("id", id);
-  if (error) fail(`/agenda/${id}/bewerken`, "Verwijderen lukte niet.");
+  if (error) fail(back, error.message.includes("HISTORISCH") ? "Bevestig eerst de waarschuwing over het afgesloten seizoen." : "Verwijderen lukte niet.");
   revalidatePath("/", "layout");
   redirect("/agenda");
 }
@@ -412,7 +445,11 @@ export async function deleteMatch(formData: FormData) {
   const { supabase } = await requireUser();
   const id = str(formData, "night_id");
   const matchId = str(formData, "match_id");
-  await supabase.from("matches").delete().eq("id", matchId);
+  const back = `/agenda/${id}/host/potje/${matchId}`;
+  const match = await historicInfo(supabase, matchId);
+  if (match?.historic) await confirmHistory(supabase, formData, "VERWIJDER", matchId, "match", back);
+  const { error } = await supabase.from("matches").delete().eq("id", matchId);
+  if (error) fail(back, "Weggooien lukte niet.");
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}/host`);
 }
@@ -421,8 +458,11 @@ export async function reopenMatch(formData: FormData) {
   const { supabase } = await requireUser();
   const id = str(formData, "night_id");
   const matchId = str(formData, "match_id");
+  const back = `/agenda/${id}/host/potje/${matchId}`;
+  const match = await historicInfo(supabase, matchId);
+  if (match?.historic) await confirmHistory(supabase, formData, "CORRECTIE", matchId, "match", back);
   const { error } = await supabase.rpc("reopen_match", { p_match_id: matchId });
-  if (error) fail(`/agenda/${id}/host/potje/${matchId}`, error.message);
+  if (error) fail(back, error.message.includes("HISTORISCH") ? "Bevestig eerst de waarschuwing over het afgesloten seizoen." : error.message);
   revalidatePath("/", "layout");
   redirect(`/agenda/${id}/host/potje/${matchId}`);
 }

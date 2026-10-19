@@ -1,5 +1,6 @@
 -- Speelt een complete gamenight door met 3 nep-spelers en controleert
 -- aanmelden, rechten, stemmen, scores, winnaar/gelijkspel en ranglijsten.
+-- (Punten per potje worden zonder een eventuele 🐺 underdog-bonus vergeleken: die hangt af van de seizoensstand.)
 -- Eindigt ALTIJD met een exception, zodat alles wordt teruggedraaid.
 -- Het testrapport staat in de foutmelding.
 do $test$
@@ -107,7 +108,7 @@ begin
   reset role;
   select count(*) into cnt from public.participants where night_id = n1 and status = 'confirmed';
   rep := rep || case when cnt = 3 then 'OK' else 'FAIL' end || E' 9 host bevestigt en voegt toe\n';
-  select string_agg(p.username || ':' || r.total || '/#' || r.placement || '/' || r.league_points || 'pt' || case when r.is_winner then '/WIN' else '' end, ', ' order by r.placement, p.username)
+  select string_agg(p.username || ':' || r.total || '/#' || r.placement || '/' || (r.league_points - r.underdog_bonus) || 'pt' || case when r.is_winner then '/WIN' else '' end, ', ' order by r.placement, p.username)
     into t from public.match_results r join public.profiles p on p.id = r.user_id where r.match_id = m1;
   rep := rep || case when t = 'ZzTestA:10.5/#1/10pt/WIN, ZzTestB:7/#2/6pt, ZzTestC:7/#2/6pt' then 'OK' else 'FAIL' end || ' 10 potje 1 uitslag: ' || t || E'\n';
 
@@ -251,7 +252,7 @@ begin
   end;
   perform public.finalize_team_match(m2, 'Fascisten', jsonb_build_object(ua::text, 'Fascisten', ub::text, 'Liberalen', uc::text, 'Liberalen'));
   reset role;
-  select string_agg(p.username || ':' || mp.team || '/' || r.league_points || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
+  select string_agg(p.username || ':' || mp.team || '/' || (r.league_points - r.underdog_bonus) || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
     into t from public.match_results r join public.profiles p on p.id = r.user_id
     join public.match_players mp on mp.match_id = r.match_id and mp.user_id = r.user_id where r.match_id = m2;
   select t || ' | winnaar=' || coalesce((select username from public.profiles where id = winner_id), 'geen') || ' | team=' || winning_team
@@ -266,7 +267,7 @@ begin
   insert into public.match_players (match_id, user_id) values (m1, ua), (m1, ub), (m1, uc);
   perform public.finalize_team_match(m1, 'Liberalen', jsonb_build_object(ua::text, 'Fascisten', ub::text, 'Liberalen', uc::text, 'Liberalen'));
   reset role;
-  select string_agg(p.username || '/' || r.league_points || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
+  select string_agg(p.username || '/' || (r.league_points - r.underdog_bonus) || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
     into t from public.match_results r join public.profiles p on p.id = r.user_id where r.match_id = m1;
   rep := rep || case when t = 'ZzTestA/2, ZzTestB/10/WIN, ZzTestC/10/WIN' then 'OK' else 'FAIL' end || ' 24c liberalen winnen samen: ' || t || E'\n';
   select payload ->> 'team_name' into t from public.activity where match_id = m1 and type = 'match_finished';
@@ -328,7 +329,7 @@ begin
   insert into public.team_scores (match_id, team, round, points) values (m1, 'Rood', 1, 5), (m1, 'Blauw', 1, 5);
   perform public.finalize_teams_match(m1);
   reset role;
-  select string_agg(p.username || ':' || r.total || '/#' || r.placement || '/' || r.league_points || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
+  select string_agg(p.username || ':' || r.total || '/#' || r.placement || '/' || (r.league_points - r.underdog_bonus) || case when r.is_winner then '/WIN' else '' end, ', ' order by p.username)
     into t from public.match_results r join public.profiles p on p.id = r.user_id where r.match_id = m2;
   select t || ' | team=' || coalesce(winning_team, '-') || ' draw=' || is_draw::text into t from public.matches where id = m2;
   rep := rep || case when t = 'ZzTestA:7/#1/10/WIN, ZzTestB:7/#1/10/WIN, ZzTestC:6/#2/6 | team=Rood draw=false' then 'OK' else 'FAIL' end

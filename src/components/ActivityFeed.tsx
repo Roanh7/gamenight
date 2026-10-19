@@ -8,6 +8,7 @@ import { Comments } from "./Comments";
 import type { CommentRow } from "@/lib/comments";
 import { bannerDef, type Rarity } from "@/lib/banners";
 import { Banner } from "./Banner";
+import { seasonLabel } from "@/lib/stats";
 
 type Props = {
   items: Activity[];
@@ -168,6 +169,39 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                     ) : null;
                   })}
                 </span>
+              </>
+            );
+            break;
+          }
+          case "history_correction": {
+            const action = String(a.payload?.action ?? "");
+            const seasons = ((a.payload?.seasons as string[] | undefined) ?? [String(a.payload?.season ?? "")])
+              .filter(Boolean)
+              .map(seasonLabel)
+              .join(", ");
+            const title = String(a.payload?.title ?? "een avond");
+            icon = <span className="text-sm leading-none">📜</span>;
+            tone = "bg-yellow-soft";
+            text = (
+              <>
+                <b className="pixel text-[9px]">📜 SEIZOENSCORRECTIE {seasons}</b>
+                <br />
+                {action === "night_removed" ? (
+                  <>
+                    {name} heeft de avond <b className="font-black">{title}</b> verwijderd ({String(a.payload?.matches ?? 0)}{" "}
+                    {Number(a.payload?.matches) === 1 ? "potje" : "potjes"}). De eindstand van {seasons} is bijgewerkt.
+                  </>
+                ) : action === "match_removed" ? (
+                  <>
+                    {name} heeft een potje {gameLink} van <b className="font-black">{title}</b> weggegooid. De eindstand van {seasons} is
+                    bijgewerkt.
+                  </>
+                ) : (
+                  <>
+                    {name} corrigeert een potje {gameLink} van <b className="font-black">{title}</b>. Na opslaan telt het weer mee voor{" "}
+                    {seasons}.
+                  </>
+                )}
               </>
             );
             break;

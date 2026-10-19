@@ -666,3 +666,22 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
   .pd-star, .pd-intro, .pd-flicker, .pd-count, .pd-zoom, .pd-pop, .pd-dots, .pd-champ, .pd-bounce, .pd-rays, .pd-block, .pd-spot { animation: none !important; }
   .pd-confetti { display: none; }
 }
+
+/* Hall of Champions 👑 */
+.hall { border: 3px solid var(--color-line); border-radius: 6px; padding: 10px; background: #3b2f63;
+  box-shadow: 0 4px 0 0 var(--color-line), inset 0 3px 0 0 #5b4a8a, inset 0 -3px 0 0 #271e45; }
+.hall-sign { margin: -24px auto 10px; width: fit-content; padding: 6px 12px; font-size: 10px;
+  background: #ffd23f; color: #16141f; border: 3px solid var(--color-line); border-radius: 4px; box-shadow: 0 3px 0 0 var(--color-line); }
+.hall-inside { position: relative; overflow: hidden; padding: 12px 10px; color: #fff;
+  border: 3px solid #1b1430; border-radius: 3px; background: #16112b;
+  background-image: linear-gradient(to bottom, rgba(255, 210, 63, 0.10), transparent 120px); }
+.hall-stars { position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background-image: radial-gradient(#fff3cc 1px, transparent 1.5px), radial-gradient(#fff3cc 1px, transparent 1.5px);
+  background-size: 46px 46px, 71px 71px; background-position: 0 0, 23px 31px; }
+.hall-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06); border: 2px solid #2c2350; }
+.hall-row.is-top { background: linear-gradient(90deg, rgba(255, 210, 63, 0.22), rgba(255, 210, 63, 0.05)); border-color: #ffd23f;
+  box-shadow: 0 0 0 2px #1b1430, 0 0 16px rgba(255, 210, 63, 0.25); }
+.hall-row svg { image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)); }
+.hall-plaque { display: inline-block; padding: 1px 5px; border-radius: 2px; font-size: 10px; font-weight: 900; white-space: nowrap;
+  background: #e8c48a; color: #3a2416; border: 1px solid #4a2a14; }

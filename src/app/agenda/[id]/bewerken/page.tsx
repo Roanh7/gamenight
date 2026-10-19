@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getGames, getProfiles } from "@/lib/data";
+import { getGames, getProfiles, getResults } from "@/lib/data";
+import { historicSeasons, seasonImpact } from "@/lib/history";
+import { HistoryWarning } from "@/components/HistoryWarning";
 import type { GameNight } from "@/lib/types";
 import { deleteNight, updateNight } from "../../actions";
 import { DateTimeField } from "@/components/DateTimeField";
@@ -17,10 +19,11 @@ export default async function EditNightPage(props: PageProps<"/agenda/[id]/bewer
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const [{ data }, profiles, games] = await Promise.all([
+  const [{ data }, profiles, games, { data: matchRows }] = await Promise.all([
     supabase.from("game_nights").select("*").eq("id", id).maybeSingle(),
     getProfiles(supabase),
     getGames(supabase),
+    supabase.from("matches").select("id, finished_at, original_finished_at").eq("night_id", id),
   ]);
   if (!data || !me) notFound();
   const night = data as GameNight;
@@ -30,6 +33,10 @@ export default async function EditNightPage(props: PageProps<"/agenda/[id]/bewer
     redirect(`/agenda/${id}?fout=${encodeURIComponent("Alleen de host, co-host of planner kan deze avond aanpassen.")}`);
   }
   const canDelete = night.host_id === uid || night.created_by === uid;
+  // 📜 Hoort deze avond (deels) bij een afgesloten seizoen? Dan eerst laten zien wat er verandert.
+  const nightMatches = (matchRows ?? []) as { id: string; finished_at: string | null; original_finished_at: string | null }[];
+  const pastSeasons = night.is_practice ? [] : historicSeasons(nightMatches);
+  const impacts = pastSeasons.length && canDelete ? seasonImpact(await getResults(supabase), new Set(nightMatches.map((m) => m.id))) : [];
 
   return (
     <div>
@@ -107,7 +114,27 @@ export default async function EditNightPage(props: PageProps<"/agenda/[id]/bewer
         <SubmitButton pendingText="Opslaan…">💾 Wijzigingen opslaan</SubmitButton>
       </form>
 
-      {canDelete && (
+      {canDelete && pastSeasons.length > 0 && (
+        <form action={deleteNight} className="mt-6">
+          <input type="hidden" name="night_id" value={id} />
+          <HistoryWarning
+            seasons={pastSeasons}
+            impacts={impacts}
+            profiles={profiles.byId}
+            word="VERWIJDER"
+            intro="Als je deze avond verwijdert, verdwijnen alle potjes en punten ervan."
+          >
+            <SubmitButton
+              className="btn btn-secondary w-full text-red"
+              confirm="Weet je het zeker? Dit verandert de eindstand van een afgesloten seizoen."
+              pendingText="Verwijderen…"
+            >
+              📜 Avond uit afgesloten seizoen verwijderen
+            </SubmitButton>
+          </HistoryWarning>
+        </form>
+      )}
+      {canDelete && pastSeasons.length === 0 && (
         <form action={deleteNight} className="mt-6">
           <input type="hidden" name="night_id" value={id} />
           <SubmitButton

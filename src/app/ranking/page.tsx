@@ -22,6 +22,8 @@ import { SeasonTabs, parseSeason } from "@/components/SeasonTabs";
 import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
 import { XP_RULES } from "@/lib/xp";
 import { UNDERDOG_BONUS, underdogs } from "@/lib/underdog";
+import { hallOfChampions } from "@/lib/history";
+import { HallOfChampions } from "@/components/HallOfChampions";
 
 export const metadata: Metadata = { title: "Ranking" };
 
@@ -46,6 +48,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const champProfile = champ ? profiles.byId.get(champ) : undefined;
   const target = isCurrent ? currentBountyTarget(results) : null;
   const targetProfile = target ? profiles.byId.get(target) : undefined;
+  const hall = hallOfChampions(results);
   const ud = isCurrent ? new Set(underdogs(overall).keys()) : new Set<string>();
 
   // Meest gespeelde games eerst
@@ -92,6 +95,32 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             <p className="mt-1 font-black">Gedeelde eerste plek: geen kampioen dit seizoen 🤝</p>
           )}
         </section>
+      )}
+
+      {season === "all" ? (
+        <HallOfChampions entries={hall.entries} timeline={hall.timeline} profiles={profiles.byId} currentSeason={currentSeason()} />
+      ) : (
+        <Link
+          href="/ranking?seizoen=all#hall-of-champions"
+          scroll={false}
+          className="card mt-3 flex items-center gap-3 bg-[#3b2f63] px-3 py-2.5 text-white"
+        >
+          <span className="text-xl" aria-hidden>
+            👑
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="pixel block text-[9px] text-yellow">HALL OF CHAMPIONS</span>
+            <span className="block truncate text-xs font-bold opacity-85">
+              {hall.entries.length
+                ? `${hall.entries.reduce((n, e) => n + e.titles, 0)} titels · meeste: ${hall.entries
+                    .filter((e) => e.rank === 1)
+                    .map((e) => profiles.byId.get(e.user_id)?.username ?? "?")
+                    .join(" & ")}`
+                : "Nog geen kampioenen. Wie wordt de eerste?"}
+            </span>
+          </span>
+          <ChevronRight size={18} />
+        </Link>
       )}
 
       {targetProfile && (
