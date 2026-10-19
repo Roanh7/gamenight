@@ -24,6 +24,9 @@ import { XP_RULES } from "@/lib/xp";
 import { UNDERDOG_BONUS, underdogs } from "@/lib/underdog";
 import { hallOfChampions } from "@/lib/history";
 import { HallOfChampions } from "@/components/HallOfChampions";
+import { SPECIALIST_MIN_PLAYED, specialistBoards } from "@/lib/specialists";
+import { SpecialistCards } from "@/components/Specialists";
+import { ResultsRefresh } from "@/components/ResultsRefresh";
 
 export const metadata: Metadata = { title: "Ranking" };
 
@@ -49,6 +52,8 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const target = isCurrent ? currentBountyTarget(results) : null;
   const targetProfile = target ? profiles.byId.get(target) : undefined;
   const hall = hallOfChampions(results);
+  const specBoards = specialistBoards(rows);
+  const specAllTime = season === "all" ? specBoards : specialistBoards(results);
   const ud = isCurrent ? new Set(underdogs(overall).keys()) : new Set<string>();
 
   // Meest gespeelde games eerst
@@ -70,6 +75,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
         }
       />
 
+      <ResultsRefresh />
       <SeasonTabs seasons={seasons} active={season} basePath="/ranking" />
 
       {/* Seizoensbanner */}
@@ -166,6 +172,17 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             Hoe werkt dat?
           </Link>
         </p>
+      )}
+
+      {sortedGames.length > 0 && (
+        <>
+          <div id="specialisten" className="scroll-mt-20" />
+          <SectionTitle>🎮 Game Specialists</SectionTitle>
+          <p className="-mt-1 mb-2.5 text-xs font-bold text-muted">
+            Wie wint het vaakst per game? Officieel vanaf {SPECIALIST_MIN_PLAYED} potjes; de beste van all-time draagt de titel.
+          </p>
+          <SpecialistCards games={sortedGames} boards={specBoards} allTime={specAllTime} profiles={profiles.byId} season={season} />
+        </>
       )}
 
       <SectionTitle>Per game</SectionTitle>

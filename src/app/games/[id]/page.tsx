@@ -13,6 +13,9 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { Avatar } from "@/components/Avatar";
 import { Flash } from "@/components/Flash";
 import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { SPECIALIST_MIN_PLAYED, specialistBoard, specialistTitle, titleHolders } from "@/lib/specialists";
+import { SpecialistBadge, SpecialistTable } from "@/components/Specialists";
+import { ResultsRefresh } from "@/components/ResultsRefresh";
 
 export const metadata: Metadata = { title: "Game" };
 
@@ -40,6 +43,11 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
   const seasons = seasonsWithData(gameResults);
   const season = parseSeason(sp.seizoen, seasons);
   const rows = standings(filterSeason(gameResults, season));
+  // 🎮 Specialist ranking (winpercentage, min. potjes); de titel gaat naar de nummer 1 van all-time
+  const specBoard = specialistBoard(filterSeason(gameResults, season));
+  const specAll = season === "all" ? specBoard : specialistBoard(gameResults);
+  const holders = titleHolders(specAll).map((s) => s.user_id);
+  const specTitle = specialistTitle(game);
   const matches = (matchData ?? []) as Match[];
   const creator = game.created_by ? profiles.byId.get(game.created_by) : undefined;
 
@@ -63,6 +71,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
         }
       />
       <Flash sp={sp} />
+      <ResultsRefresh />
 
       <section className="card flex items-center gap-4 p-4">
         <GameIcon icon={game.icon} color={game.color} size="lg" />
@@ -118,6 +127,24 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
           text="Na het eerste potje verschijnt hier de ranglijst."
         />
       )}
+
+      <div id="specialisten" className="scroll-mt-20" />
+      <SectionTitle>🎮 Specialist ranking</SectionTitle>
+      <div className="-mt-1 mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-bold text-muted">
+        {holders.length > 0 ? (
+          <>
+            <SpecialistBadge title={specTitle} />
+            <span>{holders.map((u) => profiles.byId.get(u)?.username ?? "?").join(" & ")}</span>
+          </>
+        ) : (
+          <span>👑 {specTitle}: nog niemand</span>
+        )}
+        <span className="w-full">
+          Hoogste winpercentage{season === "all" ? " aller tijden" : ` in ${seasonLabel(season)}`}, dan meeste zeges. Officieel vanaf{" "}
+          {SPECIALIST_MIN_PLAYED} potjes.
+        </span>
+      </div>
+      <SpecialistTable board={specBoard} holders={holders} title={specTitle} profiles={profiles.byId} meId={me?.user.id} />
 
       <SectionTitle>
         <span className="inline-flex items-center gap-1.5">

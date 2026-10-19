@@ -685,3 +685,29 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 .hall-row svg { image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5)); }
 .hall-plaque { display: inline-block; padding: 1px 5px; border-radius: 2px; font-size: 10px; font-weight: 900; white-space: nowrap;
   background: #e8c48a; color: #3a2416; border: 1px solid #4a2a14; }
+
+/* Game Specialists 🎮 */
+:root { --spec-gold: #9a6f00; }
+:root[data-theme="dark"] { --spec-gold: #ffc527; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --spec-gold: #ffc527; } }
+.spec-gold { color: var(--spec-gold); }
+.spec-card {
+  position: relative; display: block; height: 100%; padding: 10px; overflow: hidden;
+  border: 2px solid var(--color-line); border-radius: 12px; background: var(--color-paper);
+  box-shadow: 0 4px 0 var(--color-line); transition: transform 80ms ease, box-shadow 80ms ease;
+}
+.spec-card:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--color-line); }
+.spec-card.has-master { box-shadow: 0 4px 0 var(--color-line), inset 0 0 0 2px #ffc527; }
+.spec-card.has-master::after {
+  content: "✦"; position: absolute; right: 7px; top: 5px; font-size: 10px; color: #ffc527;
+  animation: glint 3.2s steps(1) infinite;
+}
+.spec-badge {
+  display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;
+  padding: 2px 5px; border: 2px solid var(--color-line); border-radius: 4px; font-size: 7px; line-height: 1.3;
+  background: #ffc527; color: #16141f; box-shadow: inset 0 -2px 0 #d18a0c;
+}
+.spec-dot { display: inline-block; width: 7px; height: 7px; border: 1.5px solid var(--color-line); background: var(--color-soft); }
+.spec-dot.win { background: #ffc527; }
+.spec-top { background: linear-gradient(90deg, rgba(255, 197, 39, 0.22), transparent 70%); }
+@media (prefers-reduced-motion: reduce) { .spec-card.has-master::after { animation: none; } }

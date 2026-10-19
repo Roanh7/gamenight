@@ -5,13 +5,15 @@ import { getGames, getLeaderboards, getOverall, getProfiles, getResults } from "
 import { allHeadToHeads, bountyHits, currentSeason, filterSeason, headToHead, seasonChampions, seasonLabel, standings, type HeadToHead } from "@/lib/stats";
 import { underdogs, underdogTally } from "@/lib/underdog";
 import { UnderdogChip } from "./Underdog";
+import { SPECIALIST_MIN_PLAYED, bestGames, formatRate, specialistBoards, titlesOf } from "@/lib/specialists";
+import { FormDots } from "./Specialists";
 import { computeAchievements } from "@/lib/achievements";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { XpBar } from "./XpBar";
 import type { Game, Profile } from "@/lib/types";
 import { Avatar } from "./Avatar";
 import { GameIcon } from "./GameIcon";
-import { EmptyState, RankBadge, SectionTitle } from "./ui";
+import { EmptyState, SectionTitle } from "./ui";
 import { TrophyCabinet, type CabinetItem } from "./TrophyCabinet";
 import { Banner } from "./Banner";
 import { BannerUnlock } from "./BannerUnlock";
@@ -93,12 +95,21 @@ export async function PlayerProfile({
     earned: a.earned,
     progress: a.progress,
   }));
-  const titles = [...seasonTitles.map((t) => `🏆 ${t}`), ...ach.titles.map((t) => `👑 ${t}`)];
+  // 🎮 Game Specialists (all-time): titels, beste game en stats per game
+  const specBoards = specialistBoards(allResults);
+  const specTitles = titlesOf(profile.id, specBoards, games.byId);
+  const best = bestGames(profile.id, specBoards);
+  const myGameStats = [...specBoards.entries()]
+    .map(([game_id, b]) => ({
+      game_id,
+      row: b.ranked.find((x) => x.user_id === profile.id) ?? b.unranked.find((x) => x.user_id === profile.id),
+      board: boards.find((x) => x.user_id === profile.id && x.game_id === game_id),
+    }))
+    .filter((x): x is typeof x & { row: NonNullable<typeof x.row> } => !!x.row)
+    .sort((a, b) => (a.row.rank ?? 999) - (b.row.rank ?? 999) || b.row.winrate - a.row.winrate || b.row.played - a.row.played);
+  const titles = [...seasonTitles.map((t) => `🏆 ${t}`), ...ach.titles.map((t) => `👑 ${t}`), ...specTitles.map((t) => `🎮 ${t.title}`)];
   const versus = !isMe && viewerId ? headToHead(allResults, viewerId, profile.id) : null;
   const rivals = isMe ? allHeadToHeads(allResults, profile.id) : [];
-  const myBoards = boards
-    .filter((b) => b.user_id === profile.id)
-    .sort((a, b) => a.rank - b.rank || b.points - a.points);
   const myOverall = overall.find((o) => o.user_id === profile.id);
   const udNow = underdogs(standings(filterSeason(allResults, currentSeason()))).get(profile.id);
   const udStats = underdogTally(allResults).find((t) => t.user_id === profile.id);
@@ -200,24 +211,40 @@ export async function PlayerProfile({
         </>
       )}
 
-      {/* Rankings per game */}
-      <SectionTitle>{isMe ? "Mijn rankings" : "Rankings"}</SectionTitle>
-      {myBoards.length ? (
+      {/* Statistieken per game (punten-ranking + specialist) */}
+      <SectionTitle>{isMe ? "🎮 My game stats" : "🎮 Game stats"}</SectionTitle>
+      {best.length > 0 && (
+        <p className="mb-2 text-sm font-black">
+          🔥 BEST GAME:{" "}
+          {best
+            .map((b) => games.byId.get(b.game_id)?.name ?? "?")
+            .join(" & ")
+            .toUpperCase()}{" "}
+          <span className="text-xs font-bold text-muted">({formatRate(best[0].row.winrate)}% gewonnen)</span>
+        </p>
+      )}
+      {myGameStats.length ? (
         <ul className="card divide-y-2 divide-soft overflow-hidden">
-          {myBoards.map((b) => {
-            const g = games.byId.get(b.game_id);
+          {myGameStats.map(({ game_id, row, board }) => {
+            const g = games.byId.get(game_id);
             if (!g) return null;
             return (
-              <li key={b.game_id}>
-                <Link href={`/games/${g.id}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-cream">
+              <li key={game_id}>
+                <Link href={`/games/${g.id}?seizoen=all#specialisten`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-cream">
                   <GameIcon icon={g.icon} color={g.color} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-black">{g.name}</p>
                     <p className="text-xs font-bold text-muted">
-                      {b.wins} {b.wins === 1 ? "zege" : "zeges"} · {b.played} gespeeld · {b.points} pt
+                      {row.wins}/{row.played} gewonnen · {board ? `${board.points} pt · #${board.rank} in punten` : `${row.points} pt`}
+                    </p>
+                    <FormDots form={row.form} />
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="pixel text-[11px]">{formatRate(row.winrate)}%</p>
+                    <p className="mt-1 text-[10px] font-black text-muted">
+                      {row.rank ? `🎯 #${row.rank}` : `🔒 ${row.played}/${SPECIALIST_MIN_PLAYED}`}
                     </p>
                   </div>
-                  <RankBadge rank={b.rank} />
                 </Link>
               </li>
             );

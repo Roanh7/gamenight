@@ -322,6 +322,15 @@ export default async function UitlegPage() {
             Eindig je in een potje hoger dan de koploper, dan krijg je <b>+{XP_RULES.bounty} XP</b> extra. Je ziet
             op Home, bij Ranking en bij Players op wie de premie staat.
           </p>
+          <p id="specialisten" className="scroll-mt-20 pt-1">
+            <b>🎮 Game Specialists:</b> naast de punten-ranglijst heeft elke game een eigen ranglijst op{" "}
+            <b>winpercentage</b> (bij gelijk: meeste zeges, dan meeste potjes; helemaal gelijk = gedeelde plek). Je staat
+            er officieel op vanaf <b>5 potjes</b> van die game; daarvoor zie je 🔒 en hoeveel potjes je nog nodig hebt.
+            Bij teams en geheime rollen telt een zege voor iedereen in het winnende team. De nummer 1 van all-time krijgt
+            een titel zoals <b>🏆 SMASH MASTER</b>, <b>30 SECONDS KING</b> of <b>WOLVEN SPECIALIST</b>. Puur voor de
+            eer: het levert geen punten of XP op. Je vindt het bij <b>Ranking</b>, op de pagina van elke game en bij{" "}
+            <b>My game stats</b> op je profiel.
+          </p>
           <p id="underdog" className="scroll-mt-20 pt-1">
             <b>🐺 Underdog Bonus:</b> sta je dit seizoen bij de <b>onderste twee</b> van het klassement (met minstens
             4 spelers op de lijst) én sta je ver genoeg achter op de nummer drie van onderen, dan ben je{" "}
