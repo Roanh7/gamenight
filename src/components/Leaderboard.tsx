@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Profile } from "@/lib/types";
 import { Avatar } from "./Avatar";
 import { RankBadge } from "./ui";
+import { UnderdogChip } from "./Underdog";
 
 export type BoardRow = {
   user_id: string;
@@ -18,12 +19,15 @@ export function Leaderboard({
   meId,
   limit,
   compact,
+  underdogs,
 }: {
   rows: BoardRow[];
   profiles: Map<string, Profile>;
   meId?: string;
   limit?: number;
   compact?: boolean;
+  /** 🐺 Spelers die nu underdog zijn (alleen huidige seizoen) */
+  underdogs?: Set<string>;
 }) {
   const shown = limit ? rows.slice(0, limit) : rows;
   return (
@@ -43,9 +47,12 @@ export function Leaderboard({
               <RankBadge rank={r.rank} />
               <Avatar name={p.username} color={p.avatar_color} url={p.avatar_url} emoji={p.avatar_emoji} size="sm" crown={r.rank === 1} />
               <div className="min-w-0 flex-1">
-                <p className="truncate font-black">
-                  {p.username}
-                  {me && <span className="ml-1 text-xs font-bold text-muted">(jij)</span>}
+                <p className="flex min-w-0 items-center gap-1.5 font-black">
+                  <span className="truncate">
+                    {p.username}
+                    {me && <span className="ml-1 text-xs font-bold text-muted">(jij)</span>}
+                  </span>
+                  {underdogs?.has(r.user_id) && <UnderdogChip />}
                 </p>
                 {!compact && (
                   <p className="text-xs font-bold text-muted">

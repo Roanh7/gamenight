@@ -3,7 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient, getMe } from "@/lib/supabase/server";
 import { getProfiles } from "@/lib/data";
-import type { Game, Match, MatchResult } from "@/lib/types";
+import type { Game, Match, MatchResult, MatchUnderdog } from "@/lib/types";
+import { UnderdogActive } from "@/components/Underdog";
+import { UnderdogVictory } from "@/components/UnderdogVictory";
 import { deleteMatch, rematch, reopenMatch } from "../../../../actions";
 import { GameIcon } from "@/components/GameIcon";
 import { MatchResults } from "@/components/MatchResults";
@@ -24,12 +26,13 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
   const me = await getMe();
   const supabase = await createClient();
 
-  const [{ data: night }, { data: matchData }, { data: mp }, { data: entries }, profiles] = await Promise.all([
+  const [{ data: night }, { data: matchData }, { data: mp }, { data: entries }, profiles, { data: udData }] = await Promise.all([
     supabase.from("game_nights").select("id, title, host_id, cohost_id").eq("id", id).maybeSingle(),
     supabase.from("matches").select("*").eq("id", matchId).maybeSingle(),
     supabase.from("match_players").select("user_id, team").eq("match_id", matchId),
     supabase.from("score_entries").select("user_id, round, points, version").eq("match_id", matchId),
     getProfiles(supabase),
+    supabase.from("match_underdogs").select("*").eq("match_id", matchId),
   ]);
   if (!night || !matchData || !me || matchData.night_id !== id) notFound();
   if (night.host_id !== me.user.id && night.cohost_id !== me.user.id) redirect(`/agenda/${id}`);
@@ -56,6 +59,13 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
     const { data } = await supabase.from("match_results").select("*").eq("match_id", matchId);
     results = (data ?? []) as MatchResult[];
   }
+  // 🐺 Underdogs van dit potje, vastgelegd bij de start (alleen wie echt meedoet)
+  const udActive = ((udData ?? []) as MatchUnderdog[])
+    .filter((u) => players.some((p) => p.id === u.user_id) && profiles.byId.has(u.user_id))
+    .map((u) => ({ profile: profiles.byId.get(u.user_id)!, bonus: u.bonus }));
+  const udWinners = results
+    .filter((r) => (r.underdog_bonus ?? 0) > 0)
+    .map((r) => ({ name: profiles.byId.get(r.user_id)?.username ?? "Speler", bonus: r.underdog_bonus ?? 0 }));
   const winner = match.winner_id ? profiles.byId.get(match.winner_id) : undefined;
   const teamWinners = results
     .filter((r) => r.is_winner)
@@ -69,6 +79,7 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
 
       {match.status === "live" ? (
         <>
+          <UnderdogActive players={udActive} note="Vastgelegd bij de start van dit potje. De bonus gaat er pas bij als de uitslag is opgeslagen." />
           {gameType === "teams" ? (
             <TeamScoreBoard
               matchId={match.id}
@@ -145,6 +156,9 @@ export default async function MatchPage(props: PageProps<"/agenda/[id]/host/potj
               </>
             )}
           </section>
+          {udWinners.length > 0 && (
+            <UnderdogVictory names={udWinners.map((u) => u.name)} bonus={Math.max(...udWinners.map((u) => u.bonus))} fresh={!!sp.klaar} />
+          )}
           <MatchResults match={match} game={game ?? undefined} results={results} profiles={profiles.byId} teams={teamOf} />
           <div className="mt-6 grid gap-2">
             <form action={rematch} className="card bg-night p-3 text-white">

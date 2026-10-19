@@ -4,6 +4,7 @@ import { formatScore } from "@/lib/format";
 import { Avatar } from "./Avatar";
 import { GameIcon } from "./GameIcon";
 import { RankBadge } from "./ui";
+import { UnderdogBreakdown } from "./Underdog";
 
 export function MatchResults({
   match,
@@ -27,6 +28,13 @@ export function MatchResults({
   const gameType = game?.game_type ?? (game?.is_team ? "roles" : "solo");
   const isTeamGame = gameType === "roles";
   const sorted = [...results].sort((a, b) => a.placement - b.placement);
+  const underdogRows = sorted
+    .filter((r) => (r.underdog_bonus ?? 0) > 0)
+    .map((r) => ({
+      name: profiles.get(r.user_id)?.username ?? "Speler",
+      base: r.league_points - (r.underdog_bonus ?? 0),
+      bonus: r.underdog_bonus ?? 0,
+    }));
   const header = (
     <div className="flex items-center gap-3 border-b-2 border-line bg-cream px-3 py-2.5">
       {game && <GameIcon icon={game.icon} color={game.color} size="sm" />}
@@ -50,6 +58,7 @@ export function MatchResults({
     <div className="card overflow-hidden">
       {href ? <Link href={href}>{header}</Link> : header}
       {match.status === "finished" ? (
+        <>
         <ol className="divide-y-2 divide-soft">
           {sorted.map((r) => {
             const p = profiles.get(r.user_id);
@@ -62,11 +71,20 @@ export function MatchResults({
                   <span className={`chip ${r.is_winner ? "bg-yellow" : "bg-soft"}`}>{teams.get(r.user_id)}</span>
                 )}
                 {!isTeamGame && <span className="text-sm font-black">{formatScore(r.total)}</span>}
-                <span className="w-12 text-right text-xs font-black text-green">+{r.league_points} pt</span>
+                <span className="min-w-12 shrink-0 whitespace-nowrap text-right text-xs font-black text-green">
+                  +{r.league_points} pt
+                  {(r.underdog_bonus ?? 0) > 0 && (
+                    <span className="block text-[10px] text-muted" title="Underdog Bonus">
+                      incl. 🐺+{r.underdog_bonus}
+                    </span>
+                  )}
+                </span>
               </li>
             );
           })}
         </ol>
+        <UnderdogBreakdown rows={underdogRows} />
+        </>
       ) : gameType === "teams" ? (
         liveTeams && liveTeams.length > 0 ? (
           <LiveTeams teams={liveTeams} profiles={profiles} lowestWins={game?.scoring_mode === "lowest_wins"} />

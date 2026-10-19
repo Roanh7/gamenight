@@ -90,8 +90,21 @@ export type MatchResult = {
   game_id: string;
   total: number;
   placement: number;
-  league_points: number;
+  league_points: number; // inclusief een eventuele underdog-bonus
   is_winner: boolean;
+  underdog_bonus?: number; // 🐺 extra punten (al meegeteld in league_points)
+};
+
+/** Vastgelegde underdogstatus bij de start van een potje. */
+export type MatchUnderdog = {
+  match_id: string;
+  user_id: string;
+  season: string;
+  rank: number;
+  points: number;
+  ref_points: number;
+  threshold: number;
+  bonus: number;
 };
 
 export type LeaderboardRow = {

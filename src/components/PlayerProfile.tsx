@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getGames, getLeaderboards, getOverall, getProfiles, getResults } from "@/lib/data";
-import { allHeadToHeads, bountyHits, headToHead, seasonChampions, seasonLabel, type HeadToHead } from "@/lib/stats";
+import { allHeadToHeads, bountyHits, currentSeason, filterSeason, headToHead, seasonChampions, seasonLabel, standings, type HeadToHead } from "@/lib/stats";
+import { underdogs, underdogTally } from "@/lib/underdog";
+import { UnderdogChip } from "./Underdog";
 import { computeAchievements } from "@/lib/achievements";
 import { computeXp, getAttendance } from "@/lib/xp";
 import { XpBar } from "./XpBar";
@@ -98,6 +100,8 @@ export async function PlayerProfile({
     .filter((b) => b.user_id === profile.id)
     .sort((a, b) => a.rank - b.rank || b.points - a.points);
   const myOverall = overall.find((o) => o.user_id === profile.id);
+  const udNow = underdogs(standings(filterSeason(allResults, currentSeason()))).get(profile.id);
+  const udStats = underdogTally(allResults).find((t) => t.user_id === profile.id);
   const winRate = ach.stats.played ? Math.round((ach.stats.wins / ach.stats.played) * 100) : 0;
   const since = new Intl.DateTimeFormat("nl-NL", { month: "long", year: "numeric" }).format(
     new Date(profile.created_at),
@@ -147,6 +151,20 @@ export async function PlayerProfile({
             </div>
           ))}
         </dl>
+        {(udNow || udStats) && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t-2 border-line bg-night px-4 py-2 text-xs font-bold text-white">
+            {udNow && (
+              <span className="flex items-center gap-1.5">
+                <UnderdogChip className="border-yellow" /> +{udNow.bonus} bij winst
+              </span>
+            )}
+            {udStats && (
+              <span>
+                🐺 {udStats.wins} underdog-{udStats.wins === 1 ? "zege" : "zeges"} · +{udStats.bonus} bonuspunten
+              </span>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Onderlinge stand */}

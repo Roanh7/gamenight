@@ -41,6 +41,8 @@ export async function aboutActivity(supabase: DB, activityId: number) {
                 ? `de hostwissel bij ${n}`
                 : a.type === "night_recap"
                   ? `de recap van ${n}`
-                  : "een nieuwsbericht";
+                  : a.type === "underdog_win"
+                    ? `de underdog-zege bij ${g}`
+                    : "een nieuwsbericht";
   return { users: [...users], label };
 }

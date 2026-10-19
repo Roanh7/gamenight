@@ -3,7 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Check, ChevronRight, Flag, Play, UserPlus, X } from "lucide-react";
 import { createClient, getMe } from "@/lib/supabase/server";
-import { getGames, getNight, getProfiles, nightGameOrder, tallyVotes } from "@/lib/data";
+import { getGames, getNight, getProfiles, getResults, nightGameOrder, tallyVotes } from "@/lib/data";
+import { currentSeason, filterSeason, standings } from "@/lib/stats";
+import { underdogs, type UnderdogInfo } from "@/lib/underdog";
+import { UnderdogActive } from "@/components/Underdog";
 import {
   addParticipant,
   confirmAll,
@@ -28,10 +31,11 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const [data, profiles, games] = await Promise.all([
+  const [data, profiles, games, results] = await Promise.all([
     getNight(supabase, id),
     getProfiles(supabase),
     getGames(supabase),
+    getResults(supabase),
   ]);
   if (!data || !me) notFound();
   const { night, participants, votes, matches } = data;
@@ -53,6 +57,11 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
   const picked = typeof sp.game === "string" && order.includes(sp.game) ? sp.game : undefined;
   const defaultGame = picked ?? tonight[0]?.id;
   const notTonight = games.list.filter((g) => !order.includes(g.id));
+  // 🐺 Underdogs van dit seizoen (niet op een oefenavond). De database legt de status vast bij de start.
+  const ud = night.is_practice ? new Map<string, UnderdogInfo>() : underdogs(standings(filterSeason(results, currentSeason())));
+  const udHere = confirmed
+    .filter((p) => ud.has(p.user_id) && profiles.byId.has(p.user_id))
+    .map((p) => ({ profile: profiles.byId.get(p.user_id)!, bonus: ud.get(p.user_id)!.bonus }));
 
   return (
     <div>
@@ -146,6 +155,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                 )}
                 <p className="mt-1.5 text-xs font-bold text-muted">Tik de game aan die jullie nu gaan spelen. De volgorde maakt niet uit.</p>
               </fieldset>
+              <UnderdogActive players={udHere} note="Alleen als ze meespelen en winnen. De status wordt vastgelegd bij de start van het potje." />
               <fieldset>
                 <legend className="label">Spelers</legend>
                 <div className="grid grid-cols-2 gap-2">
@@ -160,6 +170,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                         <input type="checkbox" name="players" value={p.user_id} defaultChecked className="h-4 w-4 accent-[#22a04b]" />
                         <Avatar name={pr.username} color={pr.avatar_color} url={pr.avatar_url} emoji={pr.avatar_emoji} size="xs" />
                         <span className="truncate text-sm font-bold">{pr.username}</span>
+                        {ud.has(p.user_id) && <span className="ml-auto shrink-0 text-sm" title="Underdog">🐺</span>}
                       </label>
                     );
                   })}

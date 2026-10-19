@@ -90,3 +90,26 @@ export function setSound(on: boolean) {
     localStorage.setItem("gn-sound", on ? "on" : "off");
   } catch {}
 }
+
+/** Underdog-zege: korte pixel-"huil" omhoog en dan een triomfantelijk loopje. */
+export function playUnderdog() {
+  const c = getCtx();
+  if (!c) return;
+  if (c.state === "suspended") void c.resume();
+  const t = c.currentTime + 0.05;
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(330, t);
+  osc.frequency.linearRampToValueAtTime(660, t + 0.35);
+  osc.frequency.linearRampToValueAtTime(587, t + 0.75);
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.11, t + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+  osc.connect(gain).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.9);
+  [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => tone(c, f, t + 0.9 + i * 0.08, 0.12, "square", 0.06));
+  tone(c, 1046.5, t + 1.32, 0.5, "square", 0.05);
+  tone(c, 523.25, t + 1.32, 0.5, "triangle", 0.09);
+}

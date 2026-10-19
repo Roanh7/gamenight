@@ -21,6 +21,7 @@ import { Avatar } from "@/components/Avatar";
 import { SeasonTabs, parseSeason } from "@/components/SeasonTabs";
 import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
 import { XP_RULES } from "@/lib/xp";
+import { UNDERDOG_BONUS, underdogs } from "@/lib/underdog";
 
 export const metadata: Metadata = { title: "Ranking" };
 
@@ -45,6 +46,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const champProfile = champ ? profiles.byId.get(champ) : undefined;
   const target = isCurrent ? currentBountyTarget(results) : null;
   const targetProfile = target ? profiles.byId.get(target) : undefined;
+  const ud = isCurrent ? new Set(underdogs(overall).keys()) : new Set<string>();
 
   // Meest gespeelde games eerst
   const playedCount = new Map<string, number>();
@@ -117,6 +119,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
           rows={overall.map((o) => ({ ...o, extra: `${o.games_played} ${o.games_played === 1 ? "game" : "games"}` }))}
           profiles={profiles.byId}
           meId={me?.user.id}
+          underdogs={ud}
         />
       ) : (
         <EmptyState
@@ -124,6 +127,16 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
           title={isCurrent ? "Nieuw seizoen, schone lei" : "Nog leeg"}
           text="Na het eerste afgeronde potje staat hier de stand."
         />
+      )}
+
+      {ud.size > 0 && (
+        <p className="mt-2 text-xs font-bold text-muted">
+          🐺 <b>Underdog:</b> staat onderaan en ver achter. Wint hij of zij een potje, dan komt er +{UNDERDOG_BONUS}{" "}
+          competitiepunten bij.{" "}
+          <Link href="/uitleg#underdog" className="underline">
+            Hoe werkt dat?
+          </Link>
+        </p>
       )}
 
       <SectionTitle>Per game</SectionTitle>

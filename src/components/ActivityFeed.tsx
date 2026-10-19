@@ -172,6 +172,24 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
             );
             break;
           }
+          case "underdog_win": {
+            const bonus = Number(a.payload?.bonus ?? 2);
+            const base = Number(a.payload?.base ?? 0);
+            icon = <span className="text-sm leading-none">🐺</span>;
+            tone = "bg-yellow";
+            text = (
+              <>
+                <b className="pixel text-[9px]">🐺 UNDERDOG VICTORY!</b>
+                <br />
+                {name} wint {gameLink} tegen alle verwachtingen in:{" "}
+                <b className="font-black">
+                  +{base} + {bonus} bonus = +{base + bonus} punten
+                </b>
+                {night ? <span className="text-muted"> · {night.title}</span> : null}
+              </>
+            );
+            break;
+          }
           case "banner_unlocked": {
             const def = bannerDef(String(a.payload?.banner ?? ""));
             const rarity = (String(a.payload?.rarity ?? def.rarity)) as Rarity;

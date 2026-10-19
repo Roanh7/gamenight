@@ -315,6 +315,17 @@ export default async function UitlegPage() {
             Eindig je in een potje hoger dan de koploper, dan krijg je <b>+{XP_RULES.bounty} XP</b> extra. Je ziet
             op Home, bij Ranking en bij Players op wie de premie staat.
           </p>
+          <p id="underdog" className="scroll-mt-20 pt-1">
+            <b>🐺 Underdog Bonus:</b> sta je dit seizoen bij de <b>onderste twee</b> van het klassement (met minstens
+            4 spelers op de lijst) én sta je ver genoeg achter op de nummer drie van onderen, dan ben je{" "}
+            <b>underdog</b>. &quot;Ver genoeg&quot; = minstens 10 punten, of 20% van de punten van die speler als dat
+            meer is. Win je dan een potje, dan krijg je <b>+2 competitiepunten extra</b> (geen extra XP). De status
+            wordt vastgelegd <b>bij de start van het potje</b>; inhalen tijdens het potje verandert niets. Bij teams
+            krijgt elke underdog in het winnende team de bonus. Wordt een uitslag gecorrigeerd, dan gaat de bonus
+            vanzelf naar de juiste winnaar; wordt een potje weggegooid, dan verdwijnt de bonus mee. Je ziet de 🐺 bij{" "}
+            <b>Ranking</b>, de host ziet hem bij het starten van een potje, en in het <b>Recordboek</b> staan de{" "}
+            <b>Underdog Legends</b>.
+          </p>
           <p className="pt-1">
             <b>📜 Recordboek:</b> via de knop bij <b>Ranking</b> zie je de records aller tijden: meeste zeges,
             langste winstreeks, beste avond, vaakst MVP, trouwste speler, meeste avonden gehost, de grootste

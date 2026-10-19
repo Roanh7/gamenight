@@ -595,3 +595,13 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 @keyframes bn-swim { from { transform: translateX(-90px); } to { transform: translateX(130px); } }
 .bn-bubble { animation: bn-bubble 4s linear infinite; }
 @keyframes bn-bubble { from { transform: translateY(0); opacity: 0.9; } to { transform: translateY(-48px); opacity: 0; } }
+
+/* Underdog Bonus 🐺 */
+.ud-in { animation: unlock-pop 0.5s steps(5) 0.6s both; }
+.ud-howl { display: inline-block; animation: ud-howl 0.9s steps(3) 1.1s 2 both; }
+@keyframes ud-howl { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(-12deg); } }
+.ud-bonus { animation: ud-blink 0.4s steps(2) 1.6s 4 both; }
+@keyframes ud-blink { 50% { background: #ffc527; color: #1e1b2b; } }
+.ud-star { animation: ud-twinkle 1.6s steps(2) infinite; }
+@keyframes ud-twinkle { 50% { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) { .ud-in, .ud-howl, .ud-bonus, .ud-star { animation: none; } }
