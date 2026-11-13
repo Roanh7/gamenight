@@ -163,3 +163,21 @@ export function playFanfare() {
   tone(c, 1046.5, t + 2.1, 0.6, "square", 0.05);
   tone(c, 523.25, t + 2.1, 0.6, "triangle", 0.08);
 }
+
+/** Heel kort klikje voor de knoppen van het console-menu (alleen als het geluid al "aan" staat op dit toestel). */
+export function playClick() {
+  const c = getCtx();
+  if (!c) return;
+  if (c.state === "suspended") void c.resume();
+  const t = c.currentTime + 0.005;
+  tone(c, 660, t, 0.035, "square", 0.035);
+  tone(c, 990, t + 0.03, 0.04, "square", 0.03);
+}
+
+/** XP erbij: oplopend riedeltje. */
+export function playXp() {
+  const c = getCtx();
+  if (!c || c.state !== "running") return;
+  const t = c.currentTime + 0.02;
+  [523.25, 587.33, 659.25, 783.99, 880, 1046.5].forEach((f, i) => tone(c, f, t + i * 0.07, 0.07, "square", 0.04));
+}

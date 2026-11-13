@@ -19,6 +19,11 @@ export default async function LoginPage(props: PageProps<"/login">) {
         <h1 className="mb-1 text-xl font-black">Welkom terug</h1>
         <p className="mb-5 text-sm text-muted">Log in om verder te spelen.</p>
         <LoginForm next={next} />
+        <p className="mt-4 text-center text-sm">
+          <Link href="/wachtwoord-vergeten" className="font-extrabold underline underline-offset-2">
+            Wachtwoord vergeten?
+          </Link>
+        </p>
       </div>
       <p className="mt-5 text-center text-sm">
         Nog geen account?{" "}

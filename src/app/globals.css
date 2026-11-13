@@ -1100,3 +1100,58 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
   box-shadow: 0 2px 0 var(--color-line);
 }
 @media (prefers-reduced-motion: reduce) { .help-chevron { transition: none; } }
+
+/* ---------- Paginawissel ---------- */
+.page-enter { position: relative; animation: page-enter 170ms ease-out; }
+@keyframes page-enter {
+  from { top: 10px; opacity: 0; }
+  to { top: 0; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+
+/* ---------- XP-beloning ---------- */
+.xp-gain {
+  border: 2px solid var(--color-line);
+  border-radius: 6px;
+  background: var(--color-yellow);
+  color: var(--color-night);
+  padding: 2px 5px;
+  font-size: 8px;
+  animation: unlock-pop 0.4s steps(4) both;
+}
+.xp-panel.is-counting { border-color: var(--color-yellow); box-shadow: 0 0 0 2px var(--color-line); }
+.xp-panel.is-counting .xp-block.is-on { animation: xp-flash 0.24s steps(2) infinite; }
+@keyframes xp-flash { 50% { filter: brightness(1.35); } }
+.lvl-new { animation: lvl-bounce 0.7s steps(4) 0.6s 3; }
+@keyframes lvl-bounce { 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .xp-gain, .lvl-new, .xp-panel.is-counting .xp-block.is-on { animation: none; } }
+
+/* ---------- Startlijstje ---------- */
+.start-box {
+  display: inline-flex;
+  height: 38px;
+  width: 38px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-cream);
+  box-shadow: 0 2px 0 var(--color-line);
+}
+.start-box.is-done { background: var(--color-green); color: #fff; --pi-accent: #fff; }
+.start-done p { opacity: 0.6; }
+.start-done p:first-child { text-decoration: line-through; }
+
+/* ---------- Zelfde bouwstenen op alle tabbladen ---------- */
+/* Kaarten binnen een paneel worden rijen (geen dubbele randen) */
+.hub-panel .card { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.panel-rows > li { min-width: 0; }
+.panel-rows > li + li { border-top: 2px solid var(--color-soft); }
+.panel-rows > li > a { transition: background-color 120ms; }
+.panel-rows > li > a:hover { background: var(--color-yellow-soft); }
+.panel-rows > li > a:active { background: var(--color-yellow); color: var(--color-night); transform: none; }
+/* Sectietitel: pixelblokje + lijn, zoals een menukopje in een oude game */
+.section-title > h2 { display: flex; min-width: 0; flex: 1; align-items: center; gap: 8px; }
+.section-title > h2::before { content: ""; height: 8px; width: 8px; flex-shrink: 0; background: var(--color-red); box-shadow: 2px 2px 0 var(--color-line); }
+.section-title > h2::after { content: ""; height: 2px; min-width: 12px; flex: 1; background: repeating-linear-gradient(90deg, var(--color-line) 0 6px, transparent 6px 10px); opacity: 0.35; }

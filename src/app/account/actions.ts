@@ -131,3 +131,12 @@ export async function equipFrame(frame: string): Promise<{ error?: string }> {
   revalidatePath("/", "layout");
   return {};
 }
+
+/** 🔑 Beheerder: eenmalige herstelcode voor een speler die zijn wachtwoord kwijt is (de database controleert of je beheerder bent). */
+export async function createResetCode(userId: string): Promise<{ code?: string; error?: string }> {
+  const supabase = await createClient();
+  if (typeof userId !== "string" || !/^[0-9a-f-]{36}$/i.test(userId)) return { error: "Speler niet gevonden." };
+  const { data, error } = await supabase.rpc("admin_create_reset_code", { p_user: userId });
+  if (error || typeof data !== "string") return { error: "Code maken lukte niet. Ben je beheerder?" };
+  return { code: data };
+}

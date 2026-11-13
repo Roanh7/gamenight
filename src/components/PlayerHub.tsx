@@ -17,8 +17,7 @@ import { formatDateLong, formatTime, hoursAgoIso, nowMs } from "@/lib/format";
 import { Avatar } from "./Avatar";
 import { ActivityFeed } from "./ActivityFeed";
 import { FuseCountdown } from "./FuseCountdown";
-import { PushPrompt } from "./PushPrompt";
-import { InstallHint } from "./InstallHint";
+import { StartChecklist } from "./StartChecklist";
 import { TrophySprite } from "./TrophyCabinet";
 import { Banner } from "./Banner";
 import { BannerUnlock } from "./BannerUnlock";
@@ -28,6 +27,8 @@ import { ownedBanners, shownBanner, syncBanners, unseenBanners } from "@/lib/ban
 import { unseenFrames } from "@/lib/frames";
 import { FrameUnlock } from "./FrameUnlock";
 import { PixelIcon } from "./PixelIcon";
+import { Panel } from "./ui";
+import { XpPanel } from "./XpPanel";
 
 /** Het persoonlijke videogame-dashboard op Home. */
 export async function PlayerHub({ userId, welcome }: { userId: string; welcome: boolean }) {
@@ -165,7 +166,7 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
       d={{
         welcome, active, name, me, xp, mySeason: mySeason ?? null, season, streak, msg, target, targetName, userId,
         winRate, form, mvps, nextNight: nextNight ?? null, confirmedProfiles, myStatus, isFixed, voters: tally.voters,
-        gameNames, isHost, myPart: myPart ?? null, myVote, next, earnedCount, achTotal: ach.list.length,
+        gameNames, isHost, declinedNext: !!nextNight && attExtras.declines.some((x) => x.night_id === nextNight.id && x.user_id === userId), myPart: myPart ?? null, myVote, next, earnedCount, achTotal: ach.list.length,
         rival, rivalProfile: rivalProfile ?? null, banner, attStats,
       }}
       news={news}
@@ -205,6 +206,8 @@ export type HubData = {
   gameNames: string[];
   isHost: boolean;
   myPart: Participant | null;
+  /** Heb je je voor de volgende avond afgemeld ("Ik kan niet")? */
+  declinedNext: boolean;
   myVote: boolean;
   next: ReturnType<typeof nextAchievement>;
   earnedCount: number;
@@ -216,36 +219,6 @@ export type HubData = {
 };
 
 
-/** Paneel met een gekleurde kopregel (Home): houdt de onderdelen visueel bij elkaar. */
-function HubPanel({
-  title,
-  icon,
-  tone,
-  action,
-  children,
-  label,
-}: {
-  title: string;
-  icon?: ReactNode;
-  tone: string;
-  action?: ReactNode;
-  children: ReactNode;
-  label?: string;
-}) {
-  return (
-    <section className="hub-panel" style={{ ["--panel" as string]: tone }} aria-label={label ?? title}>
-      <div className="hub-panel-head">
-        <h2 className="pixel flex min-w-0 items-center gap-1.5 truncate text-[9px]">
-          {icon}
-          {title}
-        </h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 /** Weergave van de Player Hub (los van het ophalen, zodat we hem met testgegevens kunnen bekijken). */
 export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; overlays?: ReactNode }) {
   const {
@@ -253,14 +226,16 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
     nextNight, confirmedProfiles, myStatus, isFixed, voters, gameNames, isHost, myPart, myVote, next, earnedCount,
     achTotal, rival, rivalProfile, banner, attStats,
   } = d;
-  const blocks = 12;
-  const filled = Math.min(blocks, Math.floor((xp.into / xp.span) * blocks));
   const headLink = "shrink-0 text-[11px] font-black text-ink hover:underline";
   return (
     <div className="space-y-3">
       {overlays}
-      <InstallHint />
-      <PushPrompt />
+      <StartChecklist
+        userId={userId}
+        hasAvatar={!!(me?.avatar_emoji || me?.avatar_pixel)}
+        night={nextNight && nextNight.status === "planned" ? { id: nextNight.id, title: nextNight.title } : null}
+        responded={!!myPart || isHost || d.declinedNext}
+      />
 
       {/* Live Game Mode heeft voorrang */}
       {active && (
@@ -280,9 +255,9 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
           <Link
             href="/account/banners"
             aria-label="Banner wijzigen"
-            className="header-key absolute right-2 top-2 h-8 w-8 text-sm"
+            className="header-key absolute right-2 top-2 h-8 w-8"
           >
-            🎨
+            <PixelIcon name="palette" size={16} />
           </Link>
         </div>
 
@@ -308,23 +283,8 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
             {streak.wins > 0 && <span className="chip bg-orange-soft py-0.5 text-[11px]">🔥 {streak.wins} op rij</span>}
           </div>
 
-          {/* XP-balk */}
-          <div className="xp-panel mt-3">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="pixel text-[9px] text-red">XP</span>
-              <span className="pixel text-[9px]">
-                {xp.into}/{xp.span}
-              </span>
-            </div>
-            <div className="mt-1.5 flex gap-[3px]" role="img" aria-label={`${xp.into} van ${xp.span} XP naar level ${xp.level + 1}`}>
-              {Array.from({ length: blocks }, (_, i) => (
-                <span key={i} className={`xp-block ${i < filled ? "is-on" : ""}`} />
-              ))}
-            </div>
-            <p className="mt-1.5 text-[11px] font-bold text-muted">
-              {xp.xp} XP totaal · nog {xp.toNext} tot LV {xp.level + 1}
-            </p>
-          </div>
+          {/* XP-balk (telt zichtbaar op als je XP hebt verdiend sinds je vorige bezoek) */}
+          <XpPanel userId={userId} xp={xp.xp} />
         </div>
 
         {/* Begroeting: tekstvak zoals in een RPG */}
@@ -361,7 +321,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
       </section>
 
       {/* ---------- 3. Next game night ---------- */}
-      <HubPanel
+      <Panel
         title={nextNight?.status === "live" ? "NU BEZIG" : "NEXT GAME NIGHT"}
         icon={<PixelIcon name="calendar" size={12} />}
         tone="var(--color-blue-soft)"
@@ -429,21 +389,21 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
             </Link>
           </div>
         )}
-      </HubPanel>
+      </Panel>
 
       {/* ---------- 4. Game Night News (laatste 2) ---------- */}
-      <HubPanel title="GAME NIGHT NEWS" icon={<PixelIcon name="news" size={12} />} tone="var(--color-yellow-soft)">
+      <Panel title="GAME NIGHT NEWS" icon={<PixelIcon name="news" size={12} />} tone="var(--color-yellow-soft)">
         {news}
         <Link href="/nieuws" className="hub-panel-foot">
           BEKIJK ALLES ▶
         </Link>
-      </HubPanel>
+      </Panel>
 
       {/* ---------- 5. My Attendance ---------- */}
       {attStats && <HubAttendance s={attStats} />}
 
       {/* ---------- Quests: volgende achievement + rivaal ---------- */}
-      <HubPanel title="QUESTS" icon={<span aria-hidden>⚔️</span>} tone="var(--color-purple-soft)" label="Next achievement en rivaal">
+      <Panel title="QUESTS" icon={<PixelIcon name="medal" size={12} />} tone="var(--color-purple-soft)" label="Next achievement en rivaal">
         <div className="divide-y-2 divide-soft">
           <div className="flex items-center gap-3 px-3 py-2.5" aria-label="Next achievement">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-line bg-night">
@@ -500,18 +460,20 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
             )}
           </div>
         </div>
-      </HubPanel>
+      </Panel>
 
       {/* ---------- Snelkoppelingen ---------- */}
       <nav className="grid grid-cols-4 gap-2" aria-label="Snel naar">
-        {[
-          ["/account", "🕹️", "MY PROFILE"],
-          ["/ranking", "🏆", "RANKINGS"],
-          ["/account#trofeekast", "🏅", "ACHIEVE­MENTS"],
-          ["/records", "📜", "RECORD BOOK"],
-        ].map(([href, icon, label]) => (
+        {(
+          [
+            ["/account", "user", "MY PROFILE"],
+            ["/ranking", "trophy", "RANKINGS"],
+            ["/account#trofeekast", "medal", "ACHIEVE­MENTS"],
+            ["/records", "scroll", "RECORD BOOK"],
+          ] as const
+        ).map(([href, icon, label]) => (
           <Link key={href} href={href} className="hub-key">
-            <span className="text-lg leading-none">{icon}</span>
+            <PixelIcon name={icon} size={20} />
             <span className="pixel text-[7px] leading-snug">{label}</span>
           </Link>
         ))}

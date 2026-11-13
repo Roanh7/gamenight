@@ -19,7 +19,8 @@ import { GameIcon } from "@/components/GameIcon";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Avatar } from "@/components/Avatar";
 import { SeasonTabs, parseSeason } from "@/components/SeasonTabs";
-import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { EmptyState, PageHeader, Panel, SectionTitle } from "@/components/ui";
+import { PixelIcon } from "@/components/PixelIcon";
 import { XP_RULES } from "@/lib/xp";
 import { UNDERDOG_BONUS, underdogs } from "@/lib/underdog";
 import { hallOfChampions } from "@/lib/history";
@@ -148,21 +149,28 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
         </section>
       )}
 
-      <SectionTitle>{season === "all" ? "Algemeen klassement" : "Klassement"}</SectionTitle>
-      {overall.length ? (
-        <Leaderboard
-          rows={overall.map((o) => ({ ...o, extra: `${o.games_played} ${o.games_played === 1 ? "game" : "games"}` }))}
-          profiles={profiles.byId}
-          meId={me?.user.id}
-          underdogs={ud}
-        />
-      ) : (
-        <EmptyState
-          icon={<span className="text-3xl">🏆</span>}
-          title={isCurrent ? "Nieuw seizoen, schone lei" : "Nog leeg"}
-          text="Na het eerste afgeronde potje staat hier de stand."
-        />
-      )}
+      <Panel
+        title={season === "all" ? "ALGEMEEN KLASSEMENT" : "KLASSEMENT"}
+        icon={<PixelIcon name="trophy" size={12} />}
+        tone="var(--color-yellow-soft)"
+        className="mt-3"
+        action={overall.length ? <span className="pixel text-[8px] text-muted">{overall.length} SPELERS</span> : undefined}
+      >
+        {overall.length ? (
+          <Leaderboard
+            rows={overall.map((o) => ({ ...o, extra: `${o.games_played} ${o.games_played === 1 ? "game" : "games"}` }))}
+            profiles={profiles.byId}
+            meId={me?.user.id}
+            underdogs={ud}
+          />
+        ) : (
+          <EmptyState
+            icon={<span className="text-3xl">🏆</span>}
+            title={isCurrent ? "Nieuw seizoen, schone lei" : "Nog leeg"}
+            text="Na het eerste afgeronde potje staat hier de stand."
+          />
+        )}
+      </Panel>
 
       {ud.size > 0 && (
         <p className="mt-2 text-xs font-bold text-muted">
@@ -192,7 +200,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             const gRows = boards.get(g.id) ?? [];
             const href = season === currentSeason() ? `/games/${g.id}` : `/games/${g.id}?seizoen=${season}`;
             return (
-              <li key={g.id} className="card overflow-hidden">
+              <li key={g.id} className="hub-panel">
                 <Link href={href} className="flex items-center gap-3 border-b-2 border-line bg-cream px-3 py-2.5">
                   <GameIcon icon={g.icon} color={g.color} size="sm" />
                   <div className="min-w-0 flex-1">

@@ -3,16 +3,17 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PixelIcon, type PixelIconName } from "./PixelIcon";
 
-const ITEMS = [
-  { href: "/account", icon: "🕹️", label: "My Profile" },
-  { href: "/account#customize", icon: "🎨", label: "Customize Player" },
-  { href: "/account#trofeekast", icon: "🏅", label: "Achievements" },
-  { href: "/account/banners", icon: "🖼️", label: "Profile Banners" },
-  { href: "/nieuws", icon: "📰", label: "Game Night News" },
-  { href: "/account#instellingen", icon: "⚙️", label: "Settings" },
-  { href: "/uitleg", icon: "❓", label: "Help & Rules" },
-] as const;
+const ITEMS: { href: string; icon: PixelIconName; label: string }[] = [
+  { href: "/account", icon: "user", label: "My Profile" },
+  { href: "/account#customize", icon: "palette", label: "Customize Player" },
+  { href: "/account#trofeekast", icon: "medal", label: "Achievements" },
+  { href: "/account/banners", icon: "flag", label: "Profile Banners" },
+  { href: "/nieuws", icon: "news", label: "Game Night News" },
+  { href: "/account#instellingen", icon: "gear", label: "Settings" },
+  { href: "/uitleg", icon: "help", label: "Help & Rules" },
+];
 
 /**
  * 👾 PLAYER MENU — klapt open onder je avatar rechtsboven.
@@ -79,13 +80,15 @@ export function PlayerMenu({ name, children }: { name: string; children: ReactNo
       </button>
       {open && (
         <div id={id} className="player-menu" role="menu" aria-label="Player menu">
-          <p className="pixel border-b-2 border-line px-3 py-2 text-[9px] text-red">👾 PLAYER MENU</p>
+          <p className="pixel flex items-center gap-1.5 border-b-2 border-line px-3 py-2 text-[9px] text-red">
+            <PixelIcon name="gamepad" size={12} /> PLAYER MENU
+          </p>
           <ul ref={list} className="p-1.5">
             {ITEMS.map((it) => (
               <li key={it.href} role="none">
                 <Link href={it.href} role="menuitem" className="player-menu-item" onClick={() => setOpen(false)}>
                   <span className="player-menu-icon" aria-hidden>
-                    {it.icon}
+                    <PixelIcon name={it.icon} size={16} />
                   </span>
                   <span className="min-w-0 flex-1 truncate">{it.label}</span>
                   <span className="player-menu-arrow" aria-hidden>

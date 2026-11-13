@@ -8,7 +8,8 @@ import { AttendanceBoard, MyAttendance, MyNightLine } from "@/components/Attenda
 import type { GameNight, Participant } from "@/lib/types";
 import { NightCard } from "@/components/NightCard";
 import { hoursAgoIso } from "@/lib/format";
-import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { EmptyState, PageHeader, Panel } from "@/components/ui";
+import { PixelIcon } from "@/components/PixelIcon";
 import { Flash } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { createPracticeNight } from "./actions";
@@ -105,48 +106,57 @@ export default async function AgendaPage(props: PageProps<"/agenda">) {
       <Flash sp={sp} />
       {myStats && <MyAttendance s={myStats} />}
 
-      {upcoming.length ? (
-        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">{upcoming.map(card)}</ul>
-      ) : (
-        <EmptyState
-          icon={<CalendarDays size={32} />}
-          title="Geen gamenights gepland"
-          text="Plan de eerste en nodig de rest uit."
-          action={
-            <Link href="/agenda/nieuw" className="btn btn-primary btn-sm">
-              <Plus size={16} strokeWidth={3} /> Plan een avond
-            </Link>
-          }
-        />
-      )}
+      <Panel
+        title={`UPCOMING${upcoming.length ? ` · ${upcoming.length}` : ""}`}
+        icon={<PixelIcon name="calendar" size={12} />}
+        tone="var(--color-blue-soft)"
+        label="Geplande gamenights"
+      >
+        {upcoming.length ? (
+          <ul className="panel-rows">{upcoming.map(card)}</ul>
+        ) : (
+          <EmptyState
+            icon={<CalendarDays size={32} />}
+            title="Geen gamenights gepland"
+            text="Plan de eerste en nodig de rest uit."
+            action={
+              <Link href="/agenda/nieuw" className="btn btn-primary btn-sm">
+                <Plus size={16} strokeWidth={3} /> Plan een avond
+              </Link>
+            }
+          />
+        )}
+      </Panel>
 
-      <form action={createPracticeNight} className="card mt-4 flex items-center gap-3 p-4">
-        <span className="text-3xl" aria-hidden>
-          🧪
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-black">Oefenavond</p>
-          <p className="text-xs font-bold text-muted">
-            Probeer potjes starten, scores invoeren en afronden. Telt niet mee voor ranking, XP of nieuws, en niemand
-            krijgt een melding.
-          </p>
-        </div>
-        <SubmitButton className="btn btn-yellow btn-sm shrink-0" pendingText="…">
-          Oefenen
-        </SubmitButton>
-      </form>
+      <Panel title="TRAINING MODE" icon={<PixelIcon name="gamepad" size={12} />} tone="var(--color-purple-soft)" className="mt-3" label="Oefenavond">
+        <form action={createPracticeNight} className="flex items-center gap-3 p-3">
+          <span className="text-3xl" aria-hidden>
+            🧪
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-black">Oefenavond</p>
+            <p className="text-xs font-bold text-muted">
+              Probeer potjes starten, scores invoeren en afronden. Telt niet mee voor ranking, XP of nieuws, en niemand
+              krijgt een melding.
+            </p>
+          </div>
+          <SubmitButton className="btn btn-yellow btn-sm shrink-0" pendingText="…">
+            Oefenen
+          </SubmitButton>
+        </form>
+      </Panel>
 
-      <SectionTitle>🏆 Most loyal players</SectionTitle>
-      <p className="-mt-1 mb-2.5 text-xs font-bold text-muted">
-        Aanwezigheid sinds je lid bent: meegespeeld of door de host aanwezig gezet. Op de ranglijst vanaf {ATTENDANCE_MIN_NIGHTS} avonden.
-      </p>
-      <AttendanceBoard ranked={board.ranked} unranked={board.unranked} profiles={profiles.byId} meId={me?.user.id} />
+      <Panel title="MOST LOYAL PLAYERS" icon={<PixelIcon name="trophy" size={12} />} tone="var(--color-yellow-soft)" className="mt-3">
+        <p className="border-b-2 border-soft px-3 py-2 text-xs font-bold text-muted">
+          Aanwezigheid sinds je lid bent: meegespeeld of door de host aanwezig gezet. Op de ranglijst vanaf {ATTENDANCE_MIN_NIGHTS} avonden.
+        </p>
+        <AttendanceBoard ranked={board.ranked} unranked={board.unranked} profiles={profiles.byId} meId={me?.user.id} />
+      </Panel>
 
       {past.length > 0 && (
-        <>
-          <SectionTitle>Geweest</SectionTitle>
-          <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">{past.map(card)}</ul>
-        </>
+        <Panel title={`GEWEEST · ${past.length}`} icon={<PixelIcon name="scroll" size={12} />} className="mt-3" label="Afgelopen gamenights">
+          <ul className="panel-rows">{past.map(card)}</ul>
+        </Panel>
       )}
     </div>
   );

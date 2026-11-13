@@ -101,3 +101,31 @@ export async function logout() {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+/**
+ * 🔑 Wachtwoord vergeten: nieuw wachtwoord instellen met de herstelcode van de beheerder.
+ * De database controleert de code (24 uur geldig, max. 5 pogingen, één keer bruikbaar).
+ * Lukt het, dan log je meteen in met je nieuwe wachtwoord.
+ */
+export async function resetWithCode(_: AuthState, formData: FormData): Promise<AuthState> {
+  const login = String(formData.get("login") ?? "").trim();
+  const code = String(formData.get("code") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const again = String(formData.get("password2") ?? "");
+  if (!login || !code || !password) return { error: "Vul alle velden in." };
+  if (password.length < 6) return { error: "Je nieuwe wachtwoord moet minimaal 6 tekens zijn." };
+  if (password !== again) return { error: "De twee wachtwoorden zijn niet hetzelfde." };
+
+  const supabase = await createClient();
+  const { data: email, error } = await supabase.rpc("reset_password_with_code", { p_login: login, p_code: code, p_password: password });
+  if (error) {
+    const msg = error.message ?? "";
+    return { error: msg.includes("minimaal") ? "Je nieuwe wachtwoord moet minimaal 6 tekens zijn." : "Code ongeldig of verlopen. Vraag de beheerder om een nieuwe code." };
+  }
+  if (!email) return { error: "Die code klopt niet. Let op: na 5 foute pogingen vervalt de code." };
+
+  const { error: loginError } = await supabase.auth.signInWithPassword({ email: String(email), password });
+  if (loginError) return { info: "Je wachtwoord is gewijzigd. Log nu in met je e-mail en je nieuwe wachtwoord." };
+  revalidatePath("/", "layout");
+  redirect("/");
+}

@@ -14,7 +14,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="mb-5 flex items-end justify-between gap-3">
+    <header className="page-head mb-5 flex items-end justify-between gap-3">
       <div className="min-w-0">
         {back && (
           <Link
@@ -34,10 +34,44 @@ export function PageHeader({
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mb-2.5 mt-7 flex items-center justify-between">
+    <div className="section-title mb-2.5 mt-7 flex items-center justify-between gap-3">
       <h2 className="pixel text-[11px] uppercase">{children}</h2>
       {action}
     </div>
+  );
+}
+
+/** Paneel met een gekleurde kopregel: dezelfde bouwsteen op Home, Agenda, Games en Ranking. */
+export function Panel({
+  title,
+  icon,
+  tone = "var(--color-soft)",
+  action,
+  children,
+  label,
+  className = "",
+  id,
+}: {
+  title: string;
+  icon?: ReactNode;
+  tone?: string;
+  action?: ReactNode;
+  children: ReactNode;
+  label?: string;
+  className?: string;
+  id?: string;
+}) {
+  return (
+    <section id={id} className={`hub-panel ${className}`} style={{ ["--panel" as string]: tone }} aria-label={label ?? title}>
+      <div className="hub-panel-head">
+        <h2 className="pixel flex min-w-0 items-center gap-1.5 truncate text-[9px]">
+          {icon}
+          {title}
+        </h2>
+        {action}
+      </div>
+      {children}
+    </section>
   );
 }
 

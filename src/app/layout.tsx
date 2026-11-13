@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Logo } from "@/components/Logo";
 import { Avatar } from "@/components/Avatar";
 import { PlayerMenu } from "@/components/PlayerMenu";
+import { PageTransition } from "@/components/PageTransition";
 import { getMyActiveNight } from "@/lib/live";
 import { ScoreSyncAgent } from "@/components/ScoreSyncAgent";
 import { CeremonyListener } from "@/components/CeremonyListener";
@@ -92,7 +93,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ScoreSyncAgent />
           </div>
         )}
-        <main className={`mx-auto max-w-xl px-4 ${me ? "pb-32 pt-5" : "py-8"}`}>{children}</main>
+        <main className={`mx-auto max-w-xl px-4 ${me ? "pb-32 pt-5" : "py-8"}`}>
+          <PageTransition>{children}</PageTransition>
+        </main>
         {me && <BottomNav live={live} liveOff={liveOff} />}
         {me && <CeremonyListener />}
       </body>

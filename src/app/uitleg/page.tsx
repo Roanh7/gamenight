@@ -564,7 +564,8 @@ export default async function UitlegPage() {
             <li>
               Je naam, kleur, bio en wachtwoord pas je aan op je account (avatar rechtsboven → <b>My Profile</b>). Je
               avatar, frame en banner kies je bij <b>🎨 Customize Player</b>. Thema, meldingen en geluid staan onder{" "}
-              <b>Settings</b>.
+              <b>Settings</b>. Wachtwoord vergeten? Tik bij het inloggen op <b>Wachtwoord vergeten?</b> en vraag de
+              beheerder om een herstelcode.
             </li>
             <li>
               <b>🔔 Meldingen:</b> zet ze aan op je account (of via het kaartje op Home). Je krijgt dan een melding bij

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ActiveNight } from "@/lib/data";
 import { PixelIcon, type PixelIconName } from "./PixelIcon";
+import { playClick, soundOn } from "@/lib/sfx";
 
 const ITEMS: { href: string; label: string; icon: PixelIconName; match: (p: string) => boolean }[] = [
   { href: "/", label: "Home", icon: "home", match: (p) => p === "/" || p.startsWith("/nieuws") },
@@ -18,7 +19,14 @@ const ITEMS: { href: string; label: string; icon: PixelIconName; match: (p: stri
 function Key({ href, label, icon, active, accent }: { href: string; label: string; icon: PixelIconName; active: boolean; accent?: boolean }) {
   return (
     <li className="min-w-0">
-      <Link href={href} className={`console-key ${active ? "is-on" : ""} ${accent ? "is-accent" : ""}`} aria-current={active ? "page" : undefined}>
+      <Link
+        href={href}
+        className={`console-key ${active ? "is-on" : ""} ${accent ? "is-accent" : ""}`}
+        aria-current={active ? "page" : undefined}
+        onClick={() => {
+          if (!active && soundOn()) playClick();
+        }}
+      >
         <PixelIcon name={icon} size={20} />
         <span className="console-label">{label}</span>
       </Link>

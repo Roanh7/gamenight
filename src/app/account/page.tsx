@@ -30,9 +30,10 @@ export default async function AccountPage(props: PageProps<"/account">) {
   const profile = me.profile as Profile;
   // Wat je hebt vrijgespeeld (alleen lezen; vrijspelen zelf gebeurt zoals altijd door de server)
   const supabase = await createClient();
-  const [{ data: unlockData }, { data: bannerRow }] = await Promise.all([
+  const [{ data: unlockData }, { data: bannerRow }, { data: isAdmin }] = await Promise.all([
     supabase.from("banner_unlocks").select("user_id, banner_id, revoked_at, seen, unlocked_at").eq("user_id", me.user.id),
     supabase.from("profiles").select("banner").eq("id", me.user.id).maybeSingle(),
+    supabase.rpc("is_app_admin"),
   ]);
   const unlocks = (unlockData ?? []) as UnlockRow[];
   const frames = ownedFrames(unlocks, me.user.id);
@@ -137,6 +138,20 @@ export default async function AccountPage(props: PageProps<"/account">) {
       <div id="instellingen" className="scroll-mt-20">
         <SectionTitle>⚙️ Settings</SectionTitle>
       </div>
+      {isAdmin && (
+        <Link href="/account/beheer" className="card mb-3 flex items-center gap-3 px-4 py-3 active:translate-y-[2px]">
+          <span className="text-2xl" aria-hidden>
+            🔑
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-black">Beheer: wachtwoord herstellen</span>
+            <span className="block text-xs font-bold text-muted">Herstelcode maken voor een speler die zijn wachtwoord kwijt is</span>
+          </span>
+          <span className="customize-go" aria-hidden>
+            ▶
+          </span>
+        </Link>
+      )}
       <div className="card px-4 py-3">
         <p className="mb-2 font-black">🔔 Meldingen op dit toestel</p>
         <PushToggle />

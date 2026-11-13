@@ -7,7 +7,8 @@ import { standingsByGame } from "@/lib/stats";
 import type { Game } from "@/lib/types";
 import { GameIcon } from "@/components/GameIcon";
 import { Avatar } from "@/components/Avatar";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { EmptyState, PageHeader, Panel } from "@/components/ui";
+import { PixelIcon } from "@/components/PixelIcon";
 
 export const metadata: Metadata = { title: "Games" };
 
@@ -48,7 +49,8 @@ export default async function GamesPage() {
       />
 
       {sorted.length ? (
-        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">
+        <Panel title={`GAME LIBRARY · ${sorted.length}`} icon={<PixelIcon name="gamepad" size={12} />} tone="var(--color-orange-soft)" label="Alle games">
+        <ul className="panel-rows">
           {sorted.map((g) => {
             const t = TYPE_LABEL[typeOf(g)];
             const count = played.get(g.id) ?? 0;
@@ -79,6 +81,7 @@ export default async function GamesPage() {
             );
           })}
         </ul>
+        </Panel>
       ) : (
         <EmptyState
           icon={<Gamepad2 size={32} />}
