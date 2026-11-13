@@ -62,6 +62,8 @@ export type GameNight = {
   game_ids: string[];
   cohost_id: string | null;
   date_poll: boolean;
+  /** 🏆 De Smash op deze avond is de Smash Bros Championship Cup */
+  smash_cup?: boolean;
   /** Oefenavond: telt nergens voor mee */
   is_practice?: boolean;
   created_by: string | null;

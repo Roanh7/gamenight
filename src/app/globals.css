@@ -1170,3 +1170,80 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 .section-title > h2 { display: flex; min-width: 0; flex: 1; align-items: center; gap: 8px; }
 .section-title > h2::before { content: ""; height: 8px; width: 8px; flex-shrink: 0; background: var(--color-red); box-shadow: 2px 2px 0 var(--color-line); }
 .section-title > h2::after { content: ""; height: 2px; min-width: 12px; flex: 1; background: repeating-linear-gradient(90deg, var(--color-line) 0 6px, transparent 6px 10px); opacity: 0.35; }
+
+/* ---------- 🏆 Smash Bros Championship Cup ---------- */
+:root { --cup-1: #ffc527; --cup-2: #d79a12; --cup-soft: #fff3c4; --cup-text: #8a5a00; }
+:root[data-theme="dark"] { --cup-soft: #3a3016; --cup-text: #ffd76a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cup-soft: #3a3016; --cup-text: #ffd76a; } }
+.cup-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff3b0 0%, var(--cup-1) 55%, var(--cup-2) 100%);
+  color: #3b2400;
+  padding: 1px 8px 1px 5px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.cup-card {
+  overflow: hidden;
+  border: 2px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-paper);
+  box-shadow: 0 4px 0 var(--color-line);
+}
+.cup-card-head {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  border-bottom: 2px solid var(--color-line);
+  background: linear-gradient(180deg, #fff3b0 0%, var(--cup-1) 60%, var(--cup-2) 100%);
+  color: #3b2400;
+  padding: 4px 12px;
+}
+.cup-card-foot {
+  display: block;
+  border-top: 2px solid var(--color-line);
+  background: var(--cup-soft);
+  padding: 8px 12px;
+  text-align: center;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--cup-text);
+}
+.cup-card-foot:active { background: var(--cup-1); color: #3b2400; }
+.cup-badge {
+  position: absolute;
+  right: -7px;
+  bottom: -6px;
+  display: inline-flex;
+  height: 26px;
+  width: 26px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-paper);
+}
+.cup-shine { position: relative; overflow: hidden; }
+.cup-shine::after {
+  content: "";
+  position: absolute;
+  inset: -50% auto -50% -60%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: skewX(-20deg);
+  animation: cup-shine 3.2s ease-in-out infinite;
+}
+@keyframes cup-shine { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+@media (prefers-reduced-motion: reduce) { .cup-shine::after { animation: none; display: none; } }
+.cup-choice-on { background: linear-gradient(180deg, #fff3b0 0%, var(--cup-1) 60%, var(--cup-2) 100%); color: #3b2400; box-shadow: 0 3px 0 var(--color-line); }
+/* 🏆 Smash Cup-uitreiking: zwevende gouden beker */
+.cup-float { animation: cup-float 2.6s ease-in-out infinite; filter: drop-shadow(0 0 18px rgb(255 197 39 / 0.45)); }
+@keyframes cup-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .cup-float { animation: none; } }

@@ -10,6 +10,7 @@ import { bannerDef, type Rarity } from "@/lib/banners";
 import { Banner } from "./Banner";
 import { seasonLabel } from "@/lib/stats";
 import { newsKind } from "@/lib/news";
+import { CupIcon } from "./CupIcon";
 
 type Props = {
   items: Activity[];
@@ -240,6 +241,42 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
                 <span className={`feed-extra rarity-frame r-${rarity} mt-1.5 block h-12`}>
                   <Banner id={def.id} still />
                 </span>
+              </>
+            );
+            break;
+          }
+          case "smash_champion": {
+            const defended = !!a.payload?.defended;
+            const cups = Number(a.payload?.cups ?? 1);
+            const prev = a.payload?.previous ? profiles.get(String(a.payload.previous)) : undefined;
+            icon = <CupIcon size={14} title={null} />;
+            tone = "bg-yellow";
+            text = (
+              <>
+                <b className="pixel text-[9px]">{defended ? "👑 THE KING REMAINS!" : "🏆 A NEW SMASH CHAMPION IS CROWNED!"}</b>
+                <br />
+                {defended ? (
+                  <>
+                    {name} verdedigt de <b className="font-black">Smash Bros Championship Cup</b> en houdt de wisselbeker.
+                  </>
+                ) : (
+                  <>
+                    {name} wint de <b className="font-black">Smash Bros Championship Cup</b>
+                    {prev ? <> en neemt de beker over van <b className="font-black">{prev.username}</b></> : null}!
+                  </>
+                )}{" "}
+                <span className="text-muted">
+                  {cups}e Smash Cup
+                  {night ? ` · ${night.title}` : ""}
+                </span>
+                {a.night_id && (
+                  <>
+                    {" "}
+                    <Link href={`/agenda/${a.night_id}/cup`} className="font-black underline decoration-2 underline-offset-2">
+                      Bekeruitreiking ▶
+                    </Link>
+                  </>
+                )}
               </>
             );
             break;

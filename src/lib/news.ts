@@ -5,7 +5,7 @@
  */
 export const NEWS_FILTERS = [
   { id: "all", label: "All", emoji: "📰", types: null },
-  { id: "results", label: "Results", emoji: "🏁", types: ["match_finished", "night_recap", "underdog_win", "history_correction"] },
+  { id: "results", label: "Results", emoji: "🏁", types: ["match_finished", "night_recap", "underdog_win", "history_correction", "smash_champion"] },
   { id: "rankings", label: "Rankings", emoji: "📈", types: ["rank_up"] },
   { id: "unlocks", label: "Unlocks", emoji: "✨", types: ["banner_unlocked"] },
   { id: "group", label: "Groep", emoji: "📅", types: ["night_planned", "host_changed", "member_joined", "game_added"] },

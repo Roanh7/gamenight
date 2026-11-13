@@ -24,6 +24,7 @@ import { GameIcon } from "@/components/GameIcon";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Flash } from "@/components/Flash";
 import { PageHeader, SectionTitle, StatusChip } from "@/components/ui";
+import { CupIcon } from "@/components/CupIcon";
 
 export const metadata: Metadata = { title: "Host dashboard" };
 
@@ -75,6 +76,13 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
     <div>
       <PageHeader back={night.status === "live" ? "/live" : `/agenda/${id}`} kicker="HOST DASHBOARD" title={night.title} action={<StatusChip status={night.status} />} />
       <Flash sp={sp} />
+      {night.smash_cup && !night.is_practice && (
+        <Link href={`/agenda/${id}#smash-cup`} className="cup-card mb-4 flex items-center gap-2 px-3 py-2.5 text-sm font-black">
+          <CupIcon size={18} title={null} />
+          <span className="min-w-0 flex-1">Smash Bros Championship Cup: bevestig na het Smash-potje de kampioen op de avondpagina.</span>
+          <span aria-hidden>▶</span>
+        </Link>
+      )}
       {night.is_practice && (
         <p className="mb-4 rounded-2xl border-2 border-line bg-purple-soft px-4 py-3 text-sm font-bold">
           🧪 <b>Oefenavond.</b> Hier kun je alles uitproberen: niks telt mee voor de ranking, XP, records of het nieuws, en

@@ -104,7 +104,7 @@ export default async function EditNightPage(props: PageProps<"/agenda/[id]/bewer
           </select>
           <p className="mt-1 text-xs text-muted">De co-host kan alles wat de host kan.</p>
         </div>
-        <ProgramPicker games={games.list} defaultMode={night.vote_mode} defaultGames={night.game_ids ?? []} />
+        <ProgramPicker games={games.list} defaultMode={night.vote_mode} defaultGames={night.game_ids ?? []} defaultCup={!!night.smash_cup} />
         <div>
           <label className="label" htmlFor="notes">
             Notities <span className="font-bold text-muted">(optioneel)</span>

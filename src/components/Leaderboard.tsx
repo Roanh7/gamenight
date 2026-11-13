@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
 import { Avatar } from "./Avatar";
+import { CupIcon } from "./CupIcon";
 import { RankBadge } from "./ui";
 import { UnderdogChip } from "./Underdog";
 
@@ -20,6 +21,7 @@ export function Leaderboard({
   limit,
   compact,
   underdogs,
+  champion,
 }: {
   rows: BoardRow[];
   profiles: Map<string, Profile>;
@@ -28,6 +30,8 @@ export function Leaderboard({
   compact?: boolean;
   /** 🐺 Spelers die nu underdog zijn (alleen huidige seizoen) */
   underdogs?: Set<string>;
+  /** 🏆 Regerend Smash-kampioen (gouden beker naast de naam) */
+  champion?: string | null;
 }) {
   const shown = limit ? rows.slice(0, limit) : rows;
   return (
@@ -52,6 +56,7 @@ export function Leaderboard({
                     {p.username}
                     {me && <span className="ml-1 text-xs font-bold text-muted">(jij)</span>}
                   </span>
+                  {champion === r.user_id && <CupIcon size={15} />}
                   {underdogs?.has(r.user_id) && <UnderdogChip />}
                 </p>
                 {!compact && (

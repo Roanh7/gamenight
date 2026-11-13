@@ -21,6 +21,11 @@ import { BannerUnlock } from "./BannerUnlock";
 import { ownedBanners, shownBanner, syncBanners, unseenBanners, type UnlockRow } from "@/lib/bannerSync";
 import { unseenFrames } from "@/lib/frames";
 import { FrameUnlock } from "./FrameUnlock";
+import { CupIcon } from "./CupIcon";
+import { cupDate } from "./SmashCup";
+import { cupStats, reignLabel, todayNl } from "@/lib/smashCup";
+import { getSmashCups } from "@/lib/smashCupData";
+import { nowMs } from "@/lib/format";
 
 export async function PlayerProfile({
   profile,
@@ -32,7 +37,7 @@ export async function PlayerProfile({
   viewerId?: string;
 }) {
   const supabase = await createClient();
-  const [games, boards, overall, allResults, profiles, { count: hosted }, attendance] = await Promise.all([
+  const [games, boards, overall, allResults, profiles, { count: hosted }, attendance, cupRows] = await Promise.all([
     getGames(supabase),
     getLeaderboards(supabase),
     getOverall(supabase),
@@ -45,7 +50,14 @@ export async function PlayerProfile({
       .eq("status", "finished")
       .eq("is_practice", false),
     getAttendance(supabase),
+    getSmashCups(supabase),
   ]);
+  // 🏆 Smash Bros Championship Cup
+  const today = todayNl(nowMs());
+  const cup = cupStats(cupRows, today);
+  const myCup = cup.players.get(profile.id);
+  const cupHolder = cup.champion === profile.id;
+  const myCupEditions = cup.editions.filter((e) => e.winner_id === profile.id);
   const xpOf = computeXp(allResults, attendance);
   const xp = xpOf(profile.id);
   // Banners: op je eigen profiel meteen bijwerken; bij een vriend alleen zijn gekozen banner tonen
@@ -72,6 +84,14 @@ export async function PlayerProfile({
     bounties: bountyHits(allResults).get(profile.id) ?? 0,
   });
   const cups: CabinetItem[] = [
+    ...myCupEditions.map((e) => ({
+      id: `smash-cup-${e.id}`,
+      sprite: "cup" as const,
+      title: `Smash Bros Championship Cup ${e.held_on.slice(0, 4)}`,
+      description: `${profile.username} won de Smash Cup op ${cupDate(e.held_on)}${e.defended ? " (titelverdediging)" : ""}`,
+      earned: true,
+      plaque: `SMASH ${e.held_on.slice(0, 4)}`,
+    })),
     ...wonSeasons.map((s) => ({
       id: `season-${s}`,
       sprite: "cup" as const,
@@ -147,7 +167,10 @@ export async function PlayerProfile({
               </Link>
             )}
           </div>
-          <h1 className="mt-2 text-2xl font-black">{profile.username}</h1>
+          <h1 className="mt-2 text-2xl font-black">
+            {profile.username}
+            {cupHolder && <CupIcon size={22} className="ml-2" />}
+          </h1>
           {profile.bio && <p className="mt-0.5 text-sm">{profile.bio}</p>}
           <p className="mt-1 text-xs font-bold text-muted">Speler sinds {since}</p>
           <div className="mt-3">
@@ -191,6 +214,54 @@ export async function PlayerProfile({
           </div>
         )}
       </section>
+
+      {/* 🏆 Smash Bros Championship Cup */}
+      {cupHolder && myCup && cup.championSince ? (
+        <section className="cup-card mt-4" aria-label="Reigning Smash Champion">
+          <div className="cup-card-head">
+            <h2 className="pixel flex items-center gap-1.5 text-[9px]">
+              <CupIcon size={14} title={null} /> REIGNING SMASH CHAMPION
+            </h2>
+          </div>
+          <div className="flex items-center gap-4 px-4 py-4">
+            <span className="cup-shine shrink-0 rounded-2xl border-2 border-line bg-[color:var(--cup-soft)] p-2.5">
+              <CupIcon size={56} title="Gouden wisselbeker" className="cup-float" />
+            </span>
+            <div className="min-w-0 text-sm font-bold">
+              <p className="text-base font-black">{profile.username} heeft de wisselbeker</p>
+              <p className="text-muted">
+                Kampioen sinds {cupDate(cup.championSince)} · {reignLabel(Math.round((Date.parse(today) - Date.parse(cup.championSince)) / 86_400_000))}
+              </p>
+            </div>
+          </div>
+          <dl className="grid grid-cols-3 border-t-2 border-line text-center">
+            {[
+              [myCup.cups === 1 ? "Smash Cup" : "Smash Cups", myCup.cups],
+              [myCup.defenses === 1 ? "Verdediging" : "Verdedigingen", myCup.defenses],
+              ["Laatste zege", myCup.lastYear],
+            ].map(([label, value], i) => (
+              <div key={String(label)} className={`py-3 ${i > 0 ? "border-l-2 border-line" : ""}`}>
+                <dt className="text-[10px] font-black uppercase text-muted">{label}</dt>
+                <dd className="pixel mt-1 text-sm">{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <Link href="/smash-cup" className="cup-card-foot">
+            SMASH CUP HISTORY ▶
+          </Link>
+        </section>
+      ) : myCup ? (
+        <Link href="/smash-cup" className="card mt-4 flex items-center gap-3 px-4 py-3 text-sm font-bold hover:bg-cream">
+          <span className="text-xl" aria-hidden>
+            🏆
+          </span>
+          <span className="min-w-0 flex-1">
+            Oud-kampioen Smash Cup: {myCup.cups}× gewonnen ({myCupEditions.map((e) => e.held_on.slice(0, 4)).join(", ")})
+            {myCup.defenses ? ` · ${myCup.defenses}× verdedigd` : ""}
+          </span>
+          <span aria-hidden>▶</span>
+        </Link>
+      ) : null}
 
       {/* Onderlinge stand */}
       {versus && (

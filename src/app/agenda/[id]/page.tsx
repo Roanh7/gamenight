@@ -17,6 +17,11 @@ import { LiveRefresh } from "@/components/LiveRefresh";
 import { NightRecap } from "@/components/NightRecap";
 import { Celebrate } from "@/components/Celebrate";
 import { EmptyState, PageHeader, SectionTitle, StatusChip } from "@/components/ui";
+import { SmashCupNight } from "@/components/SmashCupNight";
+import { SmashCupChip } from "@/components/SmashCup";
+import { cupStats, isSmashGame, todayNl } from "@/lib/smashCup";
+import { getSmashCups } from "@/lib/smashCupData";
+import { nowMs } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Gamenight" };
 
@@ -25,10 +30,11 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const [data, profiles, games] = await Promise.all([
+  const [data, profiles, games, cupRows] = await Promise.all([
     getNight(supabase, id),
     getProfiles(supabase),
     getGames(supabase),
+    getSmashCups(supabase),
   ]);
   if (!data || !me) notFound();
   const { night, participants, votes, matches, results, live, liveTeams, teams, dateOptions, declined } = data;
@@ -64,6 +70,10 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
   // Vaste selectie: wat nu live is eerst, dan wat nog moet, dan wat al gespeeld is
   const rank = (g: string) => (liveIds.has(g) ? 0 : playedIds.has(g) ? 2 : 1);
   const programSorted = [...program].sort((a, b) => rank(a.id) - rank(b.id));
+  // 🏆 Smash Bros Championship Cup
+  const today = todayNl(nowMs());
+  const cup = night.smash_cup && !night.is_practice ? cupStats(cupRows, today) : null;
+  const smashMatches = matches.filter((m) => isSmashGame(games.byId.get(m.game_id)?.name));
 
   const matchesSection = matches.length > 0 && (
         <>
@@ -97,6 +107,7 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
         </p>
       )}
       <Flash sp={sp} />
+      {cup && <SmashCupChip className="mb-3" />}
 
       {/* Info */}
       <section className="card p-4">
@@ -164,6 +175,19 @@ export default async function NightPage(props: PageProps<"/agenda/[id]">) {
           )
         )}
       </section>
+
+      {cup && (
+        <SmashCupNight
+          night={night}
+          stats={cup}
+          profiles={profiles.byId}
+          isHost={isHost}
+          smashMatches={smashMatches}
+          results={results}
+          participants={participants}
+          today={today}
+        />
+      )}
 
       {sp.klaar && recap && <Celebrate kind="win" />}
       {recap && <NightRecap recap={recap} profiles={profiles.byId} nightId={night.id} title={night.title} />}

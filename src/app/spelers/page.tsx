@@ -8,16 +8,19 @@ import { Avatar } from "@/components/Avatar";
 import { EmptyState, PageHeader } from "@/components/ui";
 import { SOFT_BG, safeColor } from "@/lib/colors";
 import { computeXp, getAttendance } from "@/lib/xp";
+import { CupIcon } from "@/components/CupIcon";
+import { getSmashChampion } from "@/lib/smashCupData";
 
 export const metadata: Metadata = { title: "Players" };
 
 export default async function PlayersPage() {
   const me = await getMe();
   const supabase = await createClient();
-  const [profiles, results, attendance] = await Promise.all([
+  const [profiles, results, attendance, cupChampion] = await Promise.all([
     getProfiles(supabase),
     getResults(supabase),
     getAttendance(supabase),
+    getSmashChampion(supabase),
   ]);
   const xpOf = computeXp(results, attendance);
   const target = currentBountyTarget(results);
@@ -73,7 +76,10 @@ export default async function PlayersPage() {
                         crown={s?.rank === 1}
                       />
                     </span>
-                    <span className="pixel mt-2.5 block w-full truncate text-[10px] uppercase">{p.username}</span>
+                    <span className="pixel mt-2.5 flex w-full items-center justify-center gap-1 text-[10px] uppercase">
+                      <span className="truncate">{p.username}</span>
+                      {cupChampion === p.id && <CupIcon size={14} />}
+                    </span>
                     <span className="pixel mt-1 text-[8px] text-ink/70">
                       LV {xpOf(p.id).level} · {xpOf(p.id).title.toUpperCase()}
                     </span>

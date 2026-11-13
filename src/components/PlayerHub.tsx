@@ -29,13 +29,17 @@ import { FrameUnlock } from "./FrameUnlock";
 import { PixelIcon } from "./PixelIcon";
 import { Panel } from "./ui";
 import { XpPanel } from "./XpPanel";
+import { CupIcon } from "./CupIcon";
+import { SmashCupChip, cupDate } from "./SmashCup";
+import { cupStats, todayNl } from "@/lib/smashCup";
+import { getSmashCups } from "@/lib/smashCupData";
 
 /** Het persoonlijke videogame-dashboard op Home. */
 export async function PlayerHub({ userId, welcome }: { userId: string; welcome: boolean }) {
   const supabase = await createClient();
   const since = hoursAgoIso(12);
 
-  const [profiles, games, results, activity, nightsRes, attendance, boards, hostedRes, active, allNights, allParts, attExtras] = await Promise.all([
+  const [profiles, games, results, activity, nightsRes, attendance, boards, hostedRes, active, allNights, allParts, attExtras, cupRows] = await Promise.all([
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
@@ -59,8 +63,16 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
     supabase.from("game_nights").select("id, starts_at, status, is_practice"),
     supabase.from("participants").select("night_id, user_id, status"),
     getAttendanceExtras(supabase),
+    getSmashCups(supabase),
   ]);
   const me = profiles.byId.get(userId);
+  // 🏆 Smash Bros Championship Cup
+  const cupInfo = cupStats(cupRows, todayNl(nowMs()));
+  const cup = {
+    holder: cupInfo.champion === userId,
+    champion: cupInfo.champion ? (profiles.byId.get(cupInfo.champion) ?? null) : null,
+    since: cupInfo.championSince,
+  };
   // 📅 Aanwezigheid (zelfde berekening als in de Agenda)
   const attStats = attendanceModel({
     nights: (allNights.data ?? []) as { id: string; starts_at: string; status: string; is_practice: boolean }[],
@@ -167,7 +179,7 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
         welcome, active, name, me, xp, mySeason: mySeason ?? null, season, streak, msg, target, targetName, userId,
         winRate, form, mvps, nextNight: nextNight ?? null, confirmedProfiles, myStatus, isFixed, voters: tally.voters,
         gameNames, isHost, declinedNext: !!nextNight && attExtras.declines.some((x) => x.night_id === nextNight.id && x.user_id === userId), myPart: myPart ?? null, myVote, next, earnedCount, achTotal: ach.list.length,
-        rival, rivalProfile: rivalProfile ?? null, banner, attStats,
+        rival, rivalProfile: rivalProfile ?? null, banner, attStats, cup,
       }}
       news={news}
       overlays={
@@ -216,6 +228,8 @@ export type HubData = {
   rivalProfile: Profile | null;
   banner: string;
   attStats?: AttStats;
+  /** 🏆 Smash Cup: ben jij de regerend kampioen, en wie is het? */
+  cup?: { holder: boolean; champion: Profile | null; since: string | null };
 };
 
 
@@ -224,7 +238,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
   const {
     welcome, active, name, me, xp, mySeason, season, streak, msg, target, targetName, userId, winRate, form, mvps,
     nextNight, confirmedProfiles, myStatus, isFixed, voters, gameNames, isHost, myPart, myVote, next, earnedCount,
-    achTotal, rival, rivalProfile, banner, attStats,
+    achTotal, rival, rivalProfile, banner, attStats, cup,
   } = d;
   const headLink = "shrink-0 text-[11px] font-black text-ink hover:underline";
   return (
@@ -268,7 +282,10 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
           </Link>
           <div className="ml-[96px] min-h-[44px] min-w-0">
             <Link href="/account" className="block min-w-0 hover:underline">
-              <h1 className={`break-words font-black leading-tight ${name.length > 12 ? "text-lg" : "text-xl"}`}>{name}</h1>
+              <h1 className={`break-words font-black leading-tight ${name.length > 12 ? "text-lg" : "text-xl"}`}>
+                {name}
+                {cup?.holder && <CupIcon size={18} className="ml-1.5" />}
+              </h1>
             </Link>
             <p className="mt-1 flex flex-wrap items-center gap-1.5">
               <span className="pixel rounded-md border-2 border-line bg-red px-1.5 py-0.5 text-[9px] text-white">LV {xp.level}</span>
@@ -281,6 +298,11 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
               🏆 {mySeason ? `#${mySeason.rank} · ${seasonLabel(season)}` : `Nog geen rank · ${seasonLabel(season)}`}
             </Link>
             {streak.wins > 0 && <span className="chip bg-orange-soft py-0.5 text-[11px]">🔥 {streak.wins} op rij</span>}
+            {cup?.holder && (
+              <Link href="/smash-cup" className="cup-chip py-0.5">
+                <CupIcon size={12} title={null} /> REIGNING SMASH CHAMPION
+              </Link>
+            )}
           </div>
 
           {/* XP-balk (telt zichtbaar op als je XP hebt verdiend sinds je vorige bezoek) */}
@@ -349,6 +371,20 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
               </div>
               {nextNight.status === "live" && <span className="chip bg-red text-white">● LIVE</span>}
             </div>
+            {nextNight.smash_cup && (
+              <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl border-2 border-line bg-[color:var(--cup-soft)] px-2.5 py-2 text-xs font-bold">
+                <SmashCupChip />
+                {cup?.champion ? (
+                  <span className="inline-flex min-w-0 items-center gap-1">
+                    Titelhouder: <b className="truncate font-black">{cup.champion.username}</b>
+                    <CupIcon size={14} />
+                    {cup.since && <span className="text-muted">· sinds {cupDate(cup.since)}</span>}
+                  </span>
+                ) : (
+                  <span>De eerste kampioen wordt gekroond!</span>
+                )}
+              </div>
+            )}
             {nextNight.status === "planned" && !nextNight.date_poll && (
               <FuseCountdown startsAt={nextNight.starts_at} createdAt={nextNight.created_at} serverNow={nowMs()} />
             )}

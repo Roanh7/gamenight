@@ -393,6 +393,15 @@ export default async function UitlegPage() {
             <b>Ranking</b>, de host ziet hem bij het starten van een potje, en in het <b>Recordboek</b> staan de{" "}
             <b>Underdog Legends</b>.
           </p>
+          <p id="smash-cup" className="scroll-mt-20 pt-1">
+            <b>🏆 Smash Bros Championship Cup:</b> onze wisselbeker. Plan je een avond met Smash Bros, dan vraagt de app{" "}
+            <b>Welk type Smash Bros spelen we?</b> Kies <b>🏆 Championship Cup</b> en de Smash op die avond is een
+            officieel bekerevenement (in de Agenda zie je een gouden <b>SMASH CUP</b>-label). Na afloop bevestigt de host
+            of co-host op de avondpagina wie heeft gewonnen. De winnaar wordt <b>REIGNING SMASH CHAMPION</b> en krijgt
+            het gouden bekertje naast zijn naam, tot iemand anders een volgende Cup wint. Wint de kampioen opnieuw, dan is
+            dat een <b>titelverdediging</b>. Een geplande of afgelaste Cup verandert niets. De Cup telt níet mee voor
+            punten, XP of ranking. Alle edities en records staan bij <b>Ranking → Smash Cup History</b>.
+          </p>
           <p className="pt-1">
             <b>📜 Recordboek:</b> via de knop bij <b>Ranking</b> zie je de records aller tijden: meeste zeges,
             langste winstreeks, beste avond, vaakst MVP, trouwste speler, meeste avonden gehost, de grootste

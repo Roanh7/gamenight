@@ -315,7 +315,7 @@ function Final({ data, run }: { data: CeremonyData; run: number }) {
   );
 }
 
-function Stars({ dim }: { dim: boolean }) {
+export function Stars({ dim }: { dim: boolean }) {
   return (
     <div className={`pointer-events-none fixed inset-0 transition-opacity duration-700 ${dim ? "opacity-20" : "opacity-100"}`} aria-hidden>
       {Array.from({ length: 46 }, (_, i) => (
@@ -338,7 +338,7 @@ function Stars({ dim }: { dim: boolean }) {
 
 const CONFETTI = ["#e4002b", "#2f5de0", "#22a04b", "#ffc527", "#7b4fd6", "#f5761a", "#e6489b", "#12a3a0"];
 
-function Confetti({ burst }: { burst: boolean }) {
+export function Confetti({ burst }: { burst: boolean }) {
   return (
     <div className="pd-confetti pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
       {Array.from({ length: burst ? 60 : 32 }, (_, i) => (

@@ -5,6 +5,7 @@ import type { GameNight, Profile } from "@/lib/types";
 import { dayParts, formatTime } from "@/lib/format";
 import { Avatar } from "./Avatar";
 import { StatusChip } from "./ui";
+import { SmashCupChip } from "./SmashCup";
 
 export function NightCard({
   night,
@@ -61,6 +62,7 @@ export function NightCard({
             </span>
           )}
           {host && <span>Host: {host.username}</span>}
+          {night.smash_cup && !night.is_practice && <SmashCupChip />}
         </div>
         <div className="mt-2 flex items-center justify-between">
           <div className="flex -space-x-1.5">

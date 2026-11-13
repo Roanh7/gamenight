@@ -28,6 +28,10 @@ import { HallOfChampions } from "@/components/HallOfChampions";
 import { SPECIALIST_MIN_PLAYED, specialistBoards } from "@/lib/specialists";
 import { SpecialistCards } from "@/components/Specialists";
 import { ResultsRefresh } from "@/components/ResultsRefresh";
+import { SmashCupCard } from "@/components/SmashCup";
+import { cupStats, todayNl } from "@/lib/smashCup";
+import { getSmashCups } from "@/lib/smashCupData";
+import { nowMs } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Ranking" };
 
@@ -35,11 +39,14 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const sp = await props.searchParams;
   const me = await getMe();
   const supabase = await createClient();
-  const [games, results, profiles] = await Promise.all([
+  const [games, results, profiles, cupRows] = await Promise.all([
     getGames(supabase),
     getResults(supabase),
     getProfiles(supabase),
+    getSmashCups(supabase),
   ]);
+  const today = todayNl(nowMs());
+  const cup = cupStats(cupRows, today);
 
   const seasons = seasonsWithData(results);
   const season = parseSeason(sp.seizoen, seasons);
@@ -162,6 +169,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             profiles={profiles.byId}
             meId={me?.user.id}
             underdogs={ud}
+            champion={cup.champion}
           />
         ) : (
           <EmptyState
@@ -181,6 +189,10 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
           </Link>
         </p>
       )}
+
+      <div id="smash-cup" className="mt-4 scroll-mt-20">
+        <SmashCupCard stats={cup} profiles={profiles.byId} today={today} />
+      </div>
 
       {sortedGames.length > 0 && (
         <>
@@ -213,7 +225,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
                 </Link>
                 {gRows.length > 0 ? (
                   <div className="p-2">
-                    <Leaderboard rows={gRows} profiles={profiles.byId} meId={me?.user.id} limit={3} compact />
+                    <Leaderboard rows={gRows} profiles={profiles.byId} meId={me?.user.id} limit={3} compact champion={cup.champion} />
                   </div>
                 ) : (
                   <p className="px-3 py-3 text-sm text-muted">Wie pakt de eerste kroon? 👑</p>

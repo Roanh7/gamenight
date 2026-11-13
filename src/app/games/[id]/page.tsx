@@ -16,6 +16,8 @@ import { EmptyState, PageHeader, SectionTitle } from "@/components/ui";
 import { SPECIALIST_MIN_PLAYED, specialistBoard, specialistTitle, titleHolders } from "@/lib/specialists";
 import { SpecialistBadge, SpecialistTable } from "@/components/Specialists";
 import { ResultsRefresh } from "@/components/ResultsRefresh";
+import { isSmashGame } from "@/lib/smashCup";
+import { getSmashChampion } from "@/lib/smashCupData";
 
 export const metadata: Metadata = { title: "Game" };
 
@@ -39,6 +41,8 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
   ]);
   if (!gameData) notFound();
   const game = gameData as Game;
+  // 🏆 Bij Smash staat de regerend bekerkampioen met zijn beker in de ranglijst
+  const cupChampion = isSmashGame(game.name) ? await getSmashChampion(supabase) : null;
   const gameResults = allResults.filter((r) => r.game_id === id);
   const seasons = seasonsWithData(gameResults);
   const season = parseSeason(sp.seizoen, seasons);
@@ -119,7 +123,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
       <SeasonTabs seasons={seasons} active={season} basePath={`/games/${id}`} />
       <div className="mt-2" />
       {rows.length ? (
-        <Leaderboard rows={rows} profiles={profiles.byId} meId={me?.user.id} />
+        <Leaderboard rows={rows} profiles={profiles.byId} meId={me?.user.id} champion={cupChampion} />
       ) : (
         <EmptyState
           icon={<Trophy size={32} />}

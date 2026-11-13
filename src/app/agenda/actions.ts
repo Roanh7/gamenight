@@ -79,6 +79,15 @@ function parseProgram(fd: FormData, back: string) {
   return { vote_mode, game_ids: vote_mode === "fixed" ? game_ids : [] };
 }
 
+/** 🏆 Wordt de Smash op deze avond de Championship Cup? Alleen als Smash Bros (mogelijk) op het programma staat. */
+async function smashCupFlag(supabase: DBClient, fd: FormData, program: { vote_mode: string; game_ids: string[] }) {
+  if (str(fd, "smash_type") !== "cup") return false;
+  const { data } = await supabase.from("games").select("id").ilike("name", "%smash%");
+  const ids = (data ?? []).map((g) => g.id as string);
+  if (!ids.length) return false;
+  return program.vote_mode === "vote" || program.game_ids.some((g) => ids.includes(g));
+}
+
 export async function createNight(formData: FormData) {
   const { supabase, user } = await requireUser();
   const title = str(formData, "title") || "Gamenight";
@@ -94,6 +103,7 @@ export async function createNight(formData: FormData) {
   const startsAt = poll ? options[0] : str(formData, "starts_at");
   if (!startsAt || Number.isNaN(Date.parse(startsAt))) fail("/agenda/nieuw", "Kies een datum en tijd.");
   const program = parseProgram(formData, "/agenda/nieuw");
+  const smashCup = await smashCupFlag(supabase, formData, program);
 
   const { data, error } = await supabase
     .from("game_nights")
@@ -105,6 +115,7 @@ export async function createNight(formData: FormData) {
       host_id: hostId,
       created_by: user.id,
       date_poll: poll,
+      smash_cup: smashCup,
       ...program,
     })
     .select("id")
@@ -145,6 +156,7 @@ export async function updateNight(formData: FormData) {
   const back = `/agenda/${id}/bewerken`;
   if (!startsAt || Number.isNaN(Date.parse(startsAt))) fail(back, "Kies een datum en tijd.");
   const program = parseProgram(formData, back);
+  const smashCup = await smashCupFlag(supabase, formData, program);
   const { data: saved, error } = await supabase
     .from("game_nights")
     .update({
@@ -158,6 +170,7 @@ export async function updateNight(formData: FormData) {
         return c && c !== str(formData, "host_id") ? c : null;
       })(),
       ...(program.vote_mode === "vote" ? { vote_mode: "vote" } : program),
+      smash_cup: smashCup,
     })
     .eq("id", id)
     .select("id");
@@ -592,4 +605,37 @@ export async function deletePracticeNight(formData: FormData) {
   if (error) fail(`/agenda/${id}/host`, "Weggooien lukte niet.");
   revalidatePath("/", "layout");
   redirect(`/agenda?ok=${encodeURIComponent("Oefenavond weggegooid 🧹")}`);
+}
+
+/**
+ * 🏆 Host/co-host bevestigt de winnaar van de Smash Bros Championship Cup.
+ * De database controleert alles (host, Cup-avond, bezig/afgelopen, Smash-potje af, winnaar deed mee)
+ * en voorkomt dubbele registraties. Punten en XP veranderen niet.
+ */
+export async function confirmSmashCup(formData: FormData) {
+  const { supabase, user } = await requireUser();
+  const id = str(formData, "night_id");
+  const winner = str(formData, "winner_id");
+  const back = `/agenda/${id}`;
+  if (!UUID.test(id) || !UUID.test(winner)) fail(back, "Kies de winnaar van de Cup.");
+  const { data, error } = await supabase.rpc("confirm_smash_cup", { p_night: id, p_winner: winner });
+  if (error) fail(back, error.message?.replace(/^.*?: /, "") || "Bevestigen lukte niet.");
+  const res = (data ?? {}) as { changed?: boolean; defended?: boolean };
+  if (res.changed) {
+    const info = await pushInfo(supabase, id, user.id);
+    const { data: w } = await supabase.from("profiles").select("username").eq("id", winner).maybeSingle();
+    if (!info.practice)
+      pushLater(
+        null,
+        {
+          title: res.defended ? "👑 THE KING REMAINS!" : "🏆 A NEW SMASH CHAMPION IS CROWNED!",
+          body: res.defended ? `${w?.username ?? "De kampioen"} verdedigt de Smash Cup!` : `${w?.username ?? "Iemand"} wint de Smash Bros Championship Cup!`,
+          url: `/agenda/${id}/cup`,
+          tag: `cup-${id}`,
+        },
+        user.id,
+      );
+  }
+  revalidatePath("/", "layout");
+  redirect(`/agenda/${id}/cup?auto=1`);
 }
