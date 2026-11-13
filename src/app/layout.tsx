@@ -48,7 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-season={season ?? undefined}
       // Het startscherm-script zet data-boot op <html> vóórdat React start
       suppressHydrationWarning
-      style={{ ["--nav-h" as string]: live ? "104px" : "76px" }}
+      style={{ ["--nav-h" as string]: live ? "120px" : "86px" }}
     >
       {me && (
         <head>

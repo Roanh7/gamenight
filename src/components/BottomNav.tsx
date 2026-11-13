@@ -15,20 +15,20 @@ const ITEMS: { href: string; label: string; icon: PixelIconName; match: (p: stri
   { href: "/ranking", label: "Ranking", icon: "trophy", match: (p) => p.startsWith("/ranking") || p.startsWith("/records") },
 ];
 
-/** Eén knop van het console-menu. */
+/** Eén knop van het zwevende menu. */
 function Key({ href, label, icon, active, accent }: { href: string; label: string; icon: PixelIconName; active: boolean; accent?: boolean }) {
   return (
     <li className="min-w-0">
       <Link
         href={href}
-        className={`console-key ${active ? "is-on" : ""} ${accent ? "is-accent" : ""}`}
+        className={`dock-key ${active ? "is-on" : ""} ${accent ? "is-accent" : ""}`}
         aria-current={active ? "page" : undefined}
         onClick={() => {
           if (!active && soundOn()) playClick();
         }}
       >
-        <PixelIcon name={icon} size={20} />
-        <span className="console-label">{label}</span>
+        <PixelIcon name={icon} size={22} />
+        <span className="dock-label">{label}</span>
       </Link>
     </li>
   );
@@ -42,7 +42,11 @@ function setNavCookie(value: string | null) {
     : "gn-nav=; path=/; max-age=0; samesite=lax";
 }
 
-/** Menubalk onderaan als bedieningspaneel van een spelcomputer. Tijdens een avond waar je bij bent: de live-balk. */
+/**
+ * Zwevend menu onderaan (zoals in A-Team Wrapped), in Game Night-stijl: een afgeronde balk met dikke rand,
+ * pixel-iconen met label en een geel "pilletje" achter de actieve knop.
+ * Tijdens een avond waar je bij bent: de live-variant met een rood strookje erboven.
+ */
 export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff: boolean }) {
   const path = usePathname();
   const router = useRouter();
@@ -65,8 +69,7 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
     router.refresh();
   }
 
-  const shell = "console-nav fixed inset-x-0 bottom-0 z-40";
-  const safe = { paddingBottom: "env(safe-area-inset-bottom)" };
+  const shell = "dock-wrap";
 
   if (live && !liveOff) {
     const isHost = live.role !== "player";
@@ -77,8 +80,8 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
       { href: "/ranking", label: "Ranking", icon: "trophy", active: path.startsWith("/ranking") },
     ];
     return (
-      <nav ref={ref} className={shell} style={safe} aria-label="Live-menu">
-        <Link href="/live" className="mx-auto flex h-7 max-w-xl items-center justify-between gap-2 bg-red px-4 text-white">
+      <nav ref={ref} className={shell} aria-label="Live-menu">
+        <Link href="/live" className="dock-strip bg-red">
           <span className="pixel truncate text-[9px]">
             <span className="blink">●</span> {live.practice ? "OEFENING" : "LIVE"} · {live.title.toUpperCase()}
           </span>
@@ -87,14 +90,14 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
             {live.liveMatches ? ` · ${live.liveMatches} bezig` : ""}
           </span>
         </Link>
-        <ul className={`console-keys ${isHost ? "grid-cols-5" : "grid-cols-4"}`}>
+        <ul className={`dock ${isHost ? "grid-cols-5" : "grid-cols-4"}`}>
           {items.map((it) => (
             <Key key={it.label} {...it} />
           ))}
           <li className="min-w-0">
-            <button type="button" onClick={() => toggle(true)} className="console-key w-full" aria-label="Terug naar het gewone menu">
-              <PixelIcon name="grid" size={20} />
-              <span className="console-label">Menu</span>
+            <button type="button" onClick={() => toggle(true)} className="dock-key" aria-label="Terug naar het gewone menu">
+              <PixelIcon name="grid" size={22} />
+              <span className="dock-label">Menu</span>
             </button>
           </li>
         </ul>
@@ -103,12 +106,12 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
   }
 
   return (
-    <nav ref={ref} className={shell} style={safe}>
+    <nav ref={ref} className={shell} aria-label="Hoofdmenu">
       {live && (
         <button
           type="button"
           onClick={() => toggle(false)}
-          className="mx-auto flex h-7 w-full max-w-xl items-center justify-between gap-2 bg-night px-4 text-white"
+          className="dock-strip bg-night"
         >
           <span className="pixel truncate text-[9px]">
             <span className="blink text-red">●</span> {live.title.toUpperCase()} IS BEZIG
@@ -116,7 +119,7 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
           <span className="shrink-0 text-[11px] font-black underline">Terug naar live</span>
         </button>
       )}
-      <ul className="console-keys grid-cols-5">
+      <ul className="dock grid-cols-5">
         {ITEMS.map(({ href, label, icon, match }) => (
           <Key key={href} href={href} label={label} icon={icon} active={match(path)} />
         ))}

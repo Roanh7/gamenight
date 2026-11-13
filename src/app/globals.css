@@ -206,7 +206,7 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(68px + env(safe-area-inset-bottom));
+  bottom: calc(10px + env(safe-area-inset-bottom));
   height: 55px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='55' viewBox='0 0 56 11' shape-rendering='crispEdges'%3E%3Crect x='10' y='0' width='4' height='1' fill='%23a9d8b6'/%3E%3Crect x='8' y='1' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='10' y='1' width='5' height='1' fill='%23dcf0df'/%3E%3Crect x='15' y='1' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='38' y='1' width='4' height='1' fill='%23a9d8b6'/%3E%3Crect x='6' y='2' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='8' y='2' width='9' height='1' fill='%23dcf0df'/%3E%3Crect x='17' y='2' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='35' y='2' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='37' y='2' width='5' height='1' fill='%23dcf0df'/%3E%3Crect x='42' y='2' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='4' y='3' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='6' y='3' width='5' height='1' fill='%23dcf0df'/%3E%3Crect x='11' y='3' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='12' y='3' width='7' height='1' fill='%23dcf0df'/%3E%3Crect x='19' y='3' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='33' y='3' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='35' y='3' width='10' height='1' fill='%23dcf0df'/%3E%3Crect x='45' y='3' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='3' y='4' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='4' y='4' width='13' height='1' fill='%23dcf0df'/%3E%3Crect x='17' y='4' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='18' y='4' width='3' height='1' fill='%23dcf0df'/%3E%3Crect x='21' y='4' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='31' y='4' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='33' y='4' width='3' height='1' fill='%23dcf0df'/%3E%3Crect x='36' y='4' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='37' y='4' width='11' height='1' fill='%23dcf0df'/%3E%3Crect x='48' y='4' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='2' y='5' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='3' y='5' width='4' height='1' fill='%23dcf0df'/%3E%3Crect x='7' y='5' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='8' y='5' width='13' height='1' fill='%23dcf0df'/%3E%3Crect x='21' y='5' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='29' y='5' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='31' y='5' width='14' height='1' fill='%23dcf0df'/%3E%3Crect x='45' y='5' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='46' y='5' width='5' height='1' fill='%23dcf0df'/%3E%3Crect x='51' y='5' width='2' height='1' fill='%23a9d8b6'/%3E%3Crect x='1' y='6' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='2' y='6' width='21' height='1' fill='%23dcf0df'/%3E%3Crect x='23' y='6' width='6' height='1' fill='%23a9d8b6'/%3E%3Crect x='29' y='6' width='25' height='1' fill='%23dcf0df'/%3E%3Crect x='54' y='6' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='0' y='7' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='1' y='7' width='10' height='1' fill='%23dcf0df'/%3E%3Crect x='11' y='7' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='12' y='7' width='23' height='1' fill='%23dcf0df'/%3E%3Crect x='35' y='7' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='36' y='7' width='19' height='1' fill='%23dcf0df'/%3E%3Crect x='55' y='7' width='1' height='1' fill='%23a9d8b6'/%3E%3Crect x='0' y='8' width='56' height='1' fill='%23dcf0df'/%3E%3Crect x='0' y='9' width='5' height='1' fill='%23dcf0df'/%3E%3Crect x='5' y='9' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='6' y='9' width='20' height='1' fill='%23dcf0df'/%3E%3Crect x='26' y='9' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='27' y='9' width='19' height='1' fill='%23dcf0df'/%3E%3Crect x='46' y='9' width='1' height='1' fill='%23c3e5cb'/%3E%3Crect x='47' y='9' width='9' height='1' fill='%23dcf0df'/%3E%3Crect x='0' y='10' width='56' height='1' fill='%23dcf0df'/%3E%3C/svg%3E");
   background-size: 280px 55px;
@@ -349,7 +349,7 @@ body {
 .season-layer > div { position: absolute; }
 .season-pumpkins {
   left: 0; right: 0; height: 55px;
-  bottom: calc(68px + env(safe-area-inset-bottom));
+  bottom: calc(10px + env(safe-area-inset-bottom));
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='55' viewBox='0 0 280 55' shape-rendering='crispEdges'%3E%3Crect x='135' y='13' width='6' height='3' fill='%2322a04b'/%3E%3Crect x='132' y='16' width='6' height='3' fill='%2322a04b'/%3E%3Crect x='126' y='19' width='21' height='3' fill='%23f5761a'/%3E%3Crect x='123' y='22' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='129' y='22' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='132' y='22' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='138' y='22' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='141' y='22' width='12' height='3' fill='%23f5761a'/%3E%3Crect x='120' y='25' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='126' y='25' width='6' height='3' fill='%233b1a05'/%3E%3Crect x='132' y='25' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='135' y='25' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='138' y='25' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='141' y='25' width='6' height='3' fill='%233b1a05'/%3E%3Crect x='147' y='25' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='120' y='28' width='15' height='3' fill='%23f5761a'/%3E%3Crect x='135' y='28' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='138' y='28' width='15' height='3' fill='%23f5761a'/%3E%3Crect x='120' y='31' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='126' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='129' y='31' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='132' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='135' y='31' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='138' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='141' y='31' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='144' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='147' y='31' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='123' y='34' width='9' height='3' fill='%23f5761a'/%3E%3Crect x='132' y='34' width='9' height='3' fill='%233b1a05'/%3E%3Crect x='141' y='34' width='9' height='3' fill='%23f5761a'/%3E%3Crect x='126' y='37' width='21' height='3' fill='%23f5761a'/%3E%3Crect x='169' y='19' width='3' height='3' fill='%2322a04b'/%3E%3Crect x='166' y='22' width='3' height='3' fill='%2322a04b'/%3E%3Crect x='163' y='25' width='15' height='3' fill='%23f5761a'/%3E%3Crect x='160' y='28' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='163' y='28' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='166' y='28' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='169' y='28' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='172' y='28' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='175' y='28' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='178' y='28' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='160' y='31' width='21' height='3' fill='%23f5761a'/%3E%3Crect x='160' y='34' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='163' y='34' width='15' height='3' fill='%233b1a05'/%3E%3Crect x='178' y='34' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='163' y='37' width='15' height='3' fill='%23f5761a'/%3E%3Crect x='247' y='13' width='6' height='3' fill='%2322a04b'/%3E%3Crect x='244' y='16' width='6' height='3' fill='%2322a04b'/%3E%3Crect x='238' y='19' width='21' height='3' fill='%23f5761a'/%3E%3Crect x='235' y='22' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='241' y='22' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='244' y='22' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='250' y='22' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='253' y='22' width='12' height='3' fill='%23f5761a'/%3E%3Crect x='232' y='25' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='238' y='25' width='6' height='3' fill='%233b1a05'/%3E%3Crect x='244' y='25' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='247' y='25' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='250' y='25' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='253' y='25' width='6' height='3' fill='%233b1a05'/%3E%3Crect x='259' y='25' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='232' y='28' width='15' height='3' fill='%23f5761a'/%3E%3Crect x='247' y='28' width='3' height='3' fill='%23d65a0a'/%3E%3Crect x='250' y='28' width='15' height='3' fill='%23f5761a'/%3E%3Crect x='232' y='31' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='238' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='241' y='31' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='244' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='247' y='31' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='250' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='253' y='31' width='3' height='3' fill='%23f5761a'/%3E%3Crect x='256' y='31' width='3' height='3' fill='%233b1a05'/%3E%3Crect x='259' y='31' width='6' height='3' fill='%23f5761a'/%3E%3Crect x='235' y='34' width='9' height='3' fill='%23f5761a'/%3E%3Crect x='244' y='34' width='9' height='3' fill='%233b1a05'/%3E%3Crect x='253' y='34' width='9' height='3' fill='%23f5761a'/%3E%3Crect x='238' y='37' width='21' height='3' fill='%23f5761a'/%3E%3C/svg%3E");
   background-size: 280px 55px; background-repeat: repeat-x; background-position: bottom left;
 }
@@ -747,83 +747,98 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
 .av-frame.is-locked { border-style: dashed; }
 .av-frame.is-locked .avatar-wrap { filter: saturate(0.6); opacity: 0.8; }
 
-/* ---------- Retro console-menu (onderste navigatie) ---------- */
-.console-nav {
-  background: var(--color-paper);
-  border-top: 2px solid var(--color-line);
-  /* lichte "behuizing": streep in de achtergrondkleur + pixeltrapje in de hoeken */
-  box-shadow: inset 0 3px 0 var(--color-soft);
-}
-.console-keys {
-  display: grid;
-  gap: 6px;
-  max-width: 36rem;
-  margin: 0 auto;
-  padding: 9px 10px 7px;
-}
-.console-key {
-  position: relative;
+/* ---------- Zwevend menu onderaan (dock), in Game Night-stijl ---------- */
+.dock-wrap {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
   display: flex;
-  height: 50px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px max(calc(env(safe-area-inset-bottom) - 8px), 12px);
+  pointer-events: none;
+}
+.dock-wrap > * { pointer-events: auto; }
+.dock {
+  display: grid;
+  width: 100%;
+  max-width: 420px;
+  height: 64px;
+  gap: 2px;
+  padding: 5px;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-paper) 86%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  backdrop-filter: saturate(160%) blur(16px);
+  box-shadow: 0 4px 0 var(--color-line), 0 14px 28px rgba(0, 0, 0, 0.22);
+}
+.dock-key {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  border: 2px solid var(--color-line);
-  border-radius: 10px;
-  background: var(--color-cream);
+  border: 2px solid transparent;
+  border-radius: 999px;
   color: var(--color-muted);
-  box-shadow: 0 3px 0 var(--color-line), inset 0 -3px 0 rgba(0, 0, 0, 0.07);
-  transition: transform 70ms ease, box-shadow 70ms ease, background-color 120ms;
+  transition: background-color 140ms ease, color 140ms ease, transform 110ms ease;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.console-key:active {
-  transform: translateY(3px);
-  box-shadow: 0 0 0 var(--color-line), inset 0 -1px 0 rgba(0, 0, 0, 0.07);
-}
-.console-label {
+.dock-key:active { transform: scale(0.92); }
+.dock-label {
   max-width: 100%;
   overflow: hidden;
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
 }
-.console-key.is-on {
+.dock-key.is-on {
+  border-color: var(--color-line);
   background: var(--color-yellow);
   color: var(--color-night);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.14);
   --pi-accent: var(--color-red);
-  transform: translateY(1px);
-  box-shadow: 0 2px 0 var(--color-line), inset 0 -3px 0 rgba(0, 0, 0, 0.12);
 }
-/* pixelindicator boven de actieve knop */
-.console-key.is-on::before {
-  content: "";
-  position: absolute;
-  top: -9px;
-  left: 50%;
-  width: 10px;
-  height: 4px;
-  margin-left: -5px;
-  background: var(--color-red);
-  box-shadow: 2px 2px 0 var(--color-line), -2px 2px 0 var(--color-line);
-  animation: key-pip 180ms steps(3) both;
-}
-.console-key.is-accent {
-  background: var(--color-red);
+.dock-key.is-on svg { animation: dock-hop 260ms steps(3) both; }
+.dock-key.is-accent { border-color: var(--color-line); background: var(--color-red); color: #fff; }
+.dock-key:focus-visible { outline: 3px solid var(--color-yellow); outline-offset: 1px; }
+/* Live-strook: klein pilletje boven het menu */
+.dock-strip {
+  display: flex;
+  max-width: 420px;
+  width: 100%;
+  min-height: 30px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  padding: 3px 14px;
   color: #fff;
+  box-shadow: 0 3px 0 var(--color-line);
 }
-@keyframes key-pip {
-  from { transform: translateY(4px) scaleX(0.4); opacity: 0; }
-  to { transform: translateY(0) scaleX(1); opacity: 1; }
+@keyframes dock-hop {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .console-key { transition: none; }
-  .console-key.is-on::before { animation: none; }
+  .dock-key { transition: none; }
+  .dock-key:active { transform: none; }
+  .dock-key.is-on svg { animation: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .dock { background: var(--color-paper); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 /* ---------- Header + Player Menu ---------- */
@@ -861,7 +876,7 @@ body:has(.action-bar-top) main { padding-bottom: calc(var(--nav-h, 100px) + 160p
   border-color: var(--color-line);
   background: var(--color-paper);
 }
-.player-menu-btn:focus-visible, .player-menu-item:focus-visible, .header-key:focus-visible, .console-key:focus-visible {
+.player-menu-btn:focus-visible, .player-menu-item:focus-visible, .header-key:focus-visible {
   outline: 3px solid var(--color-yellow);
   outline-offset: 2px;
 }
