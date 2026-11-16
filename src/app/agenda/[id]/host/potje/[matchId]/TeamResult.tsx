@@ -99,7 +99,7 @@ export function TeamResult({
   return (
     <div>
       <section className="card bg-purple-soft p-4">
-        <p className="pixel text-[9px] text-purple">TEAMSPEL</p>
+        <p className="pixel text-[10px] text-purple">TEAMSPEL</p>
         <p className="mt-1 font-black">Speel eerst het spel uit 🤫</p>
         <p className="text-sm">
           De rollen zijn geheim, dus hier vul je pas iets in als het spel voorbij is en iedereen zijn rol laat zien.

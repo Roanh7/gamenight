@@ -40,14 +40,14 @@ export function BannerGrid({ owned: ownedList, equipped, stats }: { owned: strin
                 <div className="h-2 overflow-hidden rounded-sm border-2 border-line bg-soft">
                   <div className="h-full bg-green" style={{ width: `${Math.round((p.have / p.need) * 100)}%` }} />
                 </div>
-                <p className="pixel mt-1 text-[8px] text-muted">
+                <p className="pixel mt-1 text-[10px] text-muted">
                   {p.have}/{p.need}
                 </p>
               </div>
             )}
             <div className="mt-2">
               {on ? (
-                <p className="pixel rounded-lg border-2 border-line bg-yellow py-2 text-center text-[9px] text-night">EQUIPPED ✓</p>
+                <p className="pixel rounded-lg border-2 border-line bg-yellow py-2 text-center text-[10px] text-night">EQUIPPED ✓</p>
               ) : has ? (
                 <form action={equipBanner}>
                   <input type="hidden" name="banner" value={b.id} />
@@ -56,7 +56,7 @@ export function BannerGrid({ owned: ownedList, equipped, stats }: { owned: strin
                   </SubmitButton>
                 </form>
               ) : (
-                <p className="pixel rounded-lg border-2 border-dashed border-line/40 py-2 text-center text-[9px] text-muted">LOCKED</p>
+                <p className="pixel rounded-lg border-2 border-dashed border-line/40 py-2 text-center text-[10px] text-muted">LOCKED</p>
               )}
             </div>
           </section>

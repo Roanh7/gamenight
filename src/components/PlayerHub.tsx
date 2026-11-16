@@ -21,8 +21,6 @@ import { StartChecklist } from "./StartChecklist";
 import { TrophySprite } from "./TrophyCabinet";
 import { Banner } from "./Banner";
 import { BannerUnlock } from "./BannerUnlock";
-import { HubAttendance } from "./Attendance";
-import { attendanceModel, type AttStats } from "@/lib/attendance";
 import { ownedBanners, shownBanner, syncBanners, unseenBanners } from "@/lib/bannerSync";
 import { unseenFrames } from "@/lib/frames";
 import { FrameUnlock } from "./FrameUnlock";
@@ -39,7 +37,7 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
   const supabase = await createClient();
   const since = hoursAgoIso(12);
 
-  const [profiles, games, results, activity, nightsRes, attendance, boards, hostedRes, active, allNights, allParts, attExtras, cupRows] = await Promise.all([
+  const [profiles, games, results, activity, nightsRes, attendance, boards, hostedRes, active, attExtras, cupRows] = await Promise.all([
     getProfiles(supabase),
     getGames(supabase),
     getResults(supabase),
@@ -60,8 +58,6 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
       .eq("status", "finished")
       .eq("is_practice", false),
     getMyActiveNight(),
-    supabase.from("game_nights").select("id, starts_at, status, is_practice"),
-    supabase.from("participants").select("night_id, user_id, status"),
     getAttendanceExtras(supabase),
     getSmashCups(supabase),
   ]);
@@ -73,14 +69,6 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
     champion: cupInfo.champion ? (profiles.byId.get(cupInfo.champion) ?? null) : null,
     since: cupInfo.championSince,
   };
-  // 📅 Aanwezigheid (zelfde berekening als in de Agenda)
-  const attStats = attendanceModel({
-    nights: (allNights.data ?? []) as { id: string; starts_at: string; status: string; is_practice: boolean }[],
-    results,
-    participants: (allParts.data ?? []) as { night_id: string; user_id: string; status: string }[],
-    declines: attExtras.declines,
-    marks: attExtras.marks,
-  }).stats(userId, me?.created_at ?? new Date(0).toISOString());
   const name = me?.username ?? "Player";
 
   // ---------- Speler ----------
@@ -179,7 +167,7 @@ export async function PlayerHub({ userId, welcome }: { userId: string; welcome: 
         welcome, active, name, me, xp, mySeason: mySeason ?? null, season, streak, msg, target, targetName, userId,
         winRate, form, mvps, nextNight: nextNight ?? null, confirmedProfiles, myStatus, isFixed, voters: tally.voters,
         gameNames, isHost, declinedNext: !!nextNight && attExtras.declines.some((x) => x.night_id === nextNight.id && x.user_id === userId), myPart: myPart ?? null, myVote, next, earnedCount, achTotal: ach.list.length,
-        rival, rivalProfile: rivalProfile ?? null, banner, attStats, cup,
+        rival, rivalProfile: rivalProfile ?? null, banner, cup,
       }}
       news={news}
       overlays={
@@ -227,7 +215,6 @@ export type HubData = {
   rival: Rival | null;
   rivalProfile: Profile | null;
   banner: string;
-  attStats?: AttStats;
   /** 🏆 Smash Cup: ben jij de regerend kampioen, en wie is het? */
   cup?: { holder: boolean; champion: Profile | null; since: string | null };
 };
@@ -238,7 +225,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
   const {
     welcome, active, name, me, xp, mySeason, season, streak, msg, target, targetName, userId, winRate, form, mvps,
     nextNight, confirmedProfiles, myStatus, isFixed, voters, gameNames, isHost, myPart, myVote, next, earnedCount,
-    achTotal, rival, rivalProfile, banner, attStats, cup,
+    achTotal, rival, rivalProfile, banner, cup,
   } = d;
   const headLink = "shrink-0 text-[11px] font-black text-ink hover:underline";
   return (
@@ -260,89 +247,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
         </Link>
       )}
 
-      {/* ---------- 1. Player Card ---------- */}
-      <section className="card player-card overflow-hidden" aria-label="Jouw spelerskaart">
-        {/* De gekozen banner (elke banner, ook toekomstige) */}
-        <div className="relative h-28 border-b-2 border-line">
-          <Banner id={banner} />
-          <p className="pixel absolute left-3 top-2.5 rounded bg-night/75 px-1.5 py-1 text-[8px] text-white">{welcome ? "NEW PLAYER JOINED!" : "PLAYER 1"}</p>
-          <Link
-            href="/account/banners"
-            aria-label="Banner wijzigen"
-            className="header-key absolute right-2 top-2 h-8 w-8"
-          >
-            <PixelIcon name="palette" size={16} />
-          </Link>
-        </div>
-
-        <div className="relative px-4 pb-3 pt-2">
-          {/* Avatar valt half over de banner; tik = je profiel */}
-          <Link href="/account" className="hub-avatar absolute -top-11 left-4" aria-label="Mijn profiel">
-            <Avatar name={name} color={me?.avatar_color} url={me?.avatar_url} emoji={me?.avatar_emoji} pixel={me?.avatar_pixel} frame={me?.avatar_frame} size="xl" />
-          </Link>
-          <div className="ml-[96px] min-h-[44px] min-w-0">
-            <Link href="/account" className="block min-w-0 hover:underline">
-              <h1 className={`break-words font-black leading-tight ${name.length > 12 ? "text-lg" : "text-xl"}`}>
-                {name}
-                {cup?.holder && <CupIcon size={18} className="ml-1.5" />}
-              </h1>
-            </Link>
-            <p className="mt-1 flex flex-wrap items-center gap-1.5">
-              <span className="pixel rounded-md border-2 border-line bg-red px-1.5 py-0.5 text-[9px] text-white">LV {xp.level}</span>
-              <span className="pixel text-[8px] text-muted">{xp.title.toUpperCase()}</span>
-            </p>
-          </div>
-
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
-            <Link href="/ranking" className="chip bg-yellow-soft py-0.5 text-[11px]">
-              🏆 {mySeason ? `#${mySeason.rank} · ${seasonLabel(season)}` : `Nog geen rank · ${seasonLabel(season)}`}
-            </Link>
-            {streak.wins > 0 && <span className="chip bg-orange-soft py-0.5 text-[11px]">🔥 {streak.wins} op rij</span>}
-            {cup?.holder && (
-              <Link href="/smash-cup" className="cup-chip py-0.5">
-                <CupIcon size={12} title={null} /> REIGNING SMASH CHAMPION
-              </Link>
-            )}
-          </div>
-
-          {/* XP-balk (telt zichtbaar op als je XP hebt verdiend sinds je vorige bezoek) */}
-          <XpPanel userId={userId} xp={xp.xp} />
-        </div>
-
-        {/* Begroeting: tekstvak zoals in een RPG */}
-        <div className="border-t-2 border-line bg-cream px-4 py-2.5">
-          <p className="pixel text-[9px] leading-relaxed text-red">
-            {msg.emoji} {msg.title}
-          </p>
-          <p className="text-sm font-bold">{msg.text}</p>
-          {targetName && target !== userId && <p className="mt-1 text-xs font-bold text-muted">🎯 Versla {targetName} in een potje: +10 XP</p>}
-          {target === userId && <p className="mt-1 text-xs font-bold text-muted">🎯 Er staat een premie op jou!</p>}
-        </div>
-      </section>
-
-      {/* ---------- 2. HUD ---------- */}
-      <section className="grid grid-cols-4 gap-2" aria-label="Statistieken">
-        <HudTile icon="target" tone="var(--color-green)" label="WINRATE" value={winRate === null ? "–" : `${winRate}%`} />
-        <HudTile icon="flame" tone="var(--color-orange)" label="STREAK" value={String(streak.wins)} />
-        <div className="hud-tile" style={{ ["--hud" as string]: "var(--color-blue)" }}>
-          <PixelIcon name="bars" size={14} className="hud-icon" />
-          <div
-            className="flex h-[20px] items-center gap-[3px]"
-            role="img"
-            aria-label={form.length ? `Laatste ${form.length}: ${form.map((w) => (w ? "gewonnen" : "niet gewonnen")).join(", ")}` : "Nog geen potjes"}
-          >
-            {form.length ? (
-              form.map((w, i) => <span key={i} className={`h-2.5 w-2.5 border-2 border-line ${w ? "bg-green" : "bg-red"}`} />)
-            ) : (
-              <span className="pixel text-[15px]">–</span>
-            )}
-          </div>
-          <p className="pixel text-[7px] text-muted">FORM</p>
-        </div>
-        <HudTile icon="crown" tone="var(--color-yellow)" label="MVP" value={String(mvps)} />
-      </section>
-
-      {/* ---------- 3. Next game night ---------- */}
+      {/* ---------- 1. Next game night (het belangrijkste staat bovenaan) ---------- */}
       <Panel
         title={nextNight?.status === "live" ? "NU BEZIG" : "NEXT GAME NIGHT"}
         icon={<PixelIcon name="calendar" size={12} />}
@@ -427,6 +332,88 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
         )}
       </Panel>
 
+      {/* ---------- 2. Player Card ---------- */}
+      <section className="card player-card overflow-hidden" aria-label="Jouw spelerskaart">
+        {/* De gekozen banner (elke banner, ook toekomstige) */}
+        <div className="relative h-28 border-b-2 border-line">
+          <Banner id={banner} />
+          {welcome && <p className="pixel absolute left-3 top-2.5 rounded bg-night/75 px-1.5 py-1 text-[10px] text-white">NEW PLAYER JOINED!</p>}
+          <Link
+            href="/account/banners"
+            aria-label="Banner wijzigen"
+            className="header-key absolute right-2 top-2 h-8 w-8"
+          >
+            <PixelIcon name="palette" size={16} />
+          </Link>
+        </div>
+
+        <div className="relative px-4 pb-3 pt-2">
+          {/* Avatar valt half over de banner; tik = je profiel */}
+          <Link href="/account" className="hub-avatar absolute -top-11 left-4" aria-label="Mijn profiel">
+            <Avatar name={name} color={me?.avatar_color} url={me?.avatar_url} emoji={me?.avatar_emoji} pixel={me?.avatar_pixel} frame={me?.avatar_frame} size="xl" />
+          </Link>
+          <div className="ml-[96px] min-h-[44px] min-w-0">
+            <div className="flex min-w-0 items-center gap-1.5">
+            <Link href="/account" className="block min-w-0 hover:underline">
+              <h1 className={`break-words font-black leading-tight ${name.length > 12 ? "text-lg" : "text-xl"}`}>
+                {name}
+              </h1>
+            </Link>
+            {cup?.holder && (
+              <Link href="/ranking?tab=cup" className="shrink-0" aria-label="Regerend Smash-kampioen: naar de Smash Cup">
+                <CupIcon size={20} />
+              </Link>
+            )}
+            </div>
+            <p className="mt-1 flex flex-wrap items-center gap-1.5">
+              <span className="pixel rounded-md border-2 border-line bg-red px-1.5 py-0.5 text-[10px] text-white">LV {xp.level}</span>
+              <span className="pixel text-[10px] text-muted">{xp.title.toUpperCase()}</span>
+            </p>
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            <Link href="/ranking" className="chip bg-yellow-soft py-0.5 text-[11px]">
+              🏆 {mySeason ? `#${mySeason.rank} · ${seasonLabel(season)}` : `Nog geen rank · ${seasonLabel(season)}`}
+            </Link>
+          </div>
+
+          {/* XP-balk (telt zichtbaar op als je XP hebt verdiend sinds je vorige bezoek) */}
+          <XpPanel userId={userId} xp={xp.xp} />
+        </div>
+
+        {/* Begroeting: tekstvak zoals in een RPG */}
+        <div className="border-t-2 border-line bg-cream px-4 py-2.5">
+          <p className="pixel text-[10px] leading-relaxed text-red">
+            {msg.emoji} {msg.title}
+          </p>
+          <p className="text-sm font-bold">{msg.text}</p>
+          {targetName && target !== userId && <p className="mt-1 text-xs font-bold text-muted">🎯 Versla {targetName} in een potje: +10 XP</p>}
+          {target === userId && <p className="mt-1 text-xs font-bold text-muted">🎯 Er staat een premie op jou!</p>}
+        </div>
+      </section>
+
+      {/* ---------- 3. HUD ---------- */}
+      <section className="grid grid-cols-4 gap-2" aria-label="Statistieken">
+        <HudTile icon="target" tone="var(--color-green)" label="WIN %" value={winRate === null ? "–" : `${winRate}%`} />
+        <HudTile icon="flame" tone="var(--color-orange)" label="STREAK" value={String(streak.wins)} />
+        <div className="hud-tile" style={{ ["--hud" as string]: "var(--color-blue)" }}>
+          <PixelIcon name="bars" size={14} className="hud-icon" />
+          <div
+            className="flex h-[20px] items-center gap-[3px]"
+            role="img"
+            aria-label={form.length ? `Laatste ${form.length}: ${form.map((w) => (w ? "gewonnen" : "niet gewonnen")).join(", ")}` : "Nog geen potjes"}
+          >
+            {form.length ? (
+              form.map((w, i) => <span key={i} className={`h-2.5 w-2.5 border-2 border-line ${w ? "bg-green" : "bg-red"}`} />)
+            ) : (
+              <span className="pixel text-[15px]">–</span>
+            )}
+          </div>
+          <p className="pixel text-[10px] text-muted">FORM</p>
+        </div>
+        <HudTile icon="crown" tone="var(--color-yellow)" label="MVP" value={String(mvps)} />
+      </section>
+
       {/* ---------- 4. Game Night News (laatste 2) ---------- */}
       <Panel title="GAME NIGHT NEWS" icon={<PixelIcon name="news" size={12} />} tone="var(--color-yellow-soft)">
         {news}
@@ -434,9 +421,6 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
           BEKIJK ALLES ▶
         </Link>
       </Panel>
-
-      {/* ---------- 5. My Attendance ---------- */}
-      {attStats && <HubAttendance s={attStats} />}
 
       {/* ---------- Quests: volgende achievement + rivaal ---------- */}
       <Panel title="QUESTS" icon={<PixelIcon name="medal" size={12} />} tone="var(--color-purple-soft)" label="Next achievement en rivaal">
@@ -446,7 +430,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
               {next ? <TrophySprite name={next.achievement.icon === "trophy" ? "cup" : next.achievement.icon} size={34} /> : <span>🏆</span>}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="pixel text-[7px] text-muted">
+              <p className="pixel text-[10px] text-muted">
                 NEXT ACHIEVEMENT · {earnedCount}/{achTotal}
               </p>
               {next ? (
@@ -460,7 +444,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
                           <span key={i} className={`h-2 flex-1 border-2 border-line ${i < next.done! ? "bg-green" : "bg-soft"}`} />
                         ))}
                       </div>
-                      <span className="pixel shrink-0 text-[8px]">
+                      <span className="pixel shrink-0 text-[10px]">
                         {next.done}/{next.goal}
                       </span>
                     </div>
@@ -476,7 +460,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
               <>
                 <Avatar name={rivalProfile.username} color={rivalProfile.avatar_color} url={rivalProfile.avatar_url} emoji={rivalProfile.avatar_emoji} pixel={rivalProfile.avatar_pixel} frame={rivalProfile.avatar_frame} size="md" />
                 <div className="min-w-0 flex-1">
-                  <p className="pixel text-[7px] text-muted">YOUR RIVAL</p>
+                  <p className="pixel text-[10px] text-muted">YOUR RIVAL</p>
                   <p className="truncate font-black">{rivalProfile.username}</p>
                   <p className="text-xs font-bold text-muted">
                     #{rival.rank} · {rival.points} pt · {rival.diff === 0 ? "gelijk met jou" : rival.ahead ? `${rival.diff} pt vóór jou` : `${rival.diff} pt achter jou`}
@@ -488,7 +472,7 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
               </>
             ) : (
               <div className="min-w-0">
-                <p className="pixel text-[7px] text-muted">YOUR RIVAL</p>
+                <p className="pixel text-[10px] text-muted">YOUR RIVAL</p>
                 <p className="text-sm font-bold text-muted">
                   {mySeason ? "Nog niemand anders op de ranglijst van dit seizoen." : `Speel een potje in ${seasonLabel(season)} om een rivaal te krijgen.`}
                 </p>
@@ -498,22 +482,6 @@ export function HubView({ d, news, overlays }: { d: HubData; news: ReactNode; ov
         </div>
       </Panel>
 
-      {/* ---------- Snelkoppelingen ---------- */}
-      <nav className="grid grid-cols-4 gap-2" aria-label="Snel naar">
-        {(
-          [
-            ["/account", "user", "MY PROFILE"],
-            ["/ranking", "trophy", "RANKINGS"],
-            ["/account#trofeekast", "medal", "ACHIEVE­MENTS"],
-            ["/records", "scroll", "RECORD BOOK"],
-          ] as const
-        ).map(([href, icon, label]) => (
-          <Link key={href} href={href} className="hub-key">
-            <PixelIcon name={icon} size={20} />
-            <span className="pixel text-[7px] leading-snug">{label}</span>
-          </Link>
-        ))}
-      </nav>
     </div>
   );
 }
@@ -523,7 +491,7 @@ function HudTile({ icon, tone, label, value }: { icon: "target" | "flame" | "cro
     <div className="hud-tile" style={{ ["--hud" as string]: tone }}>
       <PixelIcon name={icon} size={14} className="hud-icon" />
       <p className="pixel flex h-[20px] items-center text-[15px] leading-none">{value}</p>
-      <p className="pixel text-[7px] text-muted">{label}</p>
+      <p className="pixel text-[10px] text-muted">{label}</p>
     </div>
   );
 }

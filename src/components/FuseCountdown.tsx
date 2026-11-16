@@ -101,7 +101,7 @@ export function FuseCountdown({ startsAt, createdAt, serverNow }: { startsAt: st
             {segs.map(([v, l]) => (
               <div key={l} className="text-center">
                 <p className="pixel text-[15px] leading-none text-yellow">{v}</p>
-                <p className="mt-1 text-[8px] font-black tracking-wider opacity-70">{l}</p>
+                <p className="mt-1 text-[10px] font-black tracking-wider opacity-70">{l}</p>
               </div>
             ))}
           </div>
@@ -112,7 +112,7 @@ export function FuseCountdown({ startsAt, createdAt, serverNow }: { startsAt: st
           className="fuse-bomb"
         />
       </div>
-      <p className="pixel mt-1.5 text-[8px] text-[#ff8a1f]">{label}</p>
+      <p className="pixel mt-1.5 text-[10px] text-[#ff8a1f]">{label}</p>
     </div>
   );
 }

@@ -273,7 +273,7 @@ function Final({ data, run }: { data: CeremonyData; run: number }) {
                 ? `${s.players.length} spelers`
                 : s.players.map((p) => p.player.name).join(" & ")}
             </p>
-            <p className="pixel relative text-[9px] opacity-85">{s.players[0].points} PT</p>
+            <p className="pixel relative text-[10px] opacity-85">{s.players[0].points} PT</p>
             <div className={`pd-block ${TONE[s.place]} pd-rise relative mt-2 w-full ${heights[s.place]}`}>
               <span className="pixel">{s.place}</span>
             </div>

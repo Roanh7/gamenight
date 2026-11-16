@@ -64,7 +64,7 @@ export function Panel({
   return (
     <section id={id} className={`hub-panel ${className}`} style={{ ["--panel" as string]: tone }} aria-label={label ?? title}>
       <div className="hub-panel-head">
-        <h2 className="pixel flex min-w-0 items-center gap-1.5 truncate text-[9px]">
+        <h2 className="pixel flex min-w-0 items-center gap-1.5 truncate text-[10px]">
           {icon}
           {title}
         </h2>

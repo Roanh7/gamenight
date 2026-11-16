@@ -54,7 +54,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
         <Link href="/account/avatar" className="customize-row">
           <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} size="md" />
           <span className="min-w-0 flex-1">
-            <span className="pixel block text-[8px] text-muted">AVATAR</span>
+            <span className="pixel block text-[10px] text-muted">AVATAR</span>
             <span className="block truncate font-black">{avatarLabel(profile)}</span>
             <span className="block truncate text-xs font-bold text-muted">Emoji, Pixel Avatar Creator of een personage</span>
           </span>
@@ -65,7 +65,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
         <Link href="/account/avatar#frames" className="customize-row">
           <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} frame={frame} size="md" />
           <span className="min-w-0 flex-1">
-            <span className="pixel block text-[8px] text-muted">AVATAR FRAMES · {frames.size}/{FRAMES.length}</span>
+            <span className="pixel block text-[10px] text-muted">AVATAR FRAMES · {frames.size}/{FRAMES.length}</span>
             <span className="block truncate font-black">{FRAME_BY_ID.get(frame)!.name}</span>
             <span className="block truncate text-xs font-bold text-muted">Vrijgespeeld kiezen, vergrendeld met voorwaarden</span>
           </span>
@@ -78,7 +78,7 @@ export default async function AccountPage(props: PageProps<"/account">) {
             <Banner id={banner} still />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="pixel block text-[8px] text-muted">PROFILE BANNERS · {banners.size}/{BANNERS.length}</span>
+            <span className="pixel block text-[10px] text-muted">PROFILE BANNERS · {banners.size}/{BANNERS.length}</span>
             <span className="block truncate font-black">{bannerDef(banner).name}</span>
             <span className="block truncate text-xs font-bold text-muted">Vrijgespeeld kiezen, vergrendeld met voorwaarden</span>
           </span>

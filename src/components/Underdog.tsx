@@ -5,7 +5,7 @@ import { Avatar } from "./Avatar";
 export function UnderdogChip({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`pixel inline-flex shrink-0 items-center gap-0.5 rounded-md border-2 border-line bg-night px-1 py-0.5 text-[7px] leading-none text-yellow ${className}`}
+      className={`inline-flex shrink-0 items-center gap-0.5 rounded-md border-2 border-line bg-night px-1 py-0.5 text-[10px] font-black leading-none text-yellow ${className}`}
       title="Underdog: +2 competitiepunten bij winst"
     >
       🐺 UNDERDOG
@@ -24,7 +24,7 @@ export function UnderdogActive({
   if (!players.length) return null;
   return (
     <section className="card mb-4 overflow-hidden bg-night text-white shadow-[0_4px_0_var(--color-line),inset_0_0_0_2px_#ffc52766]">
-      <p className="pixel border-b-2 border-line bg-[#2b2640] px-3 py-2 text-[9px] text-yellow">🐺 UNDERDOG BONUS ACTIVE</p>
+      <p className="pixel border-b-2 border-line bg-[#2b2640] px-3 py-2 text-[10px] text-yellow">🐺 UNDERDOG BONUS ACTIVE</p>
       <ul className="divide-y-2 divide-[#2b2640]">
         {players.map(({ profile: p, bonus }) => (
           <li key={p.id} className="flex items-center gap-2.5 px-3 py-2">
@@ -46,7 +46,7 @@ export function UnderdogBreakdown({ rows }: { rows: { name: string; base: number
     <div className="border-t-2 border-line bg-night px-3 py-2.5 text-white">
       {rows.map((r) => (
         <div key={r.name} className="py-1">
-          <p className="pixel text-[8px] text-yellow">🐺 UNDERDOG VICTORY · {r.name.toUpperCase()}</p>
+          <p className="pixel text-[10px] text-yellow">🐺 UNDERDOG VICTORY · {r.name.toUpperCase()}</p>
           <dl className="mt-1 grid grid-cols-3 gap-1 text-center">
             <div className="rounded-lg bg-[#2b2640] px-1 py-1">
               <dt className="text-[10px] font-bold opacity-75">Normale punten</dt>

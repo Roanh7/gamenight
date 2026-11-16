@@ -153,7 +153,7 @@ export async function PlayerProfile({
         <div className="relative h-28 border-b-2 border-line">
           <Banner id={banner} />
           {isMe && (
-            <Link href="/account#customize" className="pixel absolute right-2 top-2 rounded-md border-2 border-line bg-paper/90 px-2 py-1.5 text-[8px] text-ink">
+            <Link href="/account#customize" className="pixel absolute right-2 top-2 rounded-md border-2 border-line bg-paper/90 px-2 py-1.5 text-[10px] text-ink">
               🎨 CUSTOMIZE PLAYER
             </Link>
           )}
@@ -162,7 +162,7 @@ export async function PlayerProfile({
           <div className="flex items-end justify-between gap-2">
             <Avatar name={profile.username} color={profile.avatar_color} url={profile.avatar_url} emoji={profile.avatar_emoji} pixel={profile.avatar_pixel} frame={profile.avatar_frame} size="xl" crown={titles.length > 0} />
             {isMe && (
-              <Link href="/account/avatar" className="pixel rounded-md border-2 border-line bg-paper px-2 py-1.5 text-[8px] text-ink">
+              <Link href="/account/avatar" className="pixel rounded-md border-2 border-line bg-paper px-2 py-1.5 text-[10px] text-ink">
                 🎮 EDIT AVATAR
               </Link>
             )}
@@ -219,7 +219,7 @@ export async function PlayerProfile({
       {cupHolder && myCup && cup.championSince ? (
         <section className="cup-card mt-4" aria-label="Reigning Smash Champion">
           <div className="cup-card-head">
-            <h2 className="pixel flex items-center gap-1.5 text-[9px]">
+            <h2 className="pixel flex items-center gap-1.5 text-[10px]">
               <CupIcon size={14} title={null} /> REIGNING SMASH CHAMPION
             </h2>
           </div>

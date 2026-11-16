@@ -188,7 +188,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
             tone = "bg-yellow-soft";
             text = (
               <>
-                <b className="pixel text-[9px]">📜 SEIZOENSCORRECTIE {seasons}</b>
+                <b className="pixel text-[10px]">📜 SEIZOENSCORRECTIE {seasons}</b>
                 <br />
                 {action === "night_removed" ? (
                   <>
@@ -217,7 +217,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
             tone = "bg-yellow";
             text = (
               <>
-                <b className="pixel text-[9px]">🐺 UNDERDOG VICTORY!</b>
+                <b className="pixel text-[10px]">🐺 UNDERDOG VICTORY!</b>
                 <br />
                 {name} wint {gameLink} tegen alle verwachtingen in:{" "}
                 <b className="font-black">
@@ -235,7 +235,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
             tone = rarity === "mythic" || rarity === "legendary" ? "bg-yellow-soft" : "bg-purple-soft";
             text = (
               <>
-                <b className="pixel text-[9px]">{rarity === "epic" ? "✨ EPIC UNLOCK!" : rarity === "mythic" ? "🌈 MYTHIC UNLOCK!" : "👑 LEGENDARY UNLOCK!"}</b>
+                <b className="pixel text-[10px]">{rarity === "epic" ? "✨ EPIC UNLOCK!" : rarity === "mythic" ? "🌈 MYTHIC UNLOCK!" : "👑 LEGENDARY UNLOCK!"}</b>
                 <br />
                 {name} heeft de <b className="font-black">{def.name}</b>-banner vrijgespeeld.
                 <span className={`feed-extra rarity-frame r-${rarity} mt-1.5 block h-12`}>
@@ -253,7 +253,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
             tone = "bg-yellow";
             text = (
               <>
-                <b className="pixel text-[9px]">{defended ? "👑 THE KING REMAINS!" : "🏆 A NEW SMASH CHAMPION IS CROWNED!"}</b>
+                <b className="pixel text-[10px]">{defended ? "👑 THE KING REMAINS!" : "🏆 A NEW SMASH CHAMPION IS CROWNED!"}</b>
                 <br />
                 {defended ? (
                   <>
@@ -305,7 +305,7 @@ export function ActivityFeed({ items, profiles, games, nights, me, reactions, co
             </div>
             <div className="min-w-0 flex-1">
               {compact && (
-                <p className="pixel mb-0.5 text-[7px] text-muted">
+                <p className="pixel mb-0.5 text-[10px] text-muted">
                   {newsKind(a.type).emoji} {newsKind(a.type).label}
                 </p>
               )}

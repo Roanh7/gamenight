@@ -65,7 +65,7 @@ export function BannerUnlock({ ids, userId }: { ids: string[]; userId: string })
         </div>
         <p className="mt-2 text-center text-sm font-bold opacity-80">{def.how}</p>
         {queue.length > 1 && (
-          <p className="pixel mt-2 text-center text-[8px] opacity-60">
+          <p className="pixel mt-2 text-center text-[10px] opacity-60">
             {i + 1} / {queue.length}
           </p>
         )}

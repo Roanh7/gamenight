@@ -17,7 +17,7 @@ type Props = {
 };
 
 const SIZES = {
-  xs: { box: "h-6 w-6", round: "rounded-md", text: "text-[9px]", emoji: "text-[13px]", femoji: "text-[10px]" },
+  xs: { box: "h-6 w-6", round: "rounded-md", text: "text-[10px]", emoji: "text-[13px]", femoji: "text-[10px]" },
   sm: { box: "h-8 w-8", round: "rounded-lg", text: "text-[10px]", emoji: "text-[17px]", femoji: "text-[13px]" },
   md: { box: "h-10 w-10", round: "rounded-xl", text: "text-xs", emoji: "text-[21px]", femoji: "text-[16px]" },
   lg: { box: "h-14 w-14", round: "rounded-2xl", text: "text-base", emoji: "text-[30px]", femoji: "text-[23px]" },

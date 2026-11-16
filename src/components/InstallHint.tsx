@@ -46,7 +46,7 @@ export function InstallHint() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icon-192.png" alt="" width={48} height={48} className="h-12 w-12 rounded-xl border-2 border-line" />
         <div>
-          <p className="pixel text-[9px] text-red">TIP</p>
+          <p className="pixel text-[10px] text-red">TIP</p>
           <p className="font-black leading-tight">Zet Game Night op je beginscherm</p>
         </div>
       </div>

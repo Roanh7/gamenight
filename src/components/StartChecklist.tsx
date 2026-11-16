@@ -176,7 +176,7 @@ export function StartChecklist({
   return (
     <section className="hub-panel" style={{ ["--panel" as string]: "var(--color-yellow-soft)" }} aria-label="Startlijstje">
       <div className="hub-panel-head">
-        <h2 className="pixel flex items-center gap-1.5 text-[9px]">
+        <h2 className="pixel flex items-center gap-1.5 text-[10px]">
           <PixelIcon name="gamepad" size={12} /> GET READY
         </h2>
         <span className="flex items-center gap-2">
@@ -185,7 +185,7 @@ export function StartChecklist({
               <span key={s.id} className={`h-2.5 w-4 border-2 border-line ${s.done ? "bg-green" : "bg-paper"}`} />
             ))}
           </span>
-          <span className="pixel text-[8px]">
+          <span className="pixel text-[10px]">
             {done}/{steps.length}
           </span>
         </span>

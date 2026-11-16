@@ -80,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <PlayerMenu name={me.profile.username}>
                   <span className="hidden max-w-[9rem] truncate text-sm font-extrabold sm:inline">{me.profile.username}</span>
                   <Avatar name={me.profile.username} color={me.profile.avatar_color} url={me.profile.avatar_url} emoji={me.profile.avatar_emoji} pixel={me.profile.avatar_pixel} frame={me.profile.avatar_frame} size="sm" />
-                  <span className="pixel text-[8px] text-muted" aria-hidden>
+                  <span className="pixel text-[10px] text-muted" aria-hidden>
                     ▼
                   </span>
                 </PlayerMenu>

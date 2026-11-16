@@ -6,10 +6,13 @@ export function SeasonTabs({
   seasons,
   active,
   basePath,
+  query = {},
 }: {
   seasons: string[];
   active: string;
   basePath: string;
+  /** Extra zoekparameters die bij elk tabblad blijven (bijv. { tab: "games" }) */
+  query?: Record<string, string>;
 }) {
   const now = currentSeason();
   const items = [...seasons.map((s) => [s, s === now ? `Nu · ${seasonLabel(s)}` : seasonLabel(s)]), ["all", "All-time"]];
@@ -18,7 +21,12 @@ export function SeasonTabs({
       {items.map(([key, label]) => (
         <Link
           key={key}
-          href={key === now ? basePath : `${basePath}?seizoen=${key}`}
+          href={(() => {
+            const q = new URLSearchParams(query);
+            if (key !== now) q.set("seizoen", key);
+            const qs = q.toString();
+            return qs ? `${basePath}?${qs}` : basePath;
+          })()}
           scroll={false}
           aria-current={active === key ? "page" : undefined}
           className={`chip shrink-0 px-3 py-1.5 text-sm ${active === key ? "bg-night text-white" : "bg-paper"}`}

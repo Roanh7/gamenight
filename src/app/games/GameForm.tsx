@@ -253,7 +253,7 @@ export function GameForm({
             <div className="grid grid-cols-6 gap-1.5">
               {PLACES.map((pl, i) => (
                 <label key={pl} className="text-center">
-                  <span className="pixel mb-1 block text-[9px] text-muted">{pl}</span>
+                  <span className="pixel mb-1 block text-[10px] text-muted">{pl}</span>
                   <input
                     name={`p${i + 1}`}
                     type="number"

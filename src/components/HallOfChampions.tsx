@@ -80,7 +80,7 @@ export function HallOfChampions({
 
         {timeline.length > 0 && (
           <div className="relative mt-4 border-t-2 border-dashed border-[#5b4a8a] pt-3">
-            <p className="pixel mb-2 text-[8px] text-[#e9dcff]/70">SEIZOEN PER SEIZOEN</p>
+            <p className="pixel mb-2 text-[10px] text-[#e9dcff]/70">SEIZOEN PER SEIZOEN</p>
             <ul className="space-y-1.5">
               {timeline.map((t) => {
                 const p = t.champion ? profiles.get(t.champion) : undefined;

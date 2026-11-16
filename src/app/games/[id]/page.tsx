@@ -97,7 +97,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
         <div className="mt-3 grid grid-cols-2 gap-3">
           {champion && (
             <div className="card bg-yellow p-3">
-              <p className="pixel text-[9px]">{season === "all" ? "KAMPIOEN" : `KAMPIOEN ${seasonLabel(season).toUpperCase()}`}</p>
+              <p className="pixel text-[10px]">{season === "all" ? "KAMPIOEN" : `KAMPIOEN ${seasonLabel(season).toUpperCase()}`}</p>
               <div className="mt-2 flex items-center gap-2">
                 <Avatar name={champion.username} color={champion.avatar_color} url={champion.avatar_url} emoji={champion.avatar_emoji} pixel={champion.avatar_pixel} frame={champion.avatar_frame} size="sm" crown />
                 <span className="truncate font-black">{champion.username}</span>
@@ -106,7 +106,7 @@ export default async function GamePage(props: PageProps<"/games/[id]">) {
           )}
           {record && recordHolder && (
             <div className="card p-3">
-              <p className="pixel text-[9px]">RECORD</p>
+              <p className="pixel text-[10px]">RECORD</p>
               <p className="mt-2 truncate font-black">
                 {formatScore(record.total)} <span className="text-sm font-bold text-muted">· {recordHolder.username}</span>
               </p>

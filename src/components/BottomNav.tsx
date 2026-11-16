@@ -82,7 +82,7 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
     return (
       <nav ref={ref} className={shell} aria-label="Live-menu">
         <Link href="/live" className="dock-strip bg-red">
-          <span className="pixel truncate text-[9px]">
+          <span className="pixel truncate text-[10px]">
             <span className="blink">●</span> {live.practice ? "OEFENING" : "LIVE"} · {live.title.toUpperCase()}
           </span>
           <span className="shrink-0 text-[11px] font-black">
@@ -113,7 +113,7 @@ export function BottomNav({ live, liveOff }: { live: ActiveNight | null; liveOff
           onClick={() => toggle(false)}
           className="dock-strip bg-night"
         >
-          <span className="pixel truncate text-[9px]">
+          <span className="pixel truncate text-[10px]">
             <span className="blink text-red">●</span> {live.title.toUpperCase()} IS BEZIG
           </span>
           <span className="shrink-0 text-[11px] font-black underline">Terug naar live</span>

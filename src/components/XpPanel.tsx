@@ -99,7 +99,7 @@ export function XpPanel({ userId, xp }: { userId: string; xp: number }) {
     <>
       <div className={`xp-panel mt-3 ${counting ? "is-counting" : ""}`}>
         <div className="flex items-baseline justify-between gap-2">
-          <span className="pixel flex items-center gap-2 text-[9px] text-red">
+          <span className="pixel flex items-center gap-2 text-[10px] text-red">
             XP
             {gain > 0 && (
               <span className="xp-gain pixel" role="status">
@@ -107,7 +107,7 @@ export function XpPanel({ userId, xp }: { userId: string; xp: number }) {
               </span>
             )}
           </span>
-          <span className="pixel text-[9px]">
+          <span className="pixel text-[10px]">
             {info.into}/{info.span}
           </span>
         </div>

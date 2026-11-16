@@ -239,7 +239,7 @@ export default async function HostPage(props: PageProps<"/agenda/[id]/host">) {
                     {g && <GameIcon icon={g.icon} color={g.color} size="sm" />}
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-black">
-                        <span className="pixel mr-1 text-[9px] text-muted">#{i + 1}</span> {g?.name}
+                        <span className="pixel mr-1 text-[10px] text-muted">#{i + 1}</span> {g?.name}
                       </p>
                       <p className="text-xs font-bold text-muted">
                         {m.status === "live"

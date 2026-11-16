@@ -60,11 +60,11 @@ export default async function PlayersPage() {
                     href={isMe ? "/account" : `/spelers/${p.username}`}
                     className={`relative flex w-full flex-col items-center px-2 pb-2.5 pt-3 text-center transition-transform active:translate-y-[2px] ${SOFT_BG[color]} ${isMe ? "pixel-frame-me" : "pixel-frame"}`}
                   >
-                    <span className="pixel absolute left-1.5 top-1.5 text-[9px] text-ink/70">
+                    <span className="pixel absolute left-1.5 top-1.5 text-[10px] text-ink/70">
                       {s ? `#${s.rank}` : "–"}
                     </span>
                     {isMe && (
-                      <span className="pixel absolute right-1 top-1 bg-red px-1 text-[8px] leading-[14px] text-white">1P</span>
+                      <span className="pixel absolute right-1 top-1 bg-red px-1 text-[10px] leading-[14px] text-white">1P</span>
                     )}
                     <span className={isMe || s?.rank === 1 ? "animate-bob" : ""}>
                       <Avatar
@@ -80,22 +80,22 @@ export default async function PlayersPage() {
                       <span className="truncate">{p.username}</span>
                       {cupChampion === p.id && <CupIcon size={14} />}
                     </span>
-                    <span className="pixel mt-1 text-[8px] text-ink/70">
+                    <span className="pixel mt-1 text-[10px] text-ink/70">
                       LV {xpOf(p.id).level} · {xpOf(p.id).title.toUpperCase()}
                     </span>
                     {p.bio && <span className="mt-1 line-clamp-1 text-[11px] font-bold text-ink/70">{p.bio}</span>}
                     <span className="mt-2 grid w-full grid-cols-2 gap-1 text-[10px] font-black">
                       <span className="rounded bg-paper/80 px-1 py-0.5">
-                        <span className="pixel block text-[9px]">{s ? s.points : 0}</span>PT
+                        <span className="pixel block text-[10px]">{s ? s.points : 0}</span>PT
                       </span>
                       <span className="rounded bg-paper/80 px-1 py-0.5">
-                        <span className="pixel block text-[9px]">{a ? a.wins : 0}</span>
+                        <span className="pixel block text-[10px]">{a ? a.wins : 0}</span>
                         {a?.wins === 1 ? "ZEGE" : "ZEGES"}
                       </span>
                     </span>
                     {titles > 0 && <span className="mt-1 text-xs">{"🏆".repeat(Math.min(titles, 3))}</span>}
                     {p.id === target && (
-                      <span className="pixel mt-1.5 bg-red px-1.5 py-0.5 text-[8px] text-white">🎯 PREMIE +10 XP</span>
+                      <span className="pixel mt-1.5 bg-red px-1.5 py-0.5 text-[10px] text-white">🎯 PREMIE +10 XP</span>
                     )}
                   </Link>
                 </li>

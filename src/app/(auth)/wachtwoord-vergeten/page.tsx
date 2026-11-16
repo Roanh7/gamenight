@@ -22,17 +22,17 @@ export default async function ForgotPage() {
         <h1 className="mb-1 text-xl font-black">Wachtwoord vergeten</h1>
         <ol className="mb-5 mt-3 space-y-2 text-sm font-bold">
           <li className="flex gap-2">
-            <span className="pixel mt-0.5 text-[9px] text-red">1</span>
+            <span className="pixel mt-0.5 text-[10px] text-red">1</span>
             <span>
               Vraag <b className="font-black">{admins}</b> om een <b className="font-black">herstelcode</b>. Die is 24 uur geldig.
             </span>
           </li>
           <li className="flex gap-2">
-            <span className="pixel mt-0.5 text-[9px] text-red">2</span>
+            <span className="pixel mt-0.5 text-[10px] text-red">2</span>
             <span>Vul hieronder je e-mail of gebruikersnaam, de code en een nieuw wachtwoord in.</span>
           </li>
           <li className="flex gap-2">
-            <span className="pixel mt-0.5 text-[9px] text-red">3</span>
+            <span className="pixel mt-0.5 text-[10px] text-red">3</span>
             <span>Je wordt meteen ingelogd. Je punten, XP en al de rest blijven gewoon staan.</span>
           </li>
         </ol>

@@ -54,7 +54,7 @@ export function SpecialistCards({
                 <GameIcon icon={g.icon} color={g.color} size="sm" />
                 <span className="min-w-0 flex-1 truncate text-sm font-black">{g.name}</span>
               </span>
-              <span className="spec-gold pixel mt-2 block truncate text-[7px]">
+              <span className="spec-gold pixel mt-2 block truncate text-[10px]">
                 {season === "all" ? `👑 ${specialistTitle(g)}` : `📅 BESTE IN ${seasonLabel(season).toUpperCase()}`}
               </span>
               {lead ? (
@@ -134,7 +134,7 @@ export function SpecialistTable({
                 </span>
                 <span className="w-9 text-right text-sm font-bold">{s.played}</span>
                 <span className="w-9 text-right text-sm font-bold">{s.wins}</span>
-                <span className="pixel w-14 text-right text-[9px]">{formatRate(s.winrate)}%</span>
+                <span className="pixel w-14 text-right text-[10px]">{formatRate(s.winrate)}%</span>
               </li>
             );
           })}
@@ -144,7 +144,7 @@ export function SpecialistTable({
       )}
       {unranked.length > 0 && (
         <div className="border-t-2 border-line bg-cream/60">
-          <p className="pixel px-3 pt-2 text-[8px] text-muted">🔒 NOT YET RANKED</p>
+          <p className="pixel px-3 pt-2 text-[10px] text-muted">🔒 NOT YET RANKED</p>
           <ul className="divide-y-2 divide-soft">
             {unranked.map((s) => {
               const p = profiles.get(s.user_id);
@@ -162,7 +162,7 @@ export function SpecialistTable({
                     </span>
                   </span>
                   <span className="w-9 text-right text-sm font-bold">{s.wins}</span>
-                  <span className="pixel w-14 text-right text-[9px] text-muted">{formatRate(s.winrate)}%</span>
+                  <span className="pixel w-14 text-right text-[10px] text-muted">{formatRate(s.winrate)}%</span>
                 </li>
               );
             })}
@@ -170,5 +170,51 @@ export function SpecialistTable({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Eén regel onder een game in Ranking → Per game: wie is de specialist (beste winpercentage)?
+ * Vervangt de losse Game Specialists-kaarten, zodat elke game maar één kaart heeft.
+ */
+export function SpecialistLine({
+  game,
+  board,
+  allTime,
+  profiles,
+  season,
+}: {
+  game: Game;
+  board: Board | undefined;
+  allTime: Board | undefined;
+  profiles: Map<string, Profile>;
+  season: string;
+}) {
+  const top = (board?.ranked ?? []).filter((s) => s.rank === 1);
+  const holders = (allTime?.ranked ?? []).filter((s) => s.rank === 1).map((s) => profiles.get(s.user_id)?.username ?? "?");
+  const lead = top[0];
+  const names = top.map((s) => profiles.get(s.user_id)?.username ?? "?").join(" & ");
+  const href = `/games/${game.id}${season === "all" ? "?seizoen=all" : season ? `?seizoen=${season}` : ""}#specialisten`;
+  return (
+    <Link href={href} className="spec-line">
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[11px] font-black uppercase text-muted">
+          {season === "all" ? `👑 ${specialistTitle(game)}` : `🎯 Beste winrate ${seasonLabel(season)}`}
+        </span>
+        {lead ? (
+          <span className="block truncate text-sm font-black">
+            {names} <span className="font-bold text-muted">· {formatRate(lead.winrate)}% · {lead.wins} {lead.wins === 1 ? "zege" : "zeges"}</span>
+          </span>
+        ) : (
+          <span className="block truncate text-xs font-bold text-muted">🔒 Nog niemand officieel (min. {SPECIALIST_MIN_PLAYED} potjes)</span>
+        )}
+        {season !== "all" && holders.length > 0 && (
+          <span className="block truncate text-[11px] font-bold text-muted">👑 Titelhouder: {holders.join(" & ")}</span>
+        )}
+      </span>
+      <span aria-hidden className="text-xs font-black">
+        ▶
+      </span>
+    </Link>
   );
 }

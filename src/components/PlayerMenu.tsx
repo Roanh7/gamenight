@@ -80,7 +80,7 @@ export function PlayerMenu({ name, children }: { name: string; children: ReactNo
       </button>
       {open && (
         <div id={id} className="player-menu" role="menu" aria-label="Player menu">
-          <p className="pixel flex items-center gap-1.5 border-b-2 border-line px-3 py-2 text-[9px] text-red">
+          <p className="pixel flex items-center gap-1.5 border-b-2 border-line px-3 py-2 text-[10px] text-red">
             <PixelIcon name="gamepad" size={12} /> PLAYER MENU
           </p>
           <ul ref={list} className="p-1.5">

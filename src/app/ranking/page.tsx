@@ -19,14 +19,16 @@ import { GameIcon } from "@/components/GameIcon";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Avatar } from "@/components/Avatar";
 import { SeasonTabs, parseSeason } from "@/components/SeasonTabs";
-import { EmptyState, PageHeader, Panel, SectionTitle } from "@/components/ui";
+import { EmptyState, PageHeader, Panel } from "@/components/ui";
+import { CupIcon } from "@/components/CupIcon";
 import { PixelIcon } from "@/components/PixelIcon";
 import { XP_RULES } from "@/lib/xp";
 import { UNDERDOG_BONUS, underdogs } from "@/lib/underdog";
 import { hallOfChampions } from "@/lib/history";
 import { HallOfChampions } from "@/components/HallOfChampions";
 import { SPECIALIST_MIN_PLAYED, specialistBoards } from "@/lib/specialists";
-import { SpecialistCards } from "@/components/Specialists";
+import { SpecialistLine } from "@/components/Specialists";
+import { SmashCupHall } from "@/components/SmashCupHall";
 import { ResultsRefresh } from "@/components/ResultsRefresh";
 import { SmashCupCard } from "@/components/SmashCup";
 import { cupStats, todayNl } from "@/lib/smashCup";
@@ -56,6 +58,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const champions = seasonChampions(results);
   const isCurrent = season === currentSeason();
   const champ = season !== "all" ? champions.get(season) : undefined;
+  const tab = sp.tab === "games" || sp.tab === "cup" ? sp.tab : "stand";
   const champProfile = champ ? profiles.byId.get(champ) : undefined;
   const target = isCurrent ? currentBountyTarget(results) : null;
   const targetProfile = target ? profiles.byId.get(target) : undefined;
@@ -66,9 +69,12 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
 
   // Meest gespeelde games eerst
   const playedCount = new Map<string, number>();
-  for (const r of rows) playedCount.set(r.game_id, (playedCount.get(r.game_id) ?? 0) + 1);
+  for (const r of rows)
+    playedCount.set(r.game_id, (playedCount.get(r.game_id) ?? 0) + 1);
   const sortedGames = [...games.list].sort(
-    (a, b) => (playedCount.get(b.id) ?? 0) - (playedCount.get(a.id) ?? 0) || a.name.localeCompare(b.name),
+    (a, b) =>
+      (playedCount.get(b.id) ?? 0) - (playedCount.get(a.id) ?? 0) ||
+      a.name.localeCompare(b.name),
   );
 
   return (
@@ -84,167 +90,273 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
       />
 
       <ResultsRefresh />
-      <SeasonTabs seasons={seasons} active={season} basePath="/ranking" />
-
-      {/* Seizoensbanner */}
-      {season !== "all" && (
-        <section className={`card mt-3 p-4 ${isCurrent ? "bg-blue text-white" : "bg-yellow"}`}>
-          <p className="pixel text-[9px] opacity-90">SEIZOEN {seasonLabel(season).toUpperCase()}</p>
-          {isCurrent ? (
-            <>
-              <p className="mt-1 text-lg font-black">Nog {daysLeftInSeason(season)} dagen te gaan</p>
-              <p className="text-sm font-bold opacity-90">
-                {seasonMonths(season)} · de nummer 1 wordt Seizoenskampioen 🏆
-              </p>
-            </>
-          ) : champProfile ? (
-            <div className="mt-2 flex items-center gap-3">
-              <Avatar name={champProfile.username} color={champProfile.avatar_color} url={champProfile.avatar_url} emoji={champProfile.avatar_emoji} pixel={champProfile.avatar_pixel} frame={champProfile.avatar_frame} size="md" crown />
-              <div>
-                <p className="text-lg font-black leading-tight">{champProfile.username}</p>
-                <p className="text-sm font-bold">Seizoenskampioen {seasonLabel(season)}</p>
-              </div>
-            </div>
-          ) : (
-            <p className="mt-1 font-black">Gedeelde eerste plek: geen kampioen dit seizoen 🤝</p>
-          )}
-        </section>
-      )}
-
-      {season === "all" ? (
-        <HallOfChampions entries={hall.entries} timeline={hall.timeline} profiles={profiles.byId} currentSeason={currentSeason()} />
-      ) : (
-        <Link
-          href="/ranking?seizoen=all#hall-of-champions"
-          scroll={false}
-          className="card mt-3 flex items-center gap-3 bg-[#3b2f63] px-3 py-2.5 text-white"
-        >
-          <span className="text-xl" aria-hidden>
-            👑
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="pixel block text-[9px] text-yellow">HALL OF CHAMPIONS</span>
-            <span className="block truncate text-xs font-bold opacity-85">
-              {hall.entries.length
-                ? `${hall.entries.reduce((n, e) => n + e.titles, 0)} titels · meeste: ${hall.entries
-                    .filter((e) => e.rank === 1)
-                    .map((e) => profiles.byId.get(e.user_id)?.username ?? "?")
-                    .join(" & ")}`
-                : "Nog geen kampioenen. Wie wordt de eerste?"}
-            </span>
-          </span>
-          <ChevronRight size={18} />
-        </Link>
-      )}
-
-      {targetProfile && (
-        <section className="card mt-3 flex items-center gap-3 bg-red-soft p-3">
-          <Avatar
-            name={targetProfile.username}
-            color={targetProfile.avatar_color}
-            url={targetProfile.avatar_url}
-            emoji={targetProfile.avatar_emoji} pixel={targetProfile.avatar_pixel} frame={targetProfile.avatar_frame}
-            size="md"
-          />
-          <div className="min-w-0">
-            <p className="pixel text-[9px] text-red">🎯 PREMIE</p>
-            <p className="text-sm font-black">
-              {target === me?.user.id ? "Er staat een premie op jouw hoofd!" : `Versla ${targetProfile.username}`}
-            </p>
-            <p className="text-xs">Wie de koploper in een potje verslaat, krijgt +{XP_RULES.bounty} XP.</p>
-          </div>
-        </section>
-      )}
-
-      <Panel
-        title={season === "all" ? "ALGEMEEN KLASSEMENT" : "KLASSEMENT"}
-        icon={<PixelIcon name="trophy" size={12} />}
-        tone="var(--color-yellow-soft)"
-        className="mt-3"
-        action={overall.length ? <span className="pixel text-[8px] text-muted">{overall.length} SPELERS</span> : undefined}
-      >
-        {overall.length ? (
-          <Leaderboard
-            rows={overall.map((o) => ({ ...o, extra: `${o.games_played} ${o.games_played === 1 ? "game" : "games"}` }))}
-            profiles={profiles.byId}
-            meId={me?.user.id}
-            underdogs={ud}
-            champion={cup.champion}
-          />
-        ) : (
-          <EmptyState
-            icon={<span className="text-3xl">🏆</span>}
-            title={isCurrent ? "Nieuw seizoen, schone lei" : "Nog leeg"}
-            text="Na het eerste afgeronde potje staat hier de stand."
-          />
-        )}
-      </Panel>
-
-      {ud.size > 0 && (
-        <p className="mt-2 text-xs font-bold text-muted">
-          🐺 <b>Underdog:</b> staat onderaan en ver achter. Wint hij of zij een potje, dan komt er +{UNDERDOG_BONUS}{" "}
-          competitiepunten bij.{" "}
-          <Link href="/uitleg#underdog" className="underline">
-            Hoe werkt dat?
+      <nav className="view-tabs mb-3" aria-label="Onderdeel van de ranking">
+        {(
+          [
+            ["stand", "Klassement", "/ranking"],
+            ["games", "Per game", "/ranking?tab=games"],
+            ["cup", "Smash Cup", "/ranking?tab=cup"],
+          ] as const
+        ).map(([key, label, href]) => (
+          <Link
+            key={key}
+            href={
+              key !== "cup" && season !== currentSeason()
+                ? `${href}${href.includes("?") ? "&" : "?"}seizoen=${season}`
+                : href
+            }
+            scroll={false}
+            aria-current={tab === key ? "page" : undefined}
+            className="view-tab"
+          >
+            {key === "cup" && <CupIcon size={14} title={null} />}
+            {label}
           </Link>
-        </p>
+        ))}
+      </nav>
+
+      {tab === "cup" ? (
+        <>
+          <SmashCupCard stats={cup} profiles={profiles.byId} today={today} href={null} />
+          <SmashCupHall stats={cup} profiles={profiles.byId} />
+        </>
+      ) : (
+        <SeasonTabs
+          seasons={seasons}
+          active={season}
+          basePath="/ranking"
+          query={tab === "games" ? { tab: "games" } : {}}
+        />
       )}
 
-      <div id="smash-cup" className="mt-4 scroll-mt-20">
-        <SmashCupCard stats={cup} profiles={profiles.byId} today={today} />
-      </div>
-
-      {sortedGames.length > 0 && (
+      {tab === "stand" && (
         <>
-          <div id="specialisten" className="scroll-mt-20" />
-          <SectionTitle>🎮 Game Specialists</SectionTitle>
-          <p className="-mt-1 mb-2.5 text-xs font-bold text-muted">
-            Wie wint het vaakst per game? Officieel vanaf {SPECIALIST_MIN_PLAYED} potjes; de beste van all-time draagt de titel.
-          </p>
-          <SpecialistCards games={sortedGames} boards={specBoards} allTime={specAllTime} profiles={profiles.byId} season={season} />
+          {/* Seizoensbanner */}
+          {season !== "all" && (
+            <section
+              className={`card mt-3 p-4 ${isCurrent ? "bg-blue text-white" : "bg-yellow"}`}
+            >
+              <p className="pixel text-[10px] opacity-90">
+                SEIZOEN {seasonLabel(season).toUpperCase()}
+              </p>
+              {isCurrent ? (
+                <>
+                  <p className="mt-1 text-lg font-black">
+                    Nog {daysLeftInSeason(season)} dagen te gaan
+                  </p>
+                  <p className="text-sm font-bold opacity-90">
+                    {seasonMonths(season)} · de nummer 1 wordt Seizoenskampioen
+                    🏆
+                  </p>
+                </>
+              ) : champProfile ? (
+                <div className="mt-2 flex items-center gap-3">
+                  <Avatar
+                    name={champProfile.username}
+                    color={champProfile.avatar_color}
+                    url={champProfile.avatar_url}
+                    emoji={champProfile.avatar_emoji}
+                    pixel={champProfile.avatar_pixel}
+                    frame={champProfile.avatar_frame}
+                    size="md"
+                    crown
+                  />
+                  <div>
+                    <p className="text-lg font-black leading-tight">
+                      {champProfile.username}
+                    </p>
+                    <p className="text-sm font-bold">
+                      Seizoenskampioen {seasonLabel(season)}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-1 font-black">
+                  Gedeelde eerste plek: geen kampioen dit seizoen 🤝
+                </p>
+              )}
+            </section>
+          )}
+
+          {season === "all" ? (
+            <HallOfChampions
+              entries={hall.entries}
+              timeline={hall.timeline}
+              profiles={profiles.byId}
+              currentSeason={currentSeason()}
+            />
+          ) : (
+            <Link
+              href="/ranking?seizoen=all#hall-of-champions"
+              scroll={false}
+              className="card mt-3 flex items-center gap-3 bg-[#3b2f63] px-3 py-2.5 text-white"
+            >
+              <span className="text-xl" aria-hidden>
+                👑
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="pixel block text-[10px] text-yellow">
+                  HALL OF CHAMPIONS
+                </span>
+                <span className="block truncate text-xs font-bold opacity-85">
+                  {hall.entries.length
+                    ? `${hall.entries.reduce((n, e) => n + e.titles, 0)} titels · meeste: ${hall.entries
+                        .filter((e) => e.rank === 1)
+                        .map(
+                          (e) => profiles.byId.get(e.user_id)?.username ?? "?",
+                        )
+                        .join(" & ")}`
+                    : "Nog geen kampioenen. Wie wordt de eerste?"}
+                </span>
+              </span>
+              <ChevronRight size={18} />
+            </Link>
+          )}
+
+          {targetProfile && (
+            <section className="card mt-3 flex items-center gap-3 bg-red-soft p-3">
+              <Avatar
+                name={targetProfile.username}
+                color={targetProfile.avatar_color}
+                url={targetProfile.avatar_url}
+                emoji={targetProfile.avatar_emoji}
+                pixel={targetProfile.avatar_pixel}
+                frame={targetProfile.avatar_frame}
+                size="md"
+              />
+              <div className="min-w-0">
+                <p className="pixel text-[10px] text-red">🎯 PREMIE</p>
+                <p className="text-sm font-black">
+                  {target === me?.user.id
+                    ? "Er staat een premie op jouw hoofd!"
+                    : `Versla ${targetProfile.username}`}
+                </p>
+                <p className="text-xs">
+                  Wie de koploper in een potje verslaat, krijgt +
+                  {XP_RULES.bounty} XP.
+                </p>
+              </div>
+            </section>
+          )}
+
+          <Panel
+            title={season === "all" ? "ALGEMEEN KLASSEMENT" : "KLASSEMENT"}
+            icon={<PixelIcon name="trophy" size={12} />}
+            tone="var(--color-yellow-soft)"
+            className="mt-3"
+            action={
+              overall.length ? (
+                <span className="pixel text-[10px] text-muted">
+                  {overall.length} SPELERS
+                </span>
+              ) : undefined
+            }
+          >
+            {overall.length ? (
+              <Leaderboard
+                rows={overall.map((o) => ({
+                  ...o,
+                  extra: `${o.games_played} ${o.games_played === 1 ? "game" : "games"}`,
+                }))}
+                profiles={profiles.byId}
+                meId={me?.user.id}
+                underdogs={ud}
+                champion={cup.champion}
+              />
+            ) : (
+              <EmptyState
+                icon={<span className="text-3xl">🏆</span>}
+                title={isCurrent ? "Nieuw seizoen, schone lei" : "Nog leeg"}
+                text="Na het eerste afgeronde potje staat hier de stand."
+              />
+            )}
+          </Panel>
+
+          {ud.size > 0 && (
+            <p className="mt-2 text-xs font-bold text-muted">
+              🐺 <b>Underdog:</b> staat onderaan en ver achter. Wint hij of zij
+              een potje, dan komt er +{UNDERDOG_BONUS} competitiepunten bij.{" "}
+              <Link href="/uitleg#underdog" className="underline">
+                Hoe werkt dat?
+              </Link>
+            </p>
+          )}
         </>
       )}
 
-      <SectionTitle>Per game</SectionTitle>
-      {sortedGames.length ? (
-        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">
-          {sortedGames.map((g) => {
-            const gRows = boards.get(g.id) ?? [];
-            const href = season === currentSeason() ? `/games/${g.id}` : `/games/${g.id}?seizoen=${season}`;
-            return (
-              <li key={g.id} className="hub-panel">
-                <Link href={href} className="flex items-center gap-3 border-b-2 border-line bg-cream px-3 py-2.5">
-                  <GameIcon icon={g.icon} color={g.color} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-black">{g.name}</p>
-                    <p className="text-xs font-bold text-muted">
-                      {gRows.length ? `${gRows.length} spelers op de ranglijst` : "Nog niet gespeeld"}
-                    </p>
-                  </div>
-                  <ChevronRight size={18} />
+      {tab === "games" && (
+        <>
+          <p className="mb-2.5 mt-2 text-xs font-bold text-muted">
+            Top 3 in punten per game, en daaronder de specialist: wie wint het
+            vaakst (officieel vanaf {SPECIALIST_MIN_PLAYED} potjes).
+          </p>
+          {sortedGames.length ? (
+            <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">
+              {sortedGames.map((g) => {
+                const gRows = boards.get(g.id) ?? [];
+                const href =
+                  season === currentSeason()
+                    ? `/games/${g.id}`
+                    : `/games/${g.id}?seizoen=${season}`;
+                return (
+                  <li key={g.id} className="hub-panel">
+                    <Link
+                      href={href}
+                      className="flex items-center gap-3 border-b-2 border-line bg-cream px-3 py-2.5"
+                    >
+                      <GameIcon icon={g.icon} color={g.color} size="sm" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-black">{g.name}</p>
+                        <p className="text-xs font-bold text-muted">
+                          {gRows.length
+                            ? `${gRows.length} spelers op de ranglijst`
+                            : "Nog niet gespeeld"}
+                        </p>
+                      </div>
+                      <ChevronRight size={18} />
+                    </Link>
+                    {gRows.length > 0 ? (
+                      <div className="p-2">
+                        <Leaderboard
+                          rows={gRows}
+                          profiles={profiles.byId}
+                          meId={me?.user.id}
+                          limit={3}
+                          compact
+                          champion={cup.champion}
+                        />
+                      </div>
+                    ) : (
+                      <p className="px-3 py-3 text-sm text-muted">
+                        Wie pakt de eerste kroon? 👑
+                      </p>
+                    )}
+                    {gRows.length > 0 && (
+                      <SpecialistLine
+                        game={g}
+                        board={specBoards.get(g.id)}
+                        allTime={specAllTime.get(g.id)}
+                        profiles={profiles.byId}
+                        season={season}
+                      />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={<Gamepad2 size={32} />}
+              title="Nog geen games"
+              text="Voeg de games toe die jullie spelen, met eigen scoreregels."
+              action={
+                <Link href="/games/nieuw" className="btn btn-primary btn-sm">
+                  <Plus size={16} strokeWidth={3} /> Game toevoegen
                 </Link>
-                {gRows.length > 0 ? (
-                  <div className="p-2">
-                    <Leaderboard rows={gRows} profiles={profiles.byId} meId={me?.user.id} limit={3} compact champion={cup.champion} />
-                  </div>
-                ) : (
-                  <p className="px-3 py-3 text-sm text-muted">Wie pakt de eerste kroon? 👑</p>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <EmptyState
-          icon={<Gamepad2 size={32} />}
-          title="Nog geen games"
-          text="Voeg de games toe die jullie spelen, met eigen scoreregels."
-          action={
-            <Link href="/games/nieuw" className="btn btn-primary btn-sm">
-              <Plus size={16} strokeWidth={3} /> Game toevoegen
-            </Link>
-          }
-        />
+              }
+            />
+          )}
+        </>
       )}
     </div>
   );

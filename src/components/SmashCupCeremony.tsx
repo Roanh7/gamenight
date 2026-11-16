@@ -148,7 +148,7 @@ export function SmashCupCeremony({ data, auto = false }: { data: CupCeremonyData
               ].map((s) => (
                 <div key={s.l} className="rounded-xl border-2 border-white/15 bg-white/5 px-2 py-3">
                   <p className="pixel text-[15px] text-[#ffc527]">{s.v}</p>
-                  <p className="pixel mt-1.5 text-[7px] leading-relaxed opacity-80">{s.l}</p>
+                  <p className="mt-1.5 text-[11px] font-black uppercase leading-tight opacity-80">{s.l}</p>
                 </div>
               ))}
             </div>

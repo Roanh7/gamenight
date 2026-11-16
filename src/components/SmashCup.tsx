@@ -49,7 +49,7 @@ export function SmashCupCard({
   return (
     <section className="cup-card" aria-label="Smash Bros Championship Cup">
       <div className="cup-card-head">
-        <h2 className="pixel flex min-w-0 items-center gap-1.5 truncate text-[9px]">
+        <h2 className="pixel flex min-w-0 items-center gap-1.5 truncate text-[10px]">
           <CupIcon size={14} title={null} />
           {title}
         </h2>
@@ -64,7 +64,7 @@ export function SmashCupCard({
               </span>
             </Link>
             <div className="min-w-0 flex-1">
-              <p className="pixel text-[8px] text-[color:var(--cup-text)]">🏆 REIGNING SMASH CHAMPION</p>
+              <p className="pixel text-[10px] text-[color:var(--cup-text)]">🏆 REIGNING SMASH CHAMPION</p>
               <p className="flex min-w-0 items-center gap-1.5 text-lg font-black leading-tight">
                 <span className="truncate">{champ.username}</span>
                 <CupIcon size={16} />

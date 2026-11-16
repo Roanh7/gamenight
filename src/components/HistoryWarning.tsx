@@ -27,7 +27,7 @@ export function HistoryWarning({
   const name = (id: string | null) => (id ? (profiles.get(id)?.username ?? "?") : null);
   return (
     <div className="overflow-hidden rounded-2xl border-2 border-line bg-paper shadow-[0_4px_0_var(--color-line)]">
-      <p className="pixel border-b-2 border-line bg-yellow px-3 py-2 text-[9px] text-night">📜 HISTORISCH SEIZOEN</p>
+      <p className="pixel border-b-2 border-line bg-yellow px-3 py-2 text-[10px] text-night">📜 HISTORISCH SEIZOEN</p>
       <div className="space-y-3 p-3 text-sm">
         <p className="font-bold">
           {intro} Dit hoort bij {seasons.length === 1 ? "seizoen" : "seizoenen"}{" "}
@@ -40,7 +40,7 @@ export function HistoryWarning({
               const after = name(im.championAfter);
               return (
                 <li key={im.season} className="rounded-xl border-2 border-line bg-cream px-3 py-2">
-                  <p className="pixel text-[8px] text-muted">
+                  <p className="pixel text-[10px] text-muted">
                     {seasonLabel(im.season).toUpperCase()}
                     {temporary ? " · ZOLANG HET POTJE OPEN STAAT" : ""}
                   </p>

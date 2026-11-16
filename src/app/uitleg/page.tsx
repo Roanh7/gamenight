@@ -44,7 +44,7 @@ function Section({
           <Icon size={18} strokeWidth={2.5} />
         </span>
         <h2 className="min-w-0 flex-1 text-base font-black leading-tight">{title}</h2>
-        <span className="help-chevron pixel text-[9px]" aria-hidden>
+        <span className="help-chevron pixel text-[10px]" aria-hidden>
           ▶
         </span>
       </summary>
@@ -92,15 +92,15 @@ export default async function UitlegPage() {
 
       <section className="hub-panel mb-5" style={{ ["--panel" as string]: "var(--color-yellow-soft)" }} aria-label="Quick start">
         <div className="hub-panel-head">
-          <h2 className="pixel text-[9px]">🎮 QUICK START</h2>
-          <span className="pixel text-[7px] text-muted">5 STAPPEN</span>
+          <h2 className="pixel text-[10px]">🎮 QUICK START</h2>
+          <span className="pixel text-[10px] text-muted">5 STAPPEN</span>
         </div>
         <ol className="divide-y-2 divide-soft">
           {QUICK_START.map(([icon, title, text, href], i) => (
             <li key={title}>
               <Link href={me ? href : "/registreren"} className="customize-row">
                 <span className="quick-step" aria-hidden>
-                  <span className="pixel text-[8px]">{i + 1}</span>
+                  <span className="pixel text-[10px]">{i + 1}</span>
                   <span className="text-base leading-none">{icon}</span>
                 </span>
                 <span className="min-w-0 flex-1">
@@ -379,7 +379,7 @@ export default async function UitlegPage() {
             er officieel op vanaf <b>5 potjes</b> van die game; daarvoor zie je 🔒 en hoeveel potjes je nog nodig hebt.
             Bij teams en geheime rollen telt een zege voor iedereen in het winnende team. De nummer 1 van all-time krijgt
             een titel zoals <b>🏆 SMASH MASTER</b>, <b>30 SECONDS KING</b> of <b>WOLVEN SPECIALIST</b>. Puur voor de
-            eer: het levert geen punten of XP op. Je vindt het bij <b>Ranking</b>, op de pagina van elke game en bij{" "}
+            eer: het levert geen punten of XP op. Je vindt het bij <b>Ranking → Per game</b>, op de pagina van elke game en bij{" "}
             <b>My game stats</b> op je profiel.
           </p>
           <p id="underdog" className="scroll-mt-20 pt-1">
@@ -400,7 +400,7 @@ export default async function UitlegPage() {
             of co-host op de avondpagina wie heeft gewonnen. De winnaar wordt <b>REIGNING SMASH CHAMPION</b> en krijgt
             het gouden bekertje naast zijn naam, tot iemand anders een volgende Cup wint. Wint de kampioen opnieuw, dan is
             dat een <b>titelverdediging</b>. Een geplande of afgelaste Cup verandert niets. De Cup telt níet mee voor
-            punten, XP of ranking. Alle edities en records staan bij <b>Ranking → Smash Cup History</b>.
+            punten, XP of ranking. Alle edities en records staan bij <b>Ranking → Smash Cup</b>.
           </p>
           <p className="pt-1">
             <b>📜 Recordboek:</b> via de knop bij <b>Ranking</b> zie je de records aller tijden: meeste zeges,
@@ -444,11 +444,12 @@ export default async function UitlegPage() {
               zijn profiel te zien.
             </li>
             <li>
-              <b>🕹️ Player Hub:</b> Home is jouw eigen spelersmenu. Bovenaan je spelerskaart met level, XP, je plek in
-              het seizoen en je winstreeks, plus een berichtje dat past bij hoe het gaat (bovenaan? winstreeks? pech?).
-              Daaronder vier cijfers: <b>winrate</b> (hoeveel procent van je potjes je won), <b>streak</b> (zoveel op rij
-              gewonnen), <b>form</b> (je laatste 5 potjes: groen = gewonnen, rood = niet gewonnen) en <b>MVP</b> (zo vaak
-              was je de beste van een avond). Dan de volgende gamenight, je <b>volgende achievement</b> en je{" "}
+              <b>🕹️ Player Hub:</b> Home is jouw eigen spelersmenu. Bovenaan de volgende gamenight, daaronder je
+              spelerskaart met level, XP en je plek in het seizoen, plus een berichtje dat past bij hoe het gaat
+              (bovenaan? winstreeks? pech?). Dan vier cijfers: <b>win %</b> (hoeveel procent van je potjes je won),{" "}
+              <b>streak</b> (zoveel op rij gewonnen), <b>form</b> (je laatste 5 potjes: groen = gewonnen, rood = niet
+              gewonnen) en <b>MVP</b> (zo vaak was je de beste van een avond). Daarna het nieuws, je{" "}
+              <b>volgende achievement</b> en je{" "}
               <b>rivaal</b>: de speler die dit seizoen het dichtst bij jou staat in punten. Gewoon voor de lol: jullie
               spelen altijd met de hele groep.
             </li>

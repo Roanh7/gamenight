@@ -74,7 +74,7 @@ export default async function RecordsPage() {
                   {r.emoji}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="pixel text-[9px] uppercase text-muted">{r.title}</p>
+                  <p className="pixel text-[10px] uppercase text-muted">{r.title}</p>
                   {r.holders.length ? (
                     <Holders ids={r.holders} />
                   ) : (
@@ -116,7 +116,7 @@ export default async function RecordsPage() {
               </ol>
               {udWins.length > 0 && (
                 <div className="border-t-2 border-line bg-cream px-3 py-2.5">
-                  <p className="pixel mb-1 text-[8px] text-muted">LAATSTE UNDERDOG-ZEGES</p>
+                  <p className="pixel mb-1 text-[10px] text-muted">LAATSTE UNDERDOG-ZEGES</p>
                   <ul className="space-y-0.5">
                     {udWins.map((r) => (
                       <li key={`${r.match_id}-${r.user_id}`} className="truncate text-xs">

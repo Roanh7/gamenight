@@ -30,7 +30,7 @@ export function MyAttendance({ s }: { s: AttStats }) {
                   {icon}
                 </span>
                 <span className="pixel mt-1 max-w-full truncate text-[11px] leading-none">{value}</span>
-                <span className="pixel mt-1 text-[6px] leading-tight opacity-75">{label}</span>
+                <span className="mt-1 text-[10px] font-black uppercase leading-tight opacity-75">{label}</span>
               </li>
             ))}
           </ul>
@@ -110,7 +110,7 @@ export function AttendanceBoard({
       <ol className="divide-y-2 divide-soft">{ranked.map((s) => row(s, s.rank))}</ol>
       {unranked.length > 0 && (
         <div className="border-t-2 border-line bg-cream/60">
-          <p className="pixel px-3 pt-2 text-[8px] text-muted">🔒 NOG TE WEINIG AVONDEN (MIN. {ATTENDANCE_MIN_NIGHTS})</p>
+          <p className="pixel px-3 pt-2 text-[10px] text-muted">🔒 NOG TE WEINIG AVONDEN (MIN. {ATTENDANCE_MIN_NIGHTS})</p>
           <ul className="divide-y-2 divide-soft">{unranked.map((s) => row(s, null))}</ul>
         </div>
       )}
@@ -127,7 +127,7 @@ export function HubAttendance({ s }: { s: AttStats }) {
           <PixelIcon name="calendar" size={22} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="pixel text-[8px] text-muted">MY ATTENDANCE</p>
+          <p className="pixel text-[10px] text-muted">MY ATTENDANCE</p>
           {s.relevant ? (
             <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-sm font-bold">
               <span>
